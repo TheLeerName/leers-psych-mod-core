@@ -248,6 +248,8 @@ class AchievementsMenuState extends MusicBeatState
 			spr.alpha = 0.6;
 			if(spr.ID == curSelected) spr.alpha = 1;
 		});
+
+		FlxG.watch.addQuick("curSelected", curSelected);
 	}
 }
 

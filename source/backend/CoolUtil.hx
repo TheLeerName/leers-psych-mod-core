@@ -62,13 +62,14 @@ class CoolUtil
 		var newValue:Float = Math.floor(value * tempMult);
 		return newValue / tempMult;
 	}
-	
-	inline public static function dominantColor(sprite:flixel.FlxSprite):Int
-	{
+
+	inline public static function dominantColor(path:String):Int {
+		var pixels = Paths.bitmapData(path);
+
 		var countByColor:Map<Int, Int> = [];
-		for(col in 0...sprite.frameWidth) {
-			for(row in 0...sprite.frameHeight) {
-				var colorOfThisPixel:Int = sprite.pixels.getPixel32(col, row);
+		for(col in 0...pixels.width) {
+			for(row in 0...pixels.height) {
+				var colorOfThisPixel:Int = pixels.getPixel32(col, row);
 				if(colorOfThisPixel != 0) {
 					if(countByColor.exists(colorOfThisPixel))
 						countByColor[colorOfThisPixel] = countByColor[colorOfThisPixel] + 1;
@@ -77,6 +78,9 @@ class CoolUtil
 				}
 			}
 		}
+		pixels.image.data = null;
+		pixels.dispose();
+		pixels.disposeImage();
 
 		var maxCount = 0;
 		var maxKey:Int = 0; //after the loop this will store the max color

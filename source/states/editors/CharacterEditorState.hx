@@ -111,7 +111,7 @@ class CharacterEditorState extends MusicBeatState
 		add(healthBar);
 		healthBar.cameras = [camHUD];
 
-		healthIcon = new HealthIcon(character.healthIcon, false, false);
+		healthIcon = new HealthIcon(character.healthIcon, false);
 		healthIcon.y = FlxG.height - 150;
 		add(healthIcon);
 		healthIcon.cameras = [camHUD];
@@ -616,14 +616,15 @@ class CharacterEditorState extends MusicBeatState
 			}
 		});
 
-		var decideIconColor:FlxButton = new FlxButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function()
-			{
-				var coolColor:FlxColor = FlxColor.fromInt(CoolUtil.dominantColor(healthIcon));
+		var decideIconColor:FlxButton = new FlxButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", () -> {
+			sys.thread.Thread.create(() -> {
+				var coolColor:FlxColor = FlxColor.fromInt(CoolUtil.dominantColor(healthIcon.graphic.key));
 				character.healthColorArray[0] = coolColor.red;
 				character.healthColorArray[1] = coolColor.green;
 				character.healthColorArray[2] = coolColor.blue;
 				updateHealthBar();
 			});
+		});
 
 		healthIconInputText = new FlxUIInputText(15, imageInputText.y + 35, 75, healthIcon.getCharacter(), 8);
 
@@ -696,7 +697,7 @@ class CharacterEditorState extends MusicBeatState
 		{
 			if(sender == healthIconInputText) {
 				var lastIcon = healthIcon.getCharacter();
-				healthIcon.changeIcon(healthIconInputText.text, false);
+				healthIcon.changeIcon(healthIconInputText.text);
 				character.healthIcon = healthIconInputText.text;
 				if(lastIcon != healthIcon.getCharacter()) updatePresence();
 			}
@@ -1074,7 +1075,7 @@ class CharacterEditorState extends MusicBeatState
 		healthColorStepperG.value = character.healthColorArray[1];
 		healthColorStepperB.value = character.healthColorArray[2];
 		healthBar.leftBar.color = healthBar.rightBar.color = FlxColor.fromRGB(character.healthColorArray[0], character.healthColorArray[1], character.healthColorArray[2]);
-		healthIcon.changeIcon(character.healthIcon, false);
+		healthIcon.changeIcon(character.healthIcon);
 		updatePresence();
 	}
 

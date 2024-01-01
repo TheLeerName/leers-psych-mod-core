@@ -22,7 +22,7 @@ class Paths {
 	 * Returns and caches `FlxGraphic` object from relative `key` path
 	 * @see `imagePath(key:String):String`
 	 */
-	public static function image(key:String, ?allowGPU:Bool = true):FlxGraphic {
+	public static function image(key:String):FlxGraphic {
 		var path = imagePath(key);
 
 		var img = imageAbsolute(path);
@@ -71,7 +71,7 @@ class Paths {
 		return fileExistsAbsolute(path);
 	}
 
-	public static function getAtlas(key:String, ?allowGPU:Bool = true):FlxAtlasFrames {
+	public static function getAtlas(key:String):FlxAtlasFrames {
 		return Paths.fileExists('images/$key.xml') ? getSparrowAtlas(key) : getPackerAtlas(key);
 	}
 
@@ -373,10 +373,18 @@ class Paths {
 			return FlxG.bitmap._cache.get(path);
 
 		if (fileExistsAbsolute(path)) {
-			var newBitmap:BitmapData = bitmapData(path);
-			var newGraphic:FlxGraphic = FlxG.bitmap.add(newBitmap, false, path);
-			newGraphic.persist = true;
-			return newGraphic;
+			var bitmap = bitmapData(path);
+			if (ClientPrefs.data.cacheOnGPU) {
+				var texture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
+				texture.uploadFromBitmapData(bitmap);
+				bitmap.image.data = null;
+				bitmap.dispose();
+				bitmap.disposeImage();
+				bitmap = BitmapData.fromTexture(texture);
+			}
+			var graphic = FlxG.bitmap.add(bitmap, false, path);
+			graphic.persist = true;
+			return graphic;
 		}
 
 		return null;

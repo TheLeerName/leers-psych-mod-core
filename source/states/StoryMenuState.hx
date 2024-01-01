@@ -368,6 +368,8 @@ class StoryMenuState extends MusicBeatState
 		#if !switch
 		intendedScore = Highscore.getWeekScore(loadedWeeks[curWeek].fileName, curDifficulty);
 		#end
+
+		FlxG.watch.addQuick("curDifficulty", curDifficulty);
 	}
 
 	var lerpScore:Int = 0;
@@ -426,6 +428,8 @@ class StoryMenuState extends MusicBeatState
 			curDifficulty = newPos;
 		}
 		updateText();
+
+		FlxG.watch.addQuick("curWeek", curWeek);
 	}
 
 	function weekIsLocked(name:String):Bool {

@@ -662,6 +662,8 @@ class ModsMenuState extends MusicBeatState
 			bgButtons.color = FlxColor.BLACK;
 			bgButtons.alpha = 0.2;
 		}
+
+		FlxG.watch.addQuick("curSelectedMod", curSelectedMod);
 	}
 
 	var colorTween:FlxTween = null;

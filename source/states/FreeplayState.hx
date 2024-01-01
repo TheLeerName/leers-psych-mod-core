@@ -447,6 +447,8 @@ class FreeplayState extends MusicBeatState
 		positionHighscore();
 		missingText.visible = false;
 		missingTextBG.visible = false;
+
+		FlxG.watch.addQuick("curDifficulty", curDifficulty);
 	}
 
 	function changeSelection(change:Int = 0, playSound:Bool = true)
@@ -514,6 +516,8 @@ class FreeplayState extends MusicBeatState
 
 		changeDiff();
 		_updateSongLastDifficulty();
+
+		FlxG.watch.addQuick("curSelected", curSelected);
 	}
 
 	inline private function _updateSongLastDifficulty()
