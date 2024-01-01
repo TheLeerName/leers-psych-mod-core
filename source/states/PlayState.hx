@@ -409,13 +409,9 @@ class PlayState extends MusicBeatState
 
 		// "GLOBAL" SCRIPTS
 		#if LUA_ALLOWED
-		for (folder in Paths.getAllFolders('/scripts/'))
-			for (file in FileSystem.readDirectory(folder))
 			{
 				if(file.toLowerCase().endsWith('.lua'))
-					new FunkinLua(folder + file);
 				if(file.toLowerCase().endsWith('.hx'))
-					initHScript(folder + file);
 			}
 		#end
 

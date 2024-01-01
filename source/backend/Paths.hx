@@ -410,22 +410,38 @@ class Paths {
 		return false;
 	}
 
+	public static function readDirectory(path:String):Array<String>
+		return fileExistsAbsolute(path) ? FileSystem.readDirectory(path) : [];
+
 	public static function getAllFolders(?add:String = ''):Array<String> {
 		var dirs:Array<String> = [
 			#if MODS_ALLOWED
 			Paths.modsPath(add),
-			Paths.modsPath(Mods.currentModDirectory + '/' + add),
 			#end
-			Paths.preloadPath(currentLevel + '/' + add),
 			#if SHARED_DIRECTORY
 			Paths.preloadPath(SHARED_DIRECTORY + '/' + add),
 			#end
 			Paths.preloadPath(add),
 		];
+
+		// adding specific folders
+		if (currentLevel != null)
+			dirs.push(Paths.preloadPath(currentLevel + '/' + add));
+		#if MODS_ALLOWED
+		if (Mods.currentModDirectory != null)
+			dirs.push(Paths.modsPath(Mods.currentModDirectory + '/' + add));
+		#end
+
+		// adding global mods
 		#if MODS_ALLOWED
 		for (mod in Mods.parseList().enabled)
 			dirs.push(Paths.modsPath(mod) + add);
 		#end
+
+		// removing nonexistent folders
+		for (dir in dirs) if (!fileExistsAbsolute(dir.endsWith('/') ? dir.substring(0, dir.length - 1) : dir))
+			dirs.remove(dir);
+
 		return dirs;
 	}
 
