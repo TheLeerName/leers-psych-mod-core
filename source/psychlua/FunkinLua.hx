@@ -80,7 +80,7 @@ class FunkinLua {
 
 		var myFolder:Array<String> = this.scriptName.split('/');
 		#if MODS_ALLOWED
-		if(myFolder[0] + '/' == Paths.mods() && (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1]))) //is inside mods folder
+		if(myFolder[0] + '/' == Paths.modsPath() && (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1]))) //is inside mods folder
 			this.modFolder = myFolder[1];
 		#end
 
@@ -458,7 +458,7 @@ class FunkinLua {
 			PlayState.SONG = Song.loadFromJson(poop, name);
 			PlayState.storyDifficulty = difficultyNum;
 			game.persistentUpdate = false;
-			LoadingState.loadAndSwitchState(new PlayState());
+			MusicBeatState.switchState(new PlayState());
 
 			FlxG.sound.music.pause();
 			FlxG.sound.music.volume = 0;
@@ -1311,12 +1311,7 @@ class FunkinLua {
 			return FlxColor.BLACK;
 		});
 		Lua_helper.add_callback(lua, "startDialogue", function(dialogueFile:String, music:String = null) {
-			var path:String;
-			#if MODS_ALLOWED
-			path = Paths.modsJson(Paths.formatToSongPath(PlayState.SONG.song) + '/' + dialogueFile);
-			if(!FileSystem.exists(path))
-			#end
-				path = Paths.json(Paths.formatToSongPath(PlayState.SONG.song) + '/' + dialogueFile);
+			var path = Paths.getTextFromFile('data/${Paths.formatToSongPath(PlayState.SONG.song)}/$dialogueFile.json');
 
 			luaTrace('startDialogue: Trying to load dialogue: ' + path);
 
@@ -1692,25 +1687,9 @@ class FunkinLua {
 	}
 	#end
 
-	function findScript(scriptFile:String, ext:String = '.lua')
-	{
+	function findScript(scriptFile:String, ext:String = '.lua') {
 		if(!scriptFile.endsWith(ext)) scriptFile += ext;
-		var preloadPath:String = Paths.getSharedPath(scriptFile);
-		#if MODS_ALLOWED
-		var path:String = Paths.modFolders(scriptFile);
-		if(FileSystem.exists(scriptFile))
-			return scriptFile;
-		else if(FileSystem.exists(path))
-			return path;
-
-		if(FileSystem.exists(preloadPath))
-		#else
-		if(Assets.exists(preloadPath))
-		#end
-		{
-			return preloadPath;
-		}
-		return null;
+		return Paths.path(scriptFile);
 	}
 
 	public function getErrorMessage(status:Int):String {
@@ -1741,56 +1720,32 @@ class FunkinLua {
 		#end
 	}
 
-	#if (MODS_ALLOWED && !flash && sys)
+	#if (!flash && sys)
 	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();
 	#end
 	public function initLuaShader(name:String, ?glslVersion:Int = 120)
 	{
 		if(!ClientPrefs.data.shaders) return false;
 
-		#if (MODS_ALLOWED && !flash && sys)
+		#if (!flash && sys)
 		if(runtimeShaders.exists(name))
 		{
 			luaTrace('Shader $name was already initialized!');
 			return true;
 		}
 
-		var foldersToCheck:Array<String> = [Paths.mods('shaders/')];
-		if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
-			foldersToCheck.insert(0, Paths.mods(Mods.currentModDirectory + '/shaders/'));
+		var frag:String = 'shaders/$name.frag';
+		var vert:String = 'shaders/$name.vert';
 
-		for(mod in Mods.getGlobalMods())
-			foldersToCheck.insert(0, Paths.mods(mod + '/shaders/'));
+		frag = Paths.getTextFromFile(frag);
+		vert = Paths.getTextFromFile(vert);
 
-		for (folder in foldersToCheck)
-		{
-			if(FileSystem.exists(folder))
-			{
-				var frag:String = folder + name + '.frag';
-				var vert:String = folder + name + '.vert';
-				var found:Bool = false;
-				if(FileSystem.exists(frag))
-				{
-					frag = File.getContent(frag);
-					found = true;
-				}
-				else frag = null;
-
-				if(FileSystem.exists(vert))
-				{
-					vert = File.getContent(vert);
-					found = true;
-				}
-				else vert = null;
-
-				if(found)
-				{
-					runtimeShaders.set(name, [frag, vert]);
-					//trace('Found shader $name!');
-					return true;
-				}
-			}
+		if(frag != null || vert != null) {
+			runtimeShaders.set(name, [frag, vert]);
+			//trace('Found shader $name!');
+			return true;
 		}
+
 		luaTrace('Missing shader $name .frag AND .vert files!', false, false, FlxColor.RED);
 		#else
 		luaTrace('This platform doesn\'t support Runtime Shaders!', false, false, FlxColor.RED);

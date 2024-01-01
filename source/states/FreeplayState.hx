@@ -395,10 +395,8 @@ class FreeplayState extends MusicBeatState
 				super.update(elapsed);
 				return;
 			}
-			LoadingState.loadAndSwitchState(new PlayState());
-
-			FlxG.sound.music.volume = 0;
-					
+			MusicBeatState.switchState(new PlayState());
+			if (FlxG.sound.music != null) FlxG.sound.music.stop();
 			destroyFreeplayVocals();
 			#if (MODS_ALLOWED && cpp)
 			DiscordClient.loadModRPC();

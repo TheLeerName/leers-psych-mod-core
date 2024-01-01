@@ -90,8 +90,8 @@ class CreditsState extends MusicBeatState
 				if(creditsStuff[i][1] != null && creditsStuff[i][1].length > 0)
 				{
 					var fileName = 'credits/' + creditsStuff[i][1];
-					if (Paths.fileExists('images/$fileName.png', IMAGE)) str = fileName;
-					else if (Paths.fileExists('images/$fileName-pixel.png', IMAGE)) str = fileName + '-pixel';
+					if (Paths.fileExists('images/$fileName.png')) str = fileName;
+					else if (Paths.fileExists('images/$fileName-pixel.png')) str = fileName + '-pixel';
 				}
 
 				var icon:AttachedSprite = new AttachedSprite(str);
@@ -262,8 +262,8 @@ class CreditsState extends MusicBeatState
 	function pushModCreditsToList(folder:String)
 	{
 		var creditsFile:String = null;
-		if(folder != null && folder.trim().length > 0) creditsFile = Paths.mods(folder + '/data/credits.txt');
-		else creditsFile = Paths.mods('data/credits.txt');
+		if(folder != null && folder.trim().length > 0) creditsFile = Paths.modsPath(folder + '/data/credits.txt');
+		else creditsFile = Paths.modsPath('data/credits.txt');
 
 		if (FileSystem.exists(creditsFile))
 		{

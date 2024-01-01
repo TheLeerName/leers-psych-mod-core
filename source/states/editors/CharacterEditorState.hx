@@ -446,14 +446,7 @@ class CharacterEditorState extends MusicBeatState
 			var intended = characterList[Std.parseInt(index)];
 			if(intended == null || intended.length < 1) return;
 
-			var characterPath:String = 'characters/$intended.json';
-			var path:String = Paths.getPath(characterPath, TEXT, null, true);
-			#if MODS_ALLOWED
-			if (FileSystem.exists(path))
-			#else
-			if (Assets.exists(path))
-			#end
-			{
+			if (Paths.fileExists('characters/$intended.json')) {
 				_char = intended;
 				check_player.checked = character.isPlayer;
 				addCharacter();
@@ -771,8 +764,7 @@ class CharacterEditorState extends MusicBeatState
 		character.destroyAtlas();
 		character.isAnimateAtlas = false;
 
-		if(Paths.fileExists('images/' + character.imageFile + '/Animation.json', TEXT))
-		{
+		if(Paths.fileExists('images/${character.imageFile}/Animation.json')) {
 			character.atlas = new FlxAnimate();
 			character.atlas.showPivot = false;
 			try
@@ -785,8 +777,8 @@ class CharacterEditorState extends MusicBeatState
 			}
 			character.isAnimateAtlas = true;
 		}
-		else if(Paths.fileExists('images/' + character.imageFile + '.txt', TEXT)) character.frames = Paths.getPackerAtlas(character.imageFile);
-		else character.frames = Paths.getSparrowAtlas(character.imageFile);
+		else
+			character.frames = Paths.getAtlas(character.imageFile);
 
 		for (anim in anims) {
 			var animAnim:String = '' + anim.anim;
@@ -1183,18 +1175,20 @@ class CharacterEditorState extends MusicBeatState
 
 	var characterList:Array<String> = [];
 	function reloadCharacterDropDown() {
-		characterList = Mods.mergeAllTextsNamed('data/characterList.txt', Paths.getSharedPath());
-		var foldersToCheck:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'characters/');
-		for (folder in foldersToCheck)
-			for (file in FileSystem.readDirectory(folder))
-				if(file.toLowerCase().endsWith('.json'))
-				{
-					var charToCheck:String = file.substr(0, file.length - 5);
-					if(!characterList.contains(charToCheck))
-						characterList.push(charToCheck);
-				}
+		characterList = [];
+		for (dir in Paths.getAllFolders('/characters/')) {
+			if(!Paths.fileExistsAbsolute(dir)) continue;
 
-		if(characterList.length < 1) characterList.push('');
+			for (file in FileSystem.readDirectory(dir)) {
+				var path = haxe.io.Path.join([dir, file]);
+				if (file.endsWith('.json')) {
+					var toCheck:String = file.substr(0, file.length - 5);
+					if(toCheck.trim().length > 0 && !characterList.contains(toCheck))
+						characterList.push(toCheck);
+				}
+			}
+		}
+
 		charDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = _char;
 	}

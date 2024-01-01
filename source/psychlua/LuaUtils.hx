@@ -117,7 +117,7 @@ class LuaUtils
 		if(FlxG.save.data.modSettings == null) FlxG.save.data.modSettings = new Map<String, Dynamic>();
 
 		var settings:Map<String, Dynamic> = FlxG.save.data.modSettings.get(modName);
-		var path:String = Paths.mods('$modName/data/settings.json');
+		var path:String = Paths.modsPath('$modName/data/settings.json');
 		if(FileSystem.exists(path))
 		{
 			if(settings == null || !settings.exists(saveTag))

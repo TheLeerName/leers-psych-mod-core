@@ -37,7 +37,6 @@ import objects.Alphabet;
 import objects.BGSprite;
 
 import states.PlayState;
-import states.LoadingState;
 
 #if flxanimate
 import flxanimate.*;

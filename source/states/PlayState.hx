@@ -409,7 +409,7 @@ class PlayState extends MusicBeatState
 
 		// "GLOBAL" SCRIPTS
 		#if LUA_ALLOWED
-		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'scripts/'))
+		for (folder in Paths.getAllFolders('/scripts/'))
 			for (file in FileSystem.readDirectory(folder))
 			{
 				if(file.toLowerCase().endsWith('.lua'))
@@ -594,7 +594,7 @@ class PlayState extends MusicBeatState
 
 		// SONG SPECIFIC SCRIPTS
 		#if LUA_ALLOWED
-		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'data/' + songName + '/'))
+		for (folder in Paths.getAllFolders('data/$songName/'))
 			for (file in FileSystem.readDirectory(folder))
 			{
 				if(file.toLowerCase().endsWith('.lua'))
@@ -752,68 +752,21 @@ class PlayState extends MusicBeatState
 	function startCharacterScripts(name:String)
 	{
 		// Lua
-		#if LUA_ALLOWED
-		var doPush:Bool = false;
-		var luaFile:String = 'characters/' + name + '.lua';
-		#if MODS_ALLOWED
-		var replacePath:String = Paths.modFolders(luaFile);
-		if(FileSystem.exists(replacePath))
-		{
-			luaFile = replacePath;
-			doPush = true;
-		}
-		else
-		{
-			luaFile = Paths.getSharedPath(luaFile);
-			if(FileSystem.exists(luaFile))
-				doPush = true;
-		}
-		#else
-		luaFile = Paths.getSharedPath(luaFile);
-		if(Assets.exists(luaFile)) doPush = true;
-		#end
-
-		if(doPush)
-		{
-			for (script in luaArray)
-			{
-				if(script.scriptName == luaFile)
-				{
-					doPush = false;
-					break;
-				}
+		var scriptFile:String = Paths.path('characters/' + name + '.lua');
+		if (Paths.fileExistsAbsolute(scriptFile)) {
+			var doPush = true;
+			for (script in luaArray) if(script.scriptName == scriptFile) {
+				doPush = false;
+				break;
 			}
-			if(doPush) new FunkinLua(luaFile);
+			if(doPush) new FunkinLua(scriptFile);
 		}
-		#end
 
 		// HScript
-		#if HSCRIPT_ALLOWED
-		var doPush:Bool = false;
-		var scriptFile:String = 'characters/' + name + '.hx';
-		#if MODS_ALLOWED
-		var replacePath:String = Paths.modFolders(scriptFile);
-		if(FileSystem.exists(replacePath))
-		{
-			scriptFile = replacePath;
-			doPush = true;
+		var scriptFile:String = Paths.path('characters/' + name + '.hx');
+		if (Paths.fileExistsAbsolute(scriptFile)) {
+			if(!SScript.global.exists(scriptFile)) initHScript(scriptFile);
 		}
-		else
-		#end
-		{
-			scriptFile = Paths.getSharedPath(scriptFile);
-			if(FileSystem.exists(scriptFile))
-				doPush = true;
-		}
-
-		if(doPush)
-		{
-			if(SScript.global.exists(scriptFile))
-				doPush = false;
-
-			if(doPush) initHScript(scriptFile);
-		}
-		#end
 	}
 
 	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
@@ -1291,12 +1244,7 @@ class PlayState extends MusicBeatState
 		// NEW SHIT
 		noteData = songData.notes;
 
-		var file:String = Paths.json(songName + '/events');
-		#if MODS_ALLOWED
-		if (FileSystem.exists(Paths.modsJson(songName + '/events')) || FileSystem.exists(file)) {
-		#else
-		if (OpenFlAssets.exists(file)) {
-		#end
+		if (Paths.fileExistsAbsolute(Paths.jsonPath('$songName/events'))) {
 			var eventsData:Array<Dynamic> = Song.loadFromJson('events', songName).events;
 			for (event in eventsData) //Event Notes
 				for (i in 0...event[1].length)
@@ -2380,7 +2328,7 @@ class PlayState extends MusicBeatState
 					FlxG.sound.music.stop();
 
 					cancelMusicFadeTween();
-					LoadingState.loadAndSwitchState(new PlayState());
+					MusicBeatState.switchState(new PlayState());
 				}
 			}
 			else
@@ -3161,17 +3109,8 @@ class PlayState extends MusicBeatState
 	#if LUA_ALLOWED
 	public function startLuasNamed(luaFile:String)
 	{
-		#if MODS_ALLOWED
-		var luaToLoad:String = Paths.modFolders(luaFile);
-		if(!FileSystem.exists(luaToLoad))
-			luaToLoad = Paths.getSharedPath(luaFile);
-
-		if(FileSystem.exists(luaToLoad))
-		#elseif sys
-		var luaToLoad:String = Paths.getSharedPath(luaFile);
-		if(OpenFlAssets.exists(luaToLoad))
-		#end
-		{
+		var luaToLoad = Paths.path(luaFile);
+		if (Paths.fileExists(luaFile)) {
 			for (script in luaArray)
 				if(script.scriptName == luaToLoad) return false;
 
@@ -3185,16 +3124,8 @@ class PlayState extends MusicBeatState
 	#if HSCRIPT_ALLOWED
 	public function startHScriptsNamed(scriptFile:String)
 	{
-		#if MODS_ALLOWED
-		var scriptToLoad:String = Paths.modFolders(scriptFile);
-		if(!FileSystem.exists(scriptToLoad))
-			scriptToLoad = Paths.getSharedPath(scriptFile);
-		#else
-		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
-		#end
-
-		if(FileSystem.exists(scriptToLoad))
-		{
+		var scriptToLoad = Paths.path(scriptFile);
+		if (Paths.fileExists(scriptFile)) {
 			if (SScript.global.exists(scriptToLoad)) return false;
 
 			initHScript(scriptToLoad);
@@ -3491,7 +3422,7 @@ class PlayState extends MusicBeatState
 	{
 		if(!ClientPrefs.data.shaders) return new FlxRuntimeShader();
 
-		#if (!flash && MODS_ALLOWED && sys)
+		#if (!flash && sys)
 		if(!runtimeShaders.exists(name) && !initLuaShader(name))
 		{
 			FlxG.log.warn('Shader $name is missing!');
@@ -3510,44 +3441,31 @@ class PlayState extends MusicBeatState
 	{
 		if(!ClientPrefs.data.shaders) return false;
 
-		#if (MODS_ALLOWED && !flash && sys)
+		#if (!flash && sys)
 		if(runtimeShaders.exists(name))
 		{
 			FlxG.log.warn('Shader $name was already initialized!');
 			return true;
 		}
 
-		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'shaders/'))
+		for (folder in Paths.getAllFolders('/shaders/'))
 		{
-			var frag:String = folder + name + '.frag';
-			var vert:String = folder + name + '.vert';
-			var found:Bool = false;
-			if(FileSystem.exists(frag))
-			{
-				frag = File.getContent(frag);
-				found = true;
-			}
-			else frag = null;
+			var frag:String = Paths.text('$folder/$name.frag');
+			var vert:String = Paths.text('$folder/$name.vert');
 
-			if(FileSystem.exists(vert))
-			{
-				vert = File.getContent(vert);
-				found = true;
-			}
-			else vert = null;
-
-			if(found)
-			{
+			if(frag != null || vert != null) {
 				runtimeShaders.set(name, [frag, vert]);
 				//trace('Found shader $name!');
 				return true;
 			}
 		}
-			#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			addTextToDebug('Missing shader $name .frag AND .vert files!', FlxColor.RED);
-			#else
-			FlxG.log.warn('Missing shader $name .frag AND .vert files!');
-			#end
+
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		addTextToDebug('Missing shader $name .frag AND .vert files!', FlxColor.RED);
+		#else
+		FlxG.log.warn('Missing shader $name .frag AND .vert files!');
+		#end
+
 		#else
 		FlxG.log.warn('This platform doesn\'t support Runtime Shaders!');
 		#end

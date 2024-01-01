@@ -8,6 +8,7 @@ typedef ModsList = {
 	all:Array<String>
 };
 
+@:access(backend.Paths)
 class Mods
 {
 	static public var currentModDirectory:String = '';
@@ -45,81 +46,17 @@ class Mods
 		return globalMods;
 	}
 
-	inline public static function getModDirectories():Array<String>
-	{
+	inline public static function getModDirectories():Array<String> {
 		var list:Array<String> = [];
-		#if MODS_ALLOWED
-		var modsFolder:String = Paths.mods();
-		if(FileSystem.exists(modsFolder)) {
-			for (folder in FileSystem.readDirectory(modsFolder))
-			{
-				var path = haxe.io.Path.join([modsFolder, folder]);
-				if (FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder.toLowerCase()) && !list.contains(folder))
+		if(FileSystem.exists(Paths.MODS_DIRECTORY)) {
+			for (folder in FileSystem.readDirectory(Paths.MODS_DIRECTORY)) {
+				var path = haxe.io.Path.join([Paths.MODS_DIRECTORY, folder]);
+				if (sys.FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder) && !list.contains(folder)) {
 					list.push(folder);
+				}
 			}
 		}
-		#end
 		return list;
-	}
-	
-	inline public static function mergeAllTextsNamed(path:String, defaultDirectory:String = null, allowDuplicates:Bool = false)
-	{
-		if(defaultDirectory == null) defaultDirectory = Paths.getSharedPath();
-		defaultDirectory = defaultDirectory.trim();
-		if(!defaultDirectory.endsWith('/')) defaultDirectory += '/';
-		if(!defaultDirectory.startsWith('assets/')) defaultDirectory = 'assets/$defaultDirectory';
-
-		var mergedList:Array<String> = [];
-		var paths:Array<String> = directoriesWithFile(defaultDirectory, path);
-
-		var defaultPath:String = defaultDirectory + path;
-		if(paths.contains(defaultPath))
-		{
-			paths.remove(defaultPath);
-			paths.insert(0, defaultPath);
-		}
-
-		for (file in paths)
-		{
-			var list:Array<String> = CoolUtil.coolTextFile(file);
-			for (value in list)
-				if((allowDuplicates || !mergedList.contains(value)) && value.length > 0)
-					mergedList.push(value);
-		}
-		return mergedList;
-	}
-
-	inline public static function directoriesWithFile(path:String, fileToFind:String, mods:Bool = true)
-	{
-		var foldersToCheck:Array<String> = [];
-		#if sys
-		if(FileSystem.exists(path + fileToFind))
-		#end
-			foldersToCheck.push(path + fileToFind);
-
-		#if MODS_ALLOWED
-		if(mods)
-		{
-			// Global mods first
-			for(mod in Mods.getGlobalMods())
-			{
-				var folder:String = Paths.mods(mod + '/' + fileToFind);
-				if(FileSystem.exists(folder)) foldersToCheck.push(folder);
-			}
-
-			// Then "PsychEngine/mods/" main folder
-			var folder:String = Paths.mods(fileToFind);
-			if(FileSystem.exists(folder)) foldersToCheck.push(Paths.mods(fileToFind));
-
-			// And lastly, the loaded mod's folder
-			if(Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0)
-			{
-				var folder:String = Paths.mods(Mods.currentModDirectory + '/' + fileToFind);
-				if(FileSystem.exists(folder)) foldersToCheck.push(folder);
-			}
-		}
-		#end
-		return foldersToCheck;
 	}
 
 	public static function getPack(?folder:String = null):Dynamic
@@ -127,7 +64,7 @@ class Mods
 		#if MODS_ALLOWED
 		if(folder == null) folder = Mods.currentModDirectory;
 
-		var path = Paths.mods(folder + '/pack.json');
+		var path = Paths.modsPath(folder + '/pack.json');
 		if(FileSystem.exists(path)) {
 			try {
 				#if sys
@@ -181,7 +118,7 @@ class Mods
 			{
 				var dat:Array<String> = mod.split("|");
 				var folder:String = dat[0];
-				if(folder.trim().length > 0 && FileSystem.exists(Paths.mods(folder)) && FileSystem.isDirectory(Paths.mods(folder)) && !added.contains(folder))
+				if(folder.trim().length > 0 && FileSystem.exists(Paths.modsPath(folder)) && FileSystem.isDirectory(Paths.modsPath(folder)) && !added.contains(folder))
 				{
 					added.push(folder);
 					list.push([folder, (dat[1] == "1")]);
@@ -194,7 +131,7 @@ class Mods
 		// Scan for folders that aren't on modsList.txt yet
 		for (folder in getModDirectories())
 		{
-			if(folder.trim().length > 0 && FileSystem.exists(Paths.mods(folder)) && FileSystem.isDirectory(Paths.mods(folder)) &&
+			if(folder.trim().length > 0 && FileSystem.exists(Paths.modsPath(folder)) && FileSystem.isDirectory(Paths.modsPath(folder)) &&
 			!ignoreModFolders.contains(folder.toLowerCase()) && !added.contains(folder))
 			{
 				added.push(folder);

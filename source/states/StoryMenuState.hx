@@ -319,9 +319,9 @@ class StoryMenuState extends MusicBeatState
 				stopspamming = true;
 			}
 
-			new FlxTimer().start(1, function(tmr:FlxTimer)
-			{
-				LoadingState.loadAndSwitchState(new PlayState(), true);
+			new FlxTimer().start(1, function(tmr:FlxTimer) {
+				MusicBeatState.switchState(new PlayState());
+				if (FlxG.sound.music != null) FlxG.sound.music.stop();
 				FreeplayState.destroyFreeplayVocals();
 			});
 			

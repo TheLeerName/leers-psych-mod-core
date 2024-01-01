@@ -97,25 +97,23 @@ class MasterEditorMenu extends MusicBeatState
 		#end
 
 		if (controls.BACK)
-		{
 			MusicBeatState.switchState(new MainMenuState());
-		}
 
 		if (controls.ACCEPT)
 		{
 			switch(options[curSelected]) {
 				case 'Chart Editor'://felt it would be cool maybe
-					LoadingState.loadAndSwitchState(new ChartingState(), false);
+					MusicBeatState.switchState(new ChartingState());
 				case 'Character Editor':
-					LoadingState.loadAndSwitchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
+					MusicBeatState.switchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
 				case 'Week Editor':
 					MusicBeatState.switchState(new WeekEditorState());
 				case 'Menu Character Editor':
 					MusicBeatState.switchState(new MenuCharacterEditorState());
 				case 'Dialogue Editor':
-					LoadingState.loadAndSwitchState(new DialogueEditorState(), false);
+					MusicBeatState.switchState(new DialogueEditorState());
 				case 'Dialogue Portrait Editor':
-					LoadingState.loadAndSwitchState(new DialogueCharacterEditorState(), false);
+					MusicBeatState.switchState(new DialogueCharacterEditorState());
 				case 'Note Splash Debug':
 					MusicBeatState.switchState(new NoteSplashDebugState());
 			}

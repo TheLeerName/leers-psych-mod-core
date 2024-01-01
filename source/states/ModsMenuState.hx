@@ -823,7 +823,7 @@ class ModItem extends FlxSpriteGroup
 		this.folder = folder;
 		pack = Mods.getPack(folder);
 
-		var path:String = Paths.mods('$folder/data/settings.json');
+		var path:String = Paths.modsPath('$folder/data/settings.json');
 		if(FileSystem.exists(path))
 		{
 			var data:String = File.getContent(path);
@@ -859,12 +859,13 @@ class ModItem extends FlxSpriteGroup
 		add(text);
 
 		var isPixel = false;
-		var bmp = Paths.cacheBitmap(Paths.mods('$folder/pack.png'));
-		if(bmp == null)
-		{
-			bmp = Paths.cacheBitmap(Paths.mods('$folder/pack-pixel.png'));
+		var bmp = null;
+		if (Paths.fileExistsAbsolute(Paths.modsPath('$folder/pack-pixel.png'))) {
+			bmp = Paths.imageAbsolute(Paths.modsPath('$folder/pack-pixel.png'));
 			isPixel = true;
 		}
+		else
+			bmp = Paths.imageAbsolute(Paths.modsPath('$folder/pack.png'));
 
 		if(bmp != null)
 		{
