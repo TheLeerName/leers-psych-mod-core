@@ -344,6 +344,8 @@ class PlayState extends MusicBeatState
 			stageData = StageData.dummy();
 		}
 
+		Paths.setCurrentLevel('week_assets/' + stageData.directory);
+
 		defaultCamZoom = stageData.defaultZoom;
 
 		stageUI = "normal";

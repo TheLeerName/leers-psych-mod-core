@@ -96,7 +96,6 @@ class Song
 		var rawJson = Paths.text(Paths.jsonPath('$formattedFolder/$formattedSong'));
 
 		var songJson:Dynamic = parseJSONshit(rawJson);
-		if(jsonInput != 'events') StageData.loadDirectory(songJson);
 		onLoadJson(songJson);
 		return songJson;
 	}
