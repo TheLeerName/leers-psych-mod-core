@@ -1,0 +1,7 @@
+or i will execute you.destroy();
+
+so
+it need for eliminating manifest folder
+dlls from hxCodec copies by lime assets so it creates manifest folder
+i using robocopy instead lime assets to prevent that
+i guess you now know why its here :)
