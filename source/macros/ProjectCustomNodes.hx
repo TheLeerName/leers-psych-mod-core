@@ -31,7 +31,10 @@ class ProjectCustomNodes {
 						if (path == null) continue;
 
 						var rename:String = el.get('rename');
-						rename = rename != null && rename.length > 0 ? '/$rename' : '/$path';
+						if (rename != null)
+							rename = rename.length == 0 ? '' : '/$rename';
+						else
+							rename = '/' + path;
 
 						Sys.command('robocopy "$path" "${output + rename}" /S /NP /NFL /NDL /NJH /NJS');
 					#end
