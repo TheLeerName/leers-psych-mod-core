@@ -81,7 +81,6 @@ class WeekData {
 			if(Paths.fileExistsAbsolute(dir)) {
 				for (file in FileSystem.readDirectory(dir)) {
 					var path = '$dir/$file';
-					trace(path);
 					if (file.endsWith('.json'))
 						addWeek(file.substr(0, file.length - 5), path, directories[i], i, directories.length);
 				}
