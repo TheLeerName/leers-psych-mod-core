@@ -413,21 +413,19 @@ class Paths {
 	public static function getAllFolders(?add:String = ''):Array<String> {
 		var dirs:Array<String> = [
 			#if MODS_ALLOWED
-			Paths.modsPath(),
-			Paths.modsPath(Mods.currentModDirectory),
+			Paths.modsPath(add),
+			Paths.modsPath(Mods.currentModDirectory + '/' + add),
 			#end
-			Paths.preloadPath(currentLevel),
+			Paths.preloadPath(currentLevel + '/' + add),
 			#if SHARED_DIRECTORY
-			Paths.preloadPath(SHARED_DIRECTORY),
+			Paths.preloadPath(SHARED_DIRECTORY + '/' + add),
 			#end
-			Paths.preloadPath(),
+			Paths.preloadPath(add),
 		];
 		#if MODS_ALLOWED
 		for (mod in Mods.parseList().enabled)
-			dirs.push(Paths.modsPath(mod));
+			dirs.push(Paths.modsPath(mod) + add);
 		#end
-		for (dir in dirs)
-			dir += add;
 		return dirs;
 	}
 

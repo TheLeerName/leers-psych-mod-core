@@ -75,12 +75,13 @@ class WeekData {
 		weeksList = [];
 		weeksLoaded.clear();
 
-		var directories:Array<String> = Paths.getAllFolders('/');
+		var directories:Array<String> = Paths.getAllFolders('weeks');
 		for (i in 0...directories.length) {
-			var directory:String = directories[i] + 'weeks';
-			if(Paths.fileExistsAbsolute(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
+			var dir:String = directories[i];
+			if(Paths.fileExistsAbsolute(dir)) {
+				for (file in FileSystem.readDirectory(dir)) {
+					var path = '$dir/$file';
+					trace(path);
 					if (file.endsWith('.json'))
 						addWeek(file.substr(0, file.length - 5), path, directories[i], i, directories.length);
 				}
