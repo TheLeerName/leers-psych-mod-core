@@ -1176,10 +1176,10 @@ class CharacterEditorState extends MusicBeatState
 	var characterList:Array<String> = [];
 	function reloadCharacterDropDown() {
 		characterList = [];
-		for (dir in Paths.getAllFolders('/characters/')) {
+		for (dir in Paths.getAllFolders('characters')) {
 			if(!Paths.fileExistsAbsolute(dir)) continue;
 
-			for (file in FileSystem.readDirectory(dir)) {
+			for (file in Paths.readDirectory(dir)) {
 				var path = haxe.io.Path.join([dir, file]);
 				if (file.endsWith('.json')) {
 					var toCheck:String = file.substr(0, file.length - 5);

@@ -475,10 +475,8 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOnStepper.push(stepperSpeed);
 
 		var characters:Array<String> = [];
-		for (dir in Paths.getAllFolders('/characters/')) {
-			if(!Paths.fileExistsAbsolute(dir)) continue;
-
-			for (file in FileSystem.readDirectory(dir)) {
+		for (dir in Paths.getAllFolders('characters')) {
+			for (file in Paths.readDirectory(dir)) {
 				var path = haxe.io.Path.join([dir, file]);
 				if (file.endsWith('.json')) {
 					var toCheck:String = file.substr(0, file.length - 5);
@@ -513,10 +511,8 @@ class ChartingState extends MusicBeatState
 		blockPressWhileScrolling.push(player2DropDown);
 
 		var stages:Array<String> = ['stage'];
-		for (dir in Paths.getAllFolders('/stages/')) {
-			if(!Paths.fileExistsAbsolute(dir)) continue;
-
-			for (file in FileSystem.readDirectory(dir)) {
+		for (dir in Paths.getAllFolders('stages')) {
+			for (file in Paths.readDirectory(dir)) {
 				var path = haxe.io.Path.join([dir, file]);
 				if (file.endsWith('.json')) {
 					var toCheck:String = file.substr(0, file.length - 5);
@@ -859,8 +855,8 @@ class ChartingState extends MusicBeatState
 			key++;
 		}
 
-		for (folder in Paths.getAllFolders('/custom_notetypes/'))
-			for (file in FileSystem.readDirectory(folder)) {
+		for (folder in Paths.getAllFolders('custom_notetypes'))
+			for (file in Paths.readDirectory(folder)) {
 				var fileName:String = file.toLowerCase().trim();
 				var wordLen:Int = 4; //length of word ".lua" and ".txt";
 				if((#if LUA_ALLOWED fileName.endsWith('.lua') || #end
@@ -910,10 +906,8 @@ class ChartingState extends MusicBeatState
 		tab_group_event.name = 'Events';
 
 		var eventPushed:Array<String> = [];
-		for (dir in Paths.getAllFolders('/custom_events/')) {
-			if(!Paths.fileExistsAbsolute(dir)) continue;
-
-			for (file in FileSystem.readDirectory(dir)) {
+		for (dir in Paths.getAllFolders('custom_events')) {
+			for (file in Paths.readDirectory(dir)) {
 				var path = haxe.io.Path.join([dir, file]);
 				if (!FileSystem.isDirectory(path) && file != 'readme.txt' && file.endsWith('.txt')) {
 					var fileToCheck:String = file.substr(0, file.length - 4);
