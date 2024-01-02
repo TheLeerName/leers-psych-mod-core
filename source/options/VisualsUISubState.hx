@@ -112,16 +112,26 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.changeValue = 0.1;
 		option.decimals = 1;
 		addOption(option);
-		
+
 		#if !mobile
 		var option:Option = new Option('FPS Counter',
 			'If unchecked, hides FPS Counter.',
 			'showFPS',
 			'bool');
+		option.onChange = Main.fpsVar.resetTextFormat;
 		addOption(option);
-		option.onChange = onChangeFPSCounter;
+
+		#if windows
+		var option:Option = new Option('Memory Counter:',
+			"Which counter do u like bois?\nShow used: enabled GPU caching displays GPU usage, disabled displays RAM usage",
+			'memoryCounter',
+			'string',
+			['Show both', 'Show used', 'Show RAM', 'Show GPU', 'None']);
+		option.onChange = Main.fpsVar.resetTextFormat;
+		addOption(option);
 		#end
-		
+		#end
+
 		var option:Option = new Option('Pause Screen Song:',
 			"What song do you prefer for the Pause Screen?",
 			'pauseMusic',
@@ -209,12 +219,4 @@ class VisualsUISubState extends BaseOptionsMenu
 		if(changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music('freakyMenu'), 1, true);
 		super.destroy();
 	}
-
-	#if !mobile
-	function onChangeFPSCounter()
-	{
-		if(Main.fpsVar != null)
-			Main.fpsVar.visible = ClientPrefs.data.showFPS;
-	}
-	#end
 }

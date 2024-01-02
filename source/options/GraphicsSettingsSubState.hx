@@ -43,6 +43,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			"If checked, allows the GPU to be used for caching textures, decreasing RAM usage.\nDon't turn this on if you have a shitty Graphics Card.", //Description
 			'cacheOnGPU',
 			'bool');
+		option.onChange = Main.fpsVar.resetTextFormat;
 		addOption(option);
 
 		#if !html5 //Apparently other framerates isn't correctly supported on Browser? Probably it has some V-Sync shit enabled by default, idk

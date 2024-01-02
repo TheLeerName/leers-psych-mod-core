@@ -1,9 +1,11 @@
 package debug;
 
-import flixel.FlxG;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 import openfl.system.System;
+
+import flixel.FlxG;
+import flixel.util.FlxStringUtil;
 
 /**
 	The FPS class provides an easy-to-use monitor to display
@@ -17,11 +19,18 @@ class FPSCounter extends TextField
 	public var currentFPS(default, null):Int;
 
 	/**
-		The current memory usage (WARNING: this is NOT your total program memory usage, rather it shows the garbage collector memory)
+		The current RAM usage (WARNING: this is NOT your total program memory usage, rather it shows the garbage collector memory)
 	**/
 	public var memoryMegas(get, never):Float;
 
-	@:noCompletion private var times:Array<Float>;
+	/**
+	 * `%fps%` replaces as `currentFPS`, `%ram%` replaces as `memoryMegas`, `%gpu%` replaces as `GPUMemory.usage`.
+	 * 
+	 * WARNING: Resets to default on calling `resetTextFormat()`.
+	 */
+	public var textFormat:String;
+
+	@:noCompletion private var times:Array<Float> = [];
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
 	{
@@ -36,9 +45,10 @@ class FPSCounter extends TextField
 		defaultTextFormat = new TextFormat("_sans", 14, color);
 		autoSize = LEFT;
 		multiline = true;
-		text = "FPS: ";
+		text = "";
 
-		times = [];
+		GPUMemory.init();
+		resetTextFormat();
 	}
 
 	var deltaTimeout:Float = 0.0;
@@ -61,13 +71,45 @@ class FPSCounter extends TextField
 		deltaTimeout += deltaTime;
 	}
 
-	public dynamic function updateText():Void { // so people can override it in hscript
-		text = 'FPS: ${currentFPS}'
-		+ '\nMemory: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}';
+	/**
+	 * Resets `textFormat` variable to default.
+	 * 
+	 * Also calls `updateText()`
+	 */
+	public dynamic function resetTextFormat() {
+		var lines:Array<String> = [];
+		#if windows
+		if (ClientPrefs.data.showFPS)
+			lines.push('FPS: %fps%');
 
-		textColor = 0xFFFFFFFF;
-		if (currentFPS < FlxG.drawFramerate * 0.5)
-			textColor = 0xFFFF0000;
+		switch(ClientPrefs.data.memoryCounter) {
+			case 'Show used':
+				lines.push(ClientPrefs.data.cacheOnGPU ? 'GPU: %gpu%' : 'RAM: %ram%');
+			case 'Show both':
+				lines.push('RAM: %ram%');
+				lines.push('GPU: %gpu%');
+			case 'Show RAM':
+				lines.push('RAM: %ram%');
+			case 'Show GPU':
+				lines.push('GPU: %gpu%');
+		}
+		#else
+		if (ClientPrefs.data.showFPS) {
+			lines.push('FPS: %fps%');
+			lines.push('Memory: %ram%');
+		}
+		#end
+		textFormat = lines.join('\n');
+		updateText();
+	}
+
+	public dynamic function updateText():Void { // so people can override it in hscript
+		text = textFormat
+		.replace('%fps%', currentFPS + '')
+		.replace('%ram%', FlxStringUtil.formatBytes(memoryMegas))
+		.replace('%gpu%', FlxStringUtil.formatBytes(GPUMemory.usage));
+
+		textColor = currentFPS < FlxG.drawFramerate * 0.5 ? 0xFFFF0000 : 0xFFFFFFFF;
 	}
 
 	inline function get_memoryMegas():Float
