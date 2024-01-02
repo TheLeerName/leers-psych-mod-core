@@ -99,6 +99,7 @@ class FPSCounter extends TextField
 			lines.push('Memory: %ram%');
 		}
 		#end
+		lines.push('v' + states.MainMenuState.modVersion);
 		textFormat = lines.join('\n');
 		updateText();
 	}

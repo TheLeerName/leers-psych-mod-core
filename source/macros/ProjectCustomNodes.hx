@@ -1,9 +1,6 @@
 package macros;
 
 #if macro
-import haxe.macro.Compiler;
-import haxe.macro.Context;
-
 import sys.io.File;
 
 class ProjectCustomNodes {
