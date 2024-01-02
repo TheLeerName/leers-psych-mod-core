@@ -4,6 +4,7 @@ package debug;
  * To start tracking GPU memory usage, call `init()` function.
  * 
  * Works only on Windows target.
+ * @author TheLeerName
  */
 #if windows
 @:cppInclude('windows.h')
