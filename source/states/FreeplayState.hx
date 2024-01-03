@@ -57,11 +57,6 @@ class FreeplayState extends MusicBeatState
 		PlayState.isStoryMode = false;
 		WeekData.reloadWeekFiles(false);
 
-		#if desktop
-		// Updating Discord Rich Presence
-		DiscordClient.changePresence("In the Menus", null);
-		#end
-
 		for (i in 0...WeekData.weeksList.length) {
 			if(weekIsLocked(WeekData.weeksList[i])) continue;
 
@@ -517,6 +512,7 @@ class FreeplayState extends MusicBeatState
 		changeDiff();
 		_updateSongLastDifficulty();
 
+		DiscordClient.changePresence("In the Freeplay Menu", "Selected " + songs[curSelected].songName);
 		FlxG.watch.addQuick("curSelected", curSelected);
 	}
 

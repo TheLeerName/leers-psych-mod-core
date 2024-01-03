@@ -89,6 +89,8 @@ class TitleState extends MusicBeatState
 
 		ClientPrefs.loadPrefs();
 
+		DiscordClient.changePresence("In the Title Menu");
+
 		#if CHECK_FOR_UPDATES
 		if(ClientPrefs.data.checkForUpdates && !closedState) {
 			trace('checking for update');

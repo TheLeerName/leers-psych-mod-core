@@ -212,10 +212,7 @@ class ChartingState extends MusicBeatState
 
 		// Paths.clearMemory();
 
-		#if desktop
-		// Updating Discord Rich Presence
-		DiscordClient.changePresence("Chart Editor", StringTools.replace(_song.song, '-', ' '));
-		#end
+		DiscordClient.changePresence("In the Chart Editor", "Selected " + _song.song);
 
 		vortex = FlxG.save.data.chart_vortex;
 		ignoreWarnings = FlxG.save.data.ignoreWarnings;
@@ -1357,11 +1354,6 @@ class ChartingState extends MusicBeatState
 				if (voicesVolume != null) vocals.volume = voicesVolume.value;
 				if (check_mute_vocals != null && check_mute_vocals.checked) vocals.volume = 0;
 			}
-
-			#if desktop
-			// Updating Discord Rich Presence
-			DiscordClient.changePresence("Chart Editor", StringTools.replace(_song.song, '-', ' '));
-			#end
 		}
 		super.closeSubState();
 	}

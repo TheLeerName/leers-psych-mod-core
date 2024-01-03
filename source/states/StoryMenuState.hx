@@ -79,11 +79,6 @@ class StoryMenuState extends MusicBeatState
 		grpLocks = new FlxTypedGroup<FlxSprite>();
 		add(grpLocks);
 
-		#if desktop
-		// Updating Discord Rich Presence
-		DiscordClient.changePresence("In the Menus", null);
-		#end
-
 		var num:Int = 0;
 		for (i in 0...WeekData.weeksList.length)
 		{
@@ -429,6 +424,7 @@ class StoryMenuState extends MusicBeatState
 		}
 		updateText();
 
+		DiscordClient.changePresence("In the Story Menu", "Selected " + leWeek.fileName);
 		FlxG.watch.addQuick("curWeek", curWeek);
 	}
 

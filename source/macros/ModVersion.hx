@@ -20,7 +20,7 @@ class ModVersion {
 		}
 
 		// its like yearmonthday.build_number
-		trace('modVersion: $ymd.$buildNumber');
+		trace('$ymd.$buildNumber');
 		return MacroUtils.addString('modVersion', '$ymd.$buildNumber', 'public static');
 	}
 }
