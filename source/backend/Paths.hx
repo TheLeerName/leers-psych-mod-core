@@ -31,8 +31,8 @@ class Paths {
 		return returnSoundAbsolute(soundPath(key));
 	public static function music(key:String):Sound
 		return returnSoundAbsolute(musicPath(key));
-	public static function voices(song:String):Sound
-		return returnSoundAbsolute(path('songs/${formatToSongPath(song)}/Voices.$SOUND_EXT'));
+	public static function voices(song:String, postfix:String = null):Sound
+		return returnSoundAbsolute(path('songs/${formatToSongPath(song)}/Voices${postfix == null ? '' : '-$postfix'}.$SOUND_EXT'));
 	public static function inst(song:String):Sound
 		return returnSoundAbsolute(path('songs/${formatToSongPath(song)}/Inst.$SOUND_EXT'));
 
@@ -47,10 +47,15 @@ class Paths {
 	public static function fileExists(key:String, ?ignoreMods:Bool = false):Bool
 		return fileExistsAbsolute(path(key, ignoreMods));
 
-	public static function getAtlas(key:String):FlxAtlasFrames
-		return Paths.fileExists('images/$key.xml') ? getSparrowAtlas(key) : getPackerAtlas(key);
+	public static function getAtlas(key:String):FlxAtlasFrames {
+		if (Paths.fileExists('images/$key.xml')) return getSparrowAtlas(key); 
+		if (Paths.fileExists('images/$key.json')) return getAsepriteAtlas(key);
+		return getPackerAtlas(key);
+	}
 	public static function getSparrowAtlas(key:String):FlxAtlasFrames
 		return FlxAtlasFrames.fromSparrow(image(key), getTextFromFile('images/$key.xml'));
+	public static function getAsepriteAtlas(key:String):FlxAtlasFrames
+		return FlxAtlasFrames.fromTexturePackerJson(image(key), getTextFromFile('images/$key.json'));
 	public static function getPackerAtlas(key:String):FlxAtlasFrames
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key), getTextFromFile('images/$key.txt'));
 

@@ -63,7 +63,7 @@ class Limo extends BaseStage {
 			resetLimoKill();
 
 			//PRECACHE SOUND
-			precacheSound('dancerdeath');
+			Paths.sound('dancerdeath');
 			setDefaultGF('gf-car');
 		}
 

@@ -49,7 +49,9 @@ class NotesSubState extends MusicBeatSubstate
 
 	public function new() {
 		super();
-		
+
+		DiscordClient.changePresence("In the Note Colors Menu", null);
+
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFFEA71FD;
 		bg.screenCenter();

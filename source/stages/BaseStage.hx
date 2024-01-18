@@ -34,20 +34,6 @@ class BaseStage extends PlayState {
 	function setStartCallback(myfn:Void->Void) PlayState.instance.startCallback = myfn;
 	function setEndCallback(myfn:Void->Void) PlayState.instance.endCallback = myfn;
 
-	//precache functions
-	function precacheImage(key:String) precache(key, 'image');
-	function precacheSound(key:String) precache(key, 'sound');
-	function precacheMusic(key:String) precache(key, 'music');
-
-	function precache(key:String, type:String) {
-		PlayState.instance.precacheList.set(key, type);
-		switch(type) {
-			case 'image': Paths.image(key);
-			case 'sound': Paths.sound(key);
-			case 'music': Paths.music(key);
-		}
-	}
-
 	// init stuff
 	function onCreate() {}
 	function onStartCountdown() {} // set stopCountdown to true to stop it

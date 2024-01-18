@@ -5,7 +5,7 @@ class CoolUtil
 	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol
 		var m:Float = Math.fround(f * snap);
-		trace(snap);
+		//trace(snap);
 		return (m / snap);
 	}
 
@@ -103,20 +103,16 @@ class CoolUtil
 
 	inline public static function openFolder(folder:String, absolute:Bool = false) {
 		#if sys
-			if(!absolute) folder =  Sys.getCwd() + '$folder';
+		if(!absolute) folder =  Sys.getCwd() + '$folder';
 
-			folder = folder.replace('/', '\\');
-			if(folder.endsWith('/')) folder.substr(0, folder.length - 1);
+		folder = folder.replace('/', '\\');
+		if(folder.endsWith('/')) folder.substr(0, folder.length - 1);
 
-			#if linux
-			var command:String = 'explorer.exe';
-			#else
-			var command:String = '/usr/bin/xdg-open';
-			#end
-			Sys.command(command, [folder]);
-			trace('$command $folder');
+		var command:String = #if linux '/usr/bin/xdg-open' #else 'explorer.exe' #end;
+		Sys.command(command, [folder]);
+		trace('$command $folder');
 		#else
-			FlxG.error("Platform is not supported for CoolUtil.openFolder");
+		FlxG.error("Platform is not supported for CoolUtil.openFolder");
 		#end
 	}
 

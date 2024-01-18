@@ -67,6 +67,7 @@ class OptionsState extends MusicBeatState
 	override function closeSubState() {
 		super.closeSubState();
 		ClientPrefs.saveSettings();
+		DiscordClient.changePresence("In the Options Menu", null);
 	}
 
 	override function update(elapsed:Float) {

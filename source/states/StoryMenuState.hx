@@ -319,13 +319,10 @@ class StoryMenuState extends MusicBeatState
 				if (FlxG.sound.music != null) FlxG.sound.music.stop();
 				FreeplayState.destroyFreeplayVocals();
 			});
-			
-			#if (MODS_ALLOWED && cpp)
+
 			DiscordClient.loadModRPC();
-			#end
-		} else {
+		} else
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-		}
 	}
 
 	var tweenDifficulty:FlxTween;

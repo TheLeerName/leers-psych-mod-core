@@ -64,6 +64,8 @@ class ControlsSubState extends MusicBeatSubstate
 	{
 		super();
 
+		DiscordClient.changePresence("In the Controls Menu", null);
+
 		options.push([true]);
 		options.push([true]);
 		options.push([true, defaultKey]);
