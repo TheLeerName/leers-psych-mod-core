@@ -33,7 +33,7 @@ class ProjectCustomNodes {
 						else
 							rename = '/' + path;
 
-						Sys.command('robocopy "$path" "${output + rename}" /S /NP /NFL /NDL /NJH /NJS >nul 2>&1');
+						Sys.command('robocopy "$path" "${output + rename}" /XF *.mp3 /S /NP /NFL /NDL /NJH /NJS >nul 2>&1');
 					#end
 					case 'section':
 						if (defined(el))
