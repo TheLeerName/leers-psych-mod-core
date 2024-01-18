@@ -32,9 +32,9 @@ class Paths {
 	public static function music(key:String):Sound
 		return returnSoundAbsolute(musicPath(key));
 	public static function voices(song:String, postfix:String = null):Sound
-		return returnSoundAbsolute(path('songs/${formatToSongPath(song)}/Voices${postfix == null ? '' : '-$postfix'}.$SOUND_EXT'));
+		return returnSoundAbsolute(voicesPath(song, postfix));
 	public static function inst(song:String):Sound
-		return returnSoundAbsolute(path('songs/${formatToSongPath(song)}/Inst.$SOUND_EXT'));
+		return returnSoundAbsolute(instPath(song));
 
 	inline public static function soundRandom(key:String, min:Int, max:Int):Sound
 		return sound(key + FlxG.random.int(min, max));
@@ -75,10 +75,16 @@ class Paths {
 		return path('data/$key.json');
 	inline static public function luaPath(key:String):String
 		return path('$key.lua');
+
 	inline public static function soundPath(key:String):String
 		return path('sounds/$key.$SOUND_EXT');
 	inline public static function musicPath(key:String):String
 		return path('music/$key.$SOUND_EXT');
+	inline public static function voicesPath(song:String, postfix:String = null):String
+		return path('songs/${formatToSongPath(song)}/Voices' + postfix == null ? '' : '-$postfix' + '.$SOUND_EXT');
+	inline public static function instPath(song:String):String
+		return path('songs/${formatToSongPath(song)}/Inst.$SOUND_EXT');
+
 	inline public static function font(key:String):String
 		return path('fonts/$key');
 	inline public static function video(key:String):String
