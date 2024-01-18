@@ -1,7 +1,7 @@
 package objects;
 
-import flixel.group.FlxGroup;
 import flixel.ui.FlxBar;
+import flixel.group.FlxGroup;
 import flixel.util.FlxStringUtil;
 
 import states.FreeplayState;

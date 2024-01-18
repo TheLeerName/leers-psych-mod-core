@@ -303,11 +303,13 @@ class PauseSubState extends MusicBeatSubstate
 					}
 					OptionsState.onPlayState = true;
 				case "Exit to menu":
-					#if desktop DiscordClient.resetClientID(); #end
+					DiscordClient.resetClientID();
 					PlayState.deathCounter = 0;
 					PlayState.seenCutscene = false;
 
+					#if MODS_ALLOWED
 					Mods.loadTopMod();
+					#end
 					if(PlayState.isStoryMode) {
 						MusicBeatState.switchState(new StoryMenuState());
 					} else {

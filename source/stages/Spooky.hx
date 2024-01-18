@@ -1,11 +1,9 @@
-package states.stages;
+package stages;
 
-class Spooky extends BaseStage
-{
+class Spooky extends BaseStage {
 	var halloweenBG:BGSprite;
 	var halloweenWhite:BGSprite;
-	override function create()
-	{
+	override function onCreate() {
 		if(!ClientPrefs.data.lowQuality) {
 			halloweenBG = new BGSprite('halloween_bg', -200, -100, ['halloweem bg0', 'halloweem bg lightning strike']);
 		} else {
@@ -27,8 +25,8 @@ class Spooky extends BaseStage
 			}
 		}
 	}
-	override function createPost()
-	{
+
+	override function onCreatePost() {
 		halloweenWhite = new BGSprite(null, -800, -400, 0, 0);
 		halloweenWhite.makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.WHITE);
 		halloweenWhite.alpha = 0;
@@ -38,16 +36,12 @@ class Spooky extends BaseStage
 
 	var lightningStrikeBeat:Int = 0;
 	var lightningOffset:Int = 8;
-	override function beatHit()
-	{
-		if (FlxG.random.bool(10) && curBeat > lightningStrikeBeat + lightningOffset)
-		{
+	override function onBeatHit() {
+		if (curBeat > lightningStrikeBeat + lightningOffset && FlxG.random.bool(10))
 			lightningStrikeShit();
-		}
 	}
 
-	function lightningStrikeShit():Void
-	{
+	function lightningStrikeShit():Void {
 		FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
 		if(!ClientPrefs.data.lowQuality) halloweenBG.animation.play('halloweem bg lightning strike');
 
@@ -83,8 +77,7 @@ class Spooky extends BaseStage
 		}
 	}
 
-	function monsterCutscene()
-	{
+	function monsterCutscene() {
 		inCutscene = true;
 		camHUD.visible = false;
 

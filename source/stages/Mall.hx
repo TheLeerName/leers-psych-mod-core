@@ -1,15 +1,11 @@
-package states.stages;
+package stages;
 
-import states.stages.objects.*;
-
-class Mall extends BaseStage
-{
+class Mall extends BaseStage {
 	var upperBoppers:BGSprite;
 	var bottomBoppers:MallCrowd;
 	var santa:BGSprite;
 
-	override function create()
-	{
+	override function onCreate() {
 		var bg:BGSprite = new BGSprite('christmas/bgWalls', -1000, -500, 0.2, 0.2);
 		bg.setGraphicSize(Std.int(bg.width * 0.8));
 		bg.updateHitbox();
@@ -45,20 +41,18 @@ class Mall extends BaseStage
 			setEndCallback(eggnogEndCutscene);
 	}
 
-	override function countdownTick(count:Countdown, num:Int) everyoneDance();
-	override function beatHit() everyoneDance();
+	override function onCountdownTick(count:Countdown, num:Int) everyoneDance();
+	override function onBeatHit() everyoneDance();
 
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
-	{
-		switch(eventName)
-		{
+	override function onEvent(name:String, v1:String, v2:String, time:Float) {
+		switch(name) {
 			case "Hey!":
-				switch(value1.toLowerCase().trim()) {
+				switch(v1.toLowerCase().trim()) {
 					case 'bf' | 'boyfriend' | '0':
 						return;
 				}
 				bottomBoppers.animation.play('hey', true);
-				bottomBoppers.heyTimer = flValue2;
+				bottomBoppers.heyTimer = Std.parseFloat(v2);
 		}
 	}
 
@@ -98,5 +92,35 @@ class Mall extends BaseStage
 			});
 		}
 		else endSong();
+	}
+}
+
+class MallCrowd extends BGSprite
+{
+	public var heyTimer:Float = 0;
+	public function new(x:Float = 0, y:Float = 0, sprite:String = 'christmas/bottomBop', idle:String = 'Bottom Level Boppers Idle', hey:String = 'Bottom Level Boppers HEY')
+	{
+		super(sprite, x, y, 0.9, 0.9, [idle]);
+		animation.addByPrefix('hey', hey, 24, false);
+		antialiasing = ClientPrefs.data.antialiasing;
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+
+		if(heyTimer > 0) {
+			heyTimer -= elapsed;
+			if(heyTimer <= 0) {
+				dance(true);
+				heyTimer = 0;
+			}
+		}
+	}
+
+	override function dance(?forceplay:Bool = false)
+	{
+		if(heyTimer > 0) return;
+		super.dance(forceplay);
 	}
 }

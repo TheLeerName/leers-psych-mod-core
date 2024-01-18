@@ -2,7 +2,6 @@ package states.editors;
 
 import backend.WeekData;
 
-import openfl.utils.Assets;
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUI;
@@ -17,7 +16,6 @@ import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import flash.net.FileFilter;
 import lime.system.Clipboard;
-import haxe.Json;
 
 import objects.HealthIcon;
 import objects.MenuCharacter;
@@ -349,7 +347,7 @@ class WeekEditorState extends MusicBeatState
 		if(isMissing) {
 			weekThing.visible = false;
 			missingFileText.visible = true;
-			missingFileText.text = 'MISSING FILE: images/storymenu/' + assetName + '.png';
+			missingFileText.text = 'MISSING FILE: images/storymenu/' + assetName;
 		}
 		recalculateStuffPosition();
 
@@ -467,7 +465,7 @@ class WeekEditorState extends MusicBeatState
 		if(_file.__path != null) fullPath = _file.__path;
 
 		if(fullPath != null) {
-			var rawJson:String = File.getContent(fullPath);
+			var rawJson:String = Paths.text(fullPath);
 			if(rawJson != null) {
 				loadedWeek = cast Json.parse(rawJson);
 				if(loadedWeek.weekCharacters != null && loadedWeek.weekName != null) //Make sure it's really a week

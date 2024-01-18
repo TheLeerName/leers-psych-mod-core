@@ -13,7 +13,6 @@ import flixel.util.FlxDestroyUtil;
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
-import openfl.utils.Assets;
 import lime.system.Clipboard;
 
 import objects.Character;
@@ -1016,7 +1015,7 @@ class CharacterEditorState extends MusicBeatState
 				MusicBeatState.switchState(new states.editors.MasterEditorMenu());
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			}
-			else MusicBeatState.switchState(new PlayState());
+			else PlayState.switchToState();
 			return;
 		}
 	}

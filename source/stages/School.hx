@@ -1,16 +1,13 @@
-package states.stages;
+package stages;
 
-import states.stages.objects.*;
 import substates.GameOverSubstate;
 import cutscenes.DialogueBox;
 
 import openfl.utils.Assets as OpenFlAssets;
 
-class School extends BaseStage
-{
+class School extends BaseStage {
 	var bgGirls:BackgroundGirls;
-	override function create()
-	{
+	override function onCreate() {
 		var _song = PlayState.SONG;
 		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pixel';
 		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'gameOver-pixel';
@@ -89,16 +86,13 @@ class School extends BaseStage
 		}
 	}
 
-	override function beatHit()
-	{
+	override function onBeatHit() {
 		if(bgGirls != null) bgGirls.dance();
 	}
 
 	// For events
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
-	{
-		switch(eventName)
-		{
+	override function onEvent(name:String, v1:String, v2:String, time:Float) {
+		switch(name) {
 			case "BG Freaks Expression":
 				if(bgGirls != null) bgGirls.swapDanceType();
 		}
@@ -150,5 +144,48 @@ class School extends BaseStage
 				black.destroy();
 			}
 		});
+	}
+}
+
+class BackgroundGirls extends FlxSprite
+{
+	var isPissed:Bool = true;
+	public function new(x:Float, y:Float)
+	{
+		super(x, y);
+
+		// BG fangirls dissuaded
+		frames = Paths.getSparrowAtlas('weeb/bgFreaks');
+		antialiasing = false;
+		swapDanceType();
+
+		setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+		updateHitbox();
+		animation.play('danceLeft');
+	}
+
+	var danceDir:Bool = false;
+
+	public function swapDanceType():Void
+	{
+		isPissed = !isPissed;
+		if(!isPissed) { //Gets unpissed
+			animation.addByIndices('danceLeft', 'BG girls group', CoolUtil.numberArray(14), "", 24, false);
+			animation.addByIndices('danceRight', 'BG girls group', CoolUtil.numberArray(30, 15), "", 24, false);
+		} else { //Pisses
+			animation.addByIndices('danceLeft', 'BG fangirls dissuaded', CoolUtil.numberArray(14), "", 24, false);
+			animation.addByIndices('danceRight', 'BG fangirls dissuaded', CoolUtil.numberArray(30, 15), "", 24, false);
+		}
+		dance();
+	}
+
+	public function dance():Void
+	{
+		danceDir = !danceDir;
+
+		if (danceDir)
+			animation.play('danceRight', true);
+		else
+			animation.play('danceLeft', true);
 	}
 }

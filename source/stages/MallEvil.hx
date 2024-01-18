@@ -1,11 +1,7 @@
-package states.stages;
+package stages;
 
-import states.stages.objects.*;
-
-class MallEvil extends BaseStage
-{
-	override function create()
-	{
+class MallEvil extends BaseStage {
+	override function onCreate() {
 		var bg:BGSprite = new BGSprite('christmas/evilBG', -400, -500, 0.2, 0.2);
 		bg.setGraphicSize(Std.int(bg.width * 0.8));
 		bg.updateHitbox();

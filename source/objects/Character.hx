@@ -5,13 +5,10 @@ import backend.animation.PsychAnimationController;
 import flixel.util.FlxSort;
 import flixel.util.FlxDestroyUtil;
 
-import openfl.utils.AssetType;
-import openfl.utils.Assets;
-import haxe.Json;
-
 import backend.Song;
 import backend.Section;
-import states.stages.objects.TankmenBG;
+
+import stages.Tank.TankmenBG;
 
 typedef CharacterFile = {
 	var animations:Array<AnimArray>;
@@ -368,11 +365,8 @@ class Character extends FlxSprite
 		try
 		{
 			var noteData:Array<SwagSection> = Song.loadFromJson('picospeaker', Paths.formatToSongPath(PlayState.SONG.song)).notes;
-			for (section in noteData) {
-				for (songNotes in section.sectionNotes) {
-					animationNotes.push(songNotes);
-				}
-			}
+			for (section in noteData) for (songNotes in section.sectionNotes)
+				animationNotes.push(songNotes);
 			TankmenBG.animationNotes = animationNotes;
 			animationNotes.sort(sortAnims);
 		}

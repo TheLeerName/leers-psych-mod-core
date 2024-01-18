@@ -34,9 +34,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		if(title == null) title = 'Options';
 		if(rpcTitle == null) rpcTitle = 'In the Options Menu';
 		
-		#if desktop
 		DiscordClient.changePresence(rpcTitle, null);
-		#end
 		
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFFea71fd;

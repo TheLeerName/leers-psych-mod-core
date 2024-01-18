@@ -1,9 +1,5 @@
 package backend;
 
-import lime.utils.Assets;
-import openfl.utils.Assets as OpenFlAssets;
-import haxe.Json;
-
 typedef WeekFile =
 {
 	// JSON variables
@@ -22,6 +18,7 @@ typedef WeekFile =
 }
 
 class WeekData {
+	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
 	public static var weeksLoaded:Map<String, WeekData> = new Map<String, WeekData>();
 	public static var weeksList:Array<String> = [];
 	public var folder:String = '';
@@ -79,7 +76,7 @@ class WeekData {
 		for (i in 0...directories.length) {
 			var dir:String = directories[i];
 			if(Paths.fileExistsAbsolute(dir)) {
-				for (file in FileSystem.readDirectory(dir)) {
+				for (file in Paths.readDirectory(dir)) {
 					var path = '$dir/$file';
 					if (file.endsWith('.json'))
 						addWeek(file.substr(0, file.length - 5), path, directories[i], i, directories.length);
@@ -112,20 +109,10 @@ class WeekData {
 	}
 
 	private static function getWeekFile(path:String):WeekFile {
-		var rawJson:String = null;
-		#if MODS_ALLOWED
-		if(FileSystem.exists(path)) {
-			rawJson = File.getContent(path);
-		}
-		#else
-		if(OpenFlAssets.exists(path)) {
-			rawJson = Assets.getText(path);
-		}
-		#end
+		var rawJson:String = Paths.text(path);
 
-		if(rawJson != null && rawJson.length > 0) {
-			return cast tjson.TJSON.parse(rawJson);
-		}
+		if(rawJson != null && rawJson.length > 0)
+			return cast Json.parse(rawJson);
 		return null;
 	}
 
@@ -141,10 +128,12 @@ class WeekData {
 		return weeksLoaded.get(weeksList[PlayState.storyWeek]);
 	}
 
-	public static function setDirectoryFromWeek(?data:WeekData = null) {
-		Mods.currentModDirectory = '';
-		if(data != null && data.folder != null && data.folder.length > 0) {
-			Mods.currentModDirectory = data.folder;
-		}
+	public static function setDirectoryFromWeek(?data:WeekData = null)
+		setDirectory(data != null ? data.folder : null);
+
+	public static function setDirectory(?folder:String) {
+		#if MODS_ALLOWED
+		Mods.currentModDirectory = folder;
+		#end
 	}
 }

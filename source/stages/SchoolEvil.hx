@@ -1,15 +1,12 @@
-package states.stages;
+package stages;
 
 import flixel.addons.effects.FlxTrail;
-import states.stages.objects.*;
 import substates.GameOverSubstate;
 import cutscenes.DialogueBox;
 import openfl.utils.Assets as OpenFlAssets;
 
-class SchoolEvil extends BaseStage
-{
-	override function create()
-	{
+class SchoolEvil extends BaseStage {
+	override function onCreate() {
 		var _song = PlayState.SONG;
 		if(_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pixel';
 		if(_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'gameOver-pixel';
@@ -38,30 +35,27 @@ class SchoolEvil extends BaseStage
 			setStartCallback(schoolIntro);
 		}
 	}
-	override function createPost()
-	{
+
+	override function onCreatePost() {
 		var trail:FlxTrail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069);
 		addBehindDad(trail);
 	}
 
 	// Ghouls event
 	var bgGhouls:BGSprite;
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
-	{
-		switch(eventName)
-		{
+	override function onEvent(name:String, v1:String, v2:String, time:Float) {
+		switch(name) {
 			case "Trigger BG Ghouls":
-				if(!ClientPrefs.data.lowQuality)
-				{
+				if(!ClientPrefs.data.lowQuality) {
 					bgGhouls.dance(true);
 					bgGhouls.visible = true;
 				}
 		}
 	}
-	override function eventPushed(event:objects.Note.EventNote)
-	{
+
+	override function onEventPushed(name:String, v1:String, v2:String, time:Float) {
 		// used for preloading assets used on events
-		switch(event.event)
+		switch(name)
 		{
 			case "Trigger BG Ghouls":
 				if(!ClientPrefs.data.lowQuality)

@@ -1,19 +1,16 @@
-package states.stages;
+package stages;
 
-import states.stages.objects.*;
 import cutscenes.CutsceneHandler;
 import substates.GameOverSubstate;
 import objects.Character;
 
-class Tank extends BaseStage
-{
+class Tank extends BaseStage {
 	var tankWatchtower:BGSprite;
 	var tankGround:BackgroundTank;
 	var tankmanRun:FlxTypedGroup<TankmenBG>;
 	var foregroundSprites:FlxTypedGroup<BGSprite>;
 
-	override function create()
-	{
+	override function onCreate() {
 		var sky:BGSprite = new BGSprite('tankSky', -400, -400, 0, 0);
 		add(sky);
 
@@ -87,8 +84,8 @@ class Tank extends BaseStage
 			}
 		}
 	}
-	override function createPost()
-	{
+
+	override function onCreatePost() {
 		add(foregroundSprites);
 
 		if(!ClientPrefs.data.lowQuality)
@@ -119,10 +116,10 @@ class Tank extends BaseStage
 		}
 	}
 
-	override function countdownTick(count:Countdown, num:Int) if(num % 2 == 0) everyoneDance();
-	override function beatHit() everyoneDance();
-	function everyoneDance()
-	{
+	override function onCountdownTick(count:Countdown, num:Int) if(num % 2 == 0) everyoneDance();
+	override function onBeatHit() everyoneDance();
+
+	function everyoneDance() {
 		if(!ClientPrefs.data.lowQuality) tankWatchtower.dance();
 		foregroundSprites.forEach(function(spr:BGSprite)
 		{
@@ -135,8 +132,7 @@ class Tank extends BaseStage
 	var tankman:FlxAnimate;
 	var pico:FlxAnimate;
 	var boyfriendCutscene:FlxSprite;
-	function prepareCutscene()
-	{
+	function prepareCutscene() {
 		cutsceneHandler = new CutsceneHandler();
 
 		dadGroup.alpha = 0.00001;
@@ -385,5 +381,98 @@ class Tank extends BaseStage
 				spr.y -= 100;
 			});
 		}
+	}
+}
+
+class TankmenBG extends FlxSprite
+{
+	public static var animationNotes:Array<Dynamic> = [];
+	private var tankSpeed:Float;
+	private var endingOffset:Float;
+	private var goingRight:Bool;
+	public var strumTime:Float;
+
+	public function new(x:Float, y:Float, facingRight:Bool)
+	{
+		tankSpeed = 0.7;
+		goingRight = false;
+		strumTime = 0;
+		goingRight = facingRight;
+		super(x, y);
+
+		frames = Paths.getSparrowAtlas('tankmanKilled1');
+		animation.addByPrefix('run', 'tankman running', 24, true);
+		animation.addByPrefix('shot', 'John Shot ' + FlxG.random.int(1, 2), 24, false);
+		animation.play('run');
+		animation.curAnim.curFrame = FlxG.random.int(0, animation.curAnim.frames.length - 1);
+		antialiasing = ClientPrefs.data.antialiasing;
+
+		scale.set(0.8, 0.8);
+		updateHitbox();
+	}
+
+	public function resetShit(x:Float, y:Float, goingRight:Bool):Void
+	{
+		this.x = x;
+		this.y = y;
+		this.goingRight = goingRight;
+		endingOffset = FlxG.random.float(50, 200);
+		tankSpeed = FlxG.random.float(0.6, 1);
+		flipX = goingRight;
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+
+		visible = (x > -0.5 * FlxG.width && x < 1.2 * FlxG.width);
+
+		if(animation.curAnim.name == "run")
+		{
+			var speed:Float = (Conductor.songPosition - strumTime) * tankSpeed;
+			if(goingRight)
+				x = (0.02 * FlxG.width - endingOffset) + speed;
+			else
+				x = (0.74 * FlxG.width + endingOffset) - speed;
+		}
+		else if(animation.curAnim.finished)
+		{
+			kill();
+		}
+
+		if(Conductor.songPosition > strumTime)
+		{
+			animation.play('shot');
+			if(goingRight)
+			{
+				offset.x = 300;
+				offset.y = 200;
+			}
+		}
+	}
+}
+
+class BackgroundTank extends BGSprite
+{
+	public var offsetX:Float = 400;
+	public var offsetY:Float = 1300;
+	public var tankSpeed:Float = 0;
+	public var tankAngle:Float = 0;
+	public function new()
+	{
+		super('tankRolling', 0, 0, 0.5, 0.5, ['BG tank w lighting'], true);
+		tankSpeed = FlxG.random.float(5, 7);
+		tankAngle = FlxG.random.int(-90, 45);
+		antialiasing = ClientPrefs.data.antialiasing;
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+
+		tankAngle += elapsed * tankSpeed;
+		angle = tankAngle - 90 + 15;
+		x = offsetX + 1500 * Math.cos(Math.PI / 180 * (tankAngle + 180));
+		y = offsetY + 1100 * Math.sin(Math.PI / 180 * (tankAngle + 180));
 	}
 }

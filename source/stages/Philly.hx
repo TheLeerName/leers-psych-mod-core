@@ -1,10 +1,8 @@
-package states.stages;
+package stages;
 
-import states.stages.objects.*;
 import objects.Character;
 
-class Philly extends BaseStage
-{
+class Philly extends BaseStage {
 	var phillyLightsColors:Array<FlxColor>;
 	var phillyWindow:BGSprite;
 	var phillyStreet:BGSprite;
@@ -18,8 +16,7 @@ class Philly extends BaseStage
 	var phillyWindowEvent:BGSprite;
 	var curLightEvent:Int = -1;
 
-	override function create()
-	{
+	override function onCreate() {
 		if(!ClientPrefs.data.lowQuality) {
 			var bg:BGSprite = new BGSprite('philly/sky', -100, 0, 0.1, 0.1);
 			add(bg);
@@ -48,9 +45,9 @@ class Philly extends BaseStage
 		phillyStreet = new BGSprite('philly/street', -40, 50);
 		add(phillyStreet);
 	}
-	override function eventPushed(event:objects.Note.EventNote)
-	{
-		switch(event.event)
+
+	override function onEventPushed(name:String, v1:String, v2:String, time:Float) {
+		switch(name)
 		{
 			case "Philly Glow":
 				blammedLightsBlack = new FlxSprite(FlxG.width * -0.5, FlxG.height * -0.5).makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
@@ -76,8 +73,7 @@ class Philly extends BaseStage
 		}
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function onUpdate(elapsed:Float) {
 		phillyWindow.alpha -= (Conductor.crochet / 1000) * FlxG.elapsed * 1.5;
 		if(phillyGlowParticles != null)
 		{
@@ -96,8 +92,7 @@ class Philly extends BaseStage
 		}
 	}
 
-	override function beatHit()
-	{
+	override function onBeatHit() {
 		phillyTrain.beatHit(curBeat);
 		if (curBeat % 4 == 0)
 		{
@@ -107,12 +102,12 @@ class Philly extends BaseStage
 		}
 	}
 
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
+	override function onEvent(name:String, v1:String, v2:String, time:Float)
 	{
-		switch(eventName)
-		{
+		switch(name) {
 			case "Philly Glow":
-				if(flValue1 == null || flValue1 <= 0) flValue1 = 0;
+				var flValue1 = Std.parseFloat(v1);
+				if(flValue1 == Math.NaN || flValue1 <= 0) flValue1 = 0;
 				var lightId:Int = Math.round(flValue1);
 
 				var chars:Array<Character> = [boyfriend, gf, dad];
@@ -205,11 +200,191 @@ class Philly extends BaseStage
 		}
 	}
 
-	function doFlash()
-	{
+	function doFlash() {
 		var color:FlxColor = FlxColor.WHITE;
 		if(!ClientPrefs.data.flashing) color.alphaFloat = 0.5;
 
 		FlxG.camera.flash(color, 0.15, null, true);
+	}
+}
+
+class PhillyGlowGradient extends FlxSprite
+{
+	public var originalY:Float;
+	public var originalHeight:Int = 400;
+	public var intendedAlpha:Float = 1;
+	public function new(x:Float, y:Float)
+	{
+		super(x, y);
+		originalY = y;
+
+		loadGraphic(Paths.image('philly/gradient'));
+		scrollFactor.set(0, 0.75);
+		setGraphicSize(2000, originalHeight);
+		updateHitbox();
+		antialiasing = ClientPrefs.data.antialiasing;
+	}
+
+	override function update(elapsed:Float)
+	{
+		var newHeight:Int = Math.round(height - 1000 * elapsed);
+		if(newHeight > 0)
+		{
+			alpha = intendedAlpha;
+			setGraphicSize(2000, newHeight);
+			updateHitbox();
+			y = originalY + (originalHeight - height);
+		}
+		else
+		{
+			alpha = 0;
+			y = -5000;
+		}
+
+		super.update(elapsed);
+	}
+
+	public function bop()
+	{
+		setGraphicSize(2000, originalHeight);
+		updateHitbox();
+		y = originalY;
+		alpha = intendedAlpha;
+	}
+}
+class PhillyGlowParticle extends FlxSprite
+{
+	var lifeTime:Float = 0;
+	var decay:Float = 0;
+	var originalScale:Float = 1;
+	public function new(x:Float, y:Float, color:FlxColor)
+	{
+		super(x, y);
+		this.color = color;
+
+		loadGraphic(Paths.image('philly/particle'));
+		lifeTime = FlxG.random.float(0.6, 0.9);
+		decay = FlxG.random.float(0.8, 1);
+		if(!ClientPrefs.data.flashing)
+		{
+			decay *= 0.5;
+			alpha = 0.5;
+		}
+
+		originalScale = FlxG.random.float(0.75, 1);
+		scale.set(originalScale, originalScale);
+
+		scrollFactor.set(FlxG.random.float(0.3, 0.75), FlxG.random.float(0.65, 0.75));
+		velocity.set(FlxG.random.float(-40, 40), FlxG.random.float(-175, -250));
+		acceleration.set(FlxG.random.float(-10, 10), 25);
+		antialiasing = ClientPrefs.data.antialiasing;
+	}
+
+	override function update(elapsed:Float)
+	{
+		lifeTime -= elapsed;
+		if(lifeTime < 0)
+		{
+			lifeTime = 0;
+			alpha -= decay * elapsed;
+			if(alpha > 0)
+			{
+				scale.set(originalScale * alpha, originalScale * alpha);
+			}
+		}
+		super.update(elapsed);
+	}
+}
+class PhillyTrain extends BGSprite
+{
+	public var sound:FlxSound;
+	public function new(x:Float = 0, y:Float = 0, image:String = 'philly/train', sound:String = 'train_passes')
+	{
+		super(image, x, y);
+		active = true; //Allow update
+		antialiasing = ClientPrefs.data.antialiasing;
+
+		this.sound = new FlxSound().loadEmbedded(Paths.sound(sound));
+		FlxG.sound.list.add(this.sound);
+	}
+
+	public var moving:Bool = false;
+	public var finishing:Bool = false;
+	public var startedMoving:Bool = false;
+	public var frameTiming:Float = 0; //Simulates 24fps cap
+
+	public var cars:Int = 8;
+	public var cooldown:Int = 0;
+
+	override function update(elapsed:Float)
+	{
+		if (moving)
+		{
+			frameTiming += elapsed;
+			if (frameTiming >= 1 / 24)
+			{
+				if (sound.time >= 4700)
+				{
+					startedMoving = true;
+					if (PlayState.instance.gf != null)
+					{
+						PlayState.instance.gf.playAnim('hairBlow');
+						PlayState.instance.gf.specialAnim = true;
+					}
+				}
+		
+				if (startedMoving)
+				{
+					x -= 400;
+					if (x < -2000 && !finishing)
+					{
+						x = -1150;
+						cars -= 1;
+
+						if (cars <= 0)
+							finishing = true;
+					}
+
+					if (x < -4000 && finishing)
+						restart();
+				}
+				frameTiming = 0;
+			}
+		}
+		super.update(elapsed);
+	}
+
+	public function beatHit(curBeat:Int):Void
+	{
+		if (!moving)
+			cooldown += 1;
+
+		if (curBeat % 8 == 4 && FlxG.random.bool(30) && !moving && cooldown > 8)
+		{
+			cooldown = FlxG.random.int(-4, 0);
+			start();
+		}
+	}
+	
+	public function start():Void
+	{
+		moving = true;
+		if (!sound.playing)
+			sound.play(true);
+	}
+
+	public function restart():Void
+	{
+		if(PlayState.instance.gf != null)
+		{
+			PlayState.instance.gf.danced = false; //Makes she bop her head to the correct side once the animation ends
+			PlayState.instance.gf.playAnim('hairFall');
+			PlayState.instance.gf.specialAnim = true;
+		}
+		x = FlxG.width + 200;
+		moving = false;
+		cars = 8;
+		finishing = false;
+		startedMoving = false;
 	}
 }

@@ -1,42 +1,43 @@
-package states.stages;
+package stages;
 
-import states.stages.objects.*;
 import objects.Character;
 
-class StageWeek1 extends BaseStage
-{
-	var dadbattleBlack:BGSprite;
-	var dadbattleLight:BGSprite;
-	var dadbattleFog:DadBattleFog;
-	override function create()
-	{
+class StageWeek1 extends BaseStage {
+	public static function makeStage(state:flixel.FlxState) {
 		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
-		add(bg);
+		state.add(bg);
 
 		var stageFront:BGSprite = new BGSprite('stagefront', -650, 600, 0.9, 0.9);
 		stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
 		stageFront.updateHitbox();
-		add(stageFront);
+		state.add(stageFront);
 		if(!ClientPrefs.data.lowQuality) {
 			var stageLight:BGSprite = new BGSprite('stage_light', -125, -100, 0.9, 0.9);
 			stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
 			stageLight.updateHitbox();
-			add(stageLight);
+			state.add(stageLight);
 			var stageLight:BGSprite = new BGSprite('stage_light', 1225, -100, 0.9, 0.9);
 			stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
 			stageLight.updateHitbox();
 			stageLight.flipX = true;
-			add(stageLight);
+			state.add(stageLight);
 
 			var stageCurtains:BGSprite = new BGSprite('stagecurtains', -500, -300, 1.3, 1.3);
 			stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.9));
 			stageCurtains.updateHitbox();
-			add(stageCurtains);
+			state.add(stageCurtains);
 		}
 	}
-	override function eventPushed(event:objects.Note.EventNote)
-	{
-		switch(event.event)
+
+	var dadbattleBlack:BGSprite;
+	var dadbattleLight:BGSprite;
+	var dadbattleFog:DadBattleFog;
+	override function onCreate() {
+		makeStage(this);
+	}
+
+	override function onEventPushed(name:String, v1:String, v2:String, time:Float) {
+		switch(name)
 		{
 			case "Dadbattle Spotlight":
 				dadbattleBlack = new BGSprite(null, -800, -400, 0, 0);
@@ -57,12 +58,12 @@ class StageWeek1 extends BaseStage
 		}
 	}
 
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
-	{
-		switch(eventName)
+	override function onEvent(name:String, v1:String, v2:String, time:Float) {
+		switch(name)
 		{
 			case "Dadbattle Spotlight":
-				if(flValue1 == null) flValue1 = 0;
+				var flValue1 = Std.parseFloat(v1);
+				if(flValue1 == Math.NaN) flValue1 = 0;
 				var val:Int = Math.round(flValue1);
 
 				switch(val)
@@ -93,5 +94,34 @@ class StageWeek1 extends BaseStage
 						FlxTween.tween(dadbattleFog, {alpha: 0}, 0.7, {onComplete: function(twn:FlxTween) dadbattleFog.visible = false});
 				}
 		}
+	}
+}
+
+class DadBattleFog extends FlxSpriteGroup
+{
+	public function new()
+	{
+		super();
+		
+		alpha = 0;
+		blend = ADD;
+
+		var offsetX = 200;
+		var smoke:BGSprite = new BGSprite('smoke', -1550 + offsetX, 660 + FlxG.random.float(-20, 20), 1.2, 1.05);
+		smoke.setGraphicSize(Std.int(smoke.width * FlxG.random.float(1.1, 1.22)));
+		smoke.updateHitbox();
+		smoke.velocity.x = FlxG.random.float(15, 22);
+		smoke.active = true;
+		smoke.antialiasing = ClientPrefs.data.antialiasing;
+		add(smoke);
+
+		var smoke:BGSprite = new BGSprite('smoke', 1550 + offsetX, 660 + FlxG.random.float(-20, 20), 1.2, 1.05);
+		smoke.setGraphicSize(Std.int(smoke.width * FlxG.random.float(1.1, 1.22)));
+		smoke.updateHitbox();
+		smoke.velocity.x = FlxG.random.float(-15, -22);
+		smoke.active = true;
+		smoke.flipX = true;
+		smoke.antialiasing = ClientPrefs.data.antialiasing;
+		add(smoke);
 	}
 }

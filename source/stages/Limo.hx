@@ -1,9 +1,6 @@
-package states.stages;
+package stages;
 
-import states.stages.objects.*;
-
-enum HenchmenKillState
-{
+enum HenchmenKillState {
 	WAIT;
 	KILLING;
 	SPEEDING_OFFSCREEN;
@@ -11,8 +8,7 @@ enum HenchmenKillState
 	STOPPING;
 }
 
-class Limo extends BaseStage
-{
+class Limo extends BaseStage {
 	var grpLimoDancers:FlxTypedGroup<BackgroundDancer>;
 	var fastCar:BGSprite;
 	var fastCarCanDrive:Bool = true;
@@ -27,8 +23,7 @@ class Limo extends BaseStage
 	var grpLimoParticles:FlxTypedGroup<BGSprite>;
 	var dancersDiff:Float = 320;
 
-	override function create()
-	{
+	override function onCreate() {
 		var skyBG:BGSprite = new BGSprite('limo/limoSunset', -120, -50, 0.1, 0.1);
 		add(skyBG);
 
@@ -75,8 +70,8 @@ class Limo extends BaseStage
 		fastCar = new BGSprite('limo/fastCarLol', -300, 160);
 		fastCar.active = true;
 	}
-	override function createPost()
-	{
+
+	override function onCreatePost() {
 		resetFastCar();
 		addBehindGF(fastCar);
 		
@@ -85,8 +80,7 @@ class Limo extends BaseStage
 	}
 
 	var limoSpeed:Float = 0;
-	override function update(elapsed:Float)
-	{
+	override function onUpdate(elapsed:Float) {
 		if(!ClientPrefs.data.lowQuality) {
 			grpLimoParticles.forEach(function(spr:BGSprite) {
 				if(spr.animation.curAnim.finished) {
@@ -169,8 +163,7 @@ class Limo extends BaseStage
 		}
 	}
 
-	override function beatHit()
-	{
+	override function onBeatHit() {
 		if(!ClientPrefs.data.lowQuality) {
 			grpLimoDancers.forEach(function(dancer:BackgroundDancer)
 			{
@@ -181,43 +174,35 @@ class Limo extends BaseStage
 		if (FlxG.random.bool(10) && fastCarCanDrive)
 			fastCarDrive();
 	}
-	
+
 	// Substates for pausing/resuming tweens and timers
-	override function closeSubState()
-	{
-		if(paused)
-		{
-			if(carTimer != null) carTimer.active = true;
-		}
+	override function onResume() {
+		if(paused) return;
+
+		if(carTimer != null) carTimer.active = true;
 	}
 
-	override function openSubState(SubState:flixel.FlxSubState)
-	{
-		if(paused)
-		{
-			if(carTimer != null) carTimer.active = false;
-		}
+	override function onPause() {
+		if(!paused) return;
+
+		if(carTimer != null) carTimer.active = false;
 	}
 
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
-	{
-		switch(eventName)
-		{
+	override function onEvent(name:String, v1:String, v2:String, time:Float) {
+		switch(name) {
 			case "Kill Henchmen":
 				killHenchmen();
 		}
 	}
 
-	function dancersParenting()
-	{
+	function dancersParenting() {
 		var dancers:Array<BackgroundDancer> = grpLimoDancers.members;
 		for (i in 0...dancers.length) {
 			dancers[i].x = (370 * i) + dancersDiff + bgLimo.x;
 		}
 	}
 	
-	function resetLimoKill():Void
-	{
+	function resetLimoKill():Void {
 		limoMetalPole.x = -500;
 		limoMetalPole.visible = false;
 		limoLight.x = -500;
@@ -228,8 +213,7 @@ class Limo extends BaseStage
 		limoCorpseTwo.visible = false;
 	}
 
-	function resetFastCar():Void
-	{
+	function resetFastCar():Void {
 		fastCar.x = -12600;
 		fastCar.y = FlxG.random.int(140, 250);
 		fastCar.velocity.x = 0;
@@ -237,8 +221,7 @@ class Limo extends BaseStage
 	}
 
 	var carTimer:FlxTimer;
-	function fastCarDrive()
-	{
+	function fastCarDrive() {
 		//trace('Car drive');
 		FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
 
@@ -251,8 +234,7 @@ class Limo extends BaseStage
 		});
 	}
 
-	function killHenchmen():Void
-	{
+	function killHenchmen():Void {
 		if(!ClientPrefs.data.lowQuality) {
 			if(limoKillingState == WAIT) {
 				limoMetalPole.x = -400;
@@ -268,5 +250,31 @@ class Limo extends BaseStage
 				#end
 			}
 		}
+	}
+}
+
+class BackgroundDancer extends FlxSprite
+{
+	public function new(x:Float, y:Float)
+	{
+		super(x, y);
+
+		frames = Paths.getSparrowAtlas("limo/limoDancer");
+		animation.addByIndices('danceLeft', 'bg dancer sketch PINK', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
+		animation.addByIndices('danceRight', 'bg dancer sketch PINK', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
+		animation.play('danceLeft');
+		antialiasing = ClientPrefs.data.antialiasing;
+	}
+
+	var danceDir:Bool = false;
+
+	public function dance():Void
+	{
+		danceDir = !danceDir;
+
+		if (danceDir)
+			animation.play('danceRight', true);
+		else
+			animation.play('danceLeft', true);
 	}
 }

@@ -1,26 +1,13 @@
 package;
 
-#if android
-import android.content.Context;
-#end
+import flixel.FlxGame;
+
+import openfl.Lib;
+import openfl.events.Event;
+import openfl.display.Sprite;
+import openfl.display.StageScaleMode;
 
 import debug.FPSCounter;
-
-import flixel.graphics.FlxGraphic;
-import flixel.FlxGame;
-import flixel.FlxState;
-import haxe.io.Path;
-import openfl.Assets;
-import openfl.Lib;
-import openfl.display.Sprite;
-import openfl.events.Event;
-import openfl.display.StageScaleMode;
-import lime.app.Application;
-import states.TitleState;
-
-#if linux
-import lime.graphics.Image;
-#end
 
 //crash handler stuff
 #if CRASH_HANDLER
@@ -30,6 +17,8 @@ import haxe.io.Path;
 #end
 
 #if linux
+import lime.graphics.Image;
+
 @:cppInclude('./external/gamemode_client.h')
 @:cppFileCode('
 	#define GAMEMODE_AUTO
@@ -41,7 +30,7 @@ class Main extends Sprite
 	var game = {
 		width: 1280, // WINDOW width
 		height: 720, // WINDOW height
-		initialState: TitleState, // initial game state
+		initialState: states.TitleState, // initial game state
 		zoom: -1.0, // game state bounds
 		framerate: 60, // default framerate
 		skipSplash: true, // if the default flixel splash screen should be skipped
@@ -62,9 +51,7 @@ class Main extends Sprite
 		super();
 
 		// Credits to MAJigsaw77 (he's the og author for this code)
-		#if android
-		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));
-		#elseif ios
+		#if ios
 		Sys.setCwd(lime.system.System.applicationStorageDirectory);
 		#end
 
@@ -129,9 +116,7 @@ class Main extends Sprite
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 		#end
 
-		#if desktop
 		DiscordClient.prepare();
-		#end
 
 		// shader coords fix
 		FlxG.signals.gameResized.add(function (w, h) {
@@ -167,7 +152,7 @@ class Main extends Sprite
 		dateNow = dateNow.replace(" ", "_");
 		dateNow = dateNow.replace(":", "'");
 
-		path = "./crash/" + "PsychEngine_" + dateNow + ".txt";
+		path = "./crash/" + FlxG.stage.window.application.meta.get('file') + "_" + dateNow + ".txt";
 
 		for (stackItem in callStack)
 		{
@@ -180,7 +165,7 @@ class Main extends Sprite
 			}
 		}
 
-		errMsg += "\nUncaught Error: " + e.error + "\nPlease report this error to the GitHub page: https://github.com/ShadowMario/FNF-PsychEngine\n\n> Crash Handler written by: sqirra-rng";
+		errMsg += "\nUncaught Error: " + e.error + "\n\n> Crash Handler written by: sqirra-rng";
 
 		if (!FileSystem.exists("./crash/"))
 			FileSystem.createDirectory("./crash/");
@@ -190,9 +175,9 @@ class Main extends Sprite
 		Sys.println(errMsg);
 		Sys.println("Crash dump saved in " + Path.normalize(path));
 
-		Application.current.window.alert(errMsg, "Error!");
+		FlxG.stage.window.alert(errMsg, "Error!");
 		DiscordClient.shutdown();
-		Sys.exit(1);
+		FlxG.stage.window.close();
 	}
 	#end
 }

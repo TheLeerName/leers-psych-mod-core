@@ -1,8 +1,5 @@
 package cutscenes;
 
-import haxe.Json;
-import lime.utils.Assets;
-
 typedef DialogueAnimArray = {
 	var anim:String;
 	var loop_name:String;

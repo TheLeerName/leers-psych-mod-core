@@ -88,13 +88,15 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		if (controls.BACK)
 		{
-			#if desktop DiscordClient.resetClientID(); #end
+			DiscordClient.resetClientID();
 			FlxG.sound.music.stop();
 			PlayState.deathCounter = 0;
 			PlayState.seenCutscene = false;
 			PlayState.chartingMode = false;
 
+			#if MODS_ALLOWED
 			Mods.loadTopMod();
+			#end
 			if (PlayState.isStoryMode)
 				MusicBeatState.switchState(new StoryMenuState());
 			else

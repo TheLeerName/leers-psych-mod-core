@@ -1,5 +1,6 @@
 package states;
 
+import backend.WeekData;
 import objects.AttachedSprite;
 
 class CreditsState extends MusicBeatState
@@ -79,16 +80,14 @@ class CreditsState extends MusicBeatState
 
 			if(isSelectable) {
 				if(creditsStuff[i][5] != null)
-				{
-					Mods.currentModDirectory = creditsStuff[i][5];
-				}
+					WeekData.setDirectory(creditsStuff[i][5]);
 
 				var str:String = 'credits/missing_icon';
 				if(creditsStuff[i][1] != null && creditsStuff[i][1].length > 0)
 				{
 					var fileName = 'credits/' + creditsStuff[i][1];
-					if (Paths.fileExists('images/$fileName.png')) str = fileName;
-					else if (Paths.fileExists('images/$fileName-pixel.png')) str = fileName + '-pixel';
+					if (Paths.fileExistsAbsolute(Paths.imagePath(fileName))) str = fileName;
+					else if (Paths.fileExistsAbsolute(Paths.imagePath('$fileName-pixel'))) str = fileName + '-pixel';
 				}
 
 				var icon:AttachedSprite = new AttachedSprite(str);
@@ -99,7 +98,7 @@ class CreditsState extends MusicBeatState
 				// using a FlxGroup is too much fuss!
 				iconArray.push(icon);
 				add(icon);
-				Mods.currentModDirectory = '';
+				WeekData.setDirectory();
 
 				if(curSelected == -1) curSelected = i;
 			}

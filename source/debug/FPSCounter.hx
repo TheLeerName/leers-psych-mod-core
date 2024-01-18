@@ -1,8 +1,8 @@
 package debug;
 
+import openfl.system.System;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import openfl.system.System;
 
 import flixel.FlxG;
 import flixel.util.FlxStringUtil;

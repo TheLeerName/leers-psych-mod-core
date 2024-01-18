@@ -74,14 +74,13 @@ class FreeplayState extends MusicBeatState
 			for (song in leWeek.songs)
 			{
 				var colors:Array<Int> = song[2];
-				if(colors == null || colors.length < 3)
-				{
-					colors = [146, 113, 253];
-				}
+				if(colors == null || colors.length < 3) colors = [146, 113, 253];
 				addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]));
 			}
 		}
+		#if MODS_ALLOWED
 		Mods.loadTopMod();
+		#end
 
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
@@ -100,7 +99,7 @@ class FreeplayState extends MusicBeatState
 			songText.scaleX = Math.min(1, 980 / songText.width);
 			songText.snapToPosition();
 
-			Mods.currentModDirectory = songs[i].folder;
+			WeekData.setDirectory(songs[i].folder);
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
 			icon.sprTracker = songText;
 
@@ -184,7 +183,7 @@ class FreeplayState extends MusicBeatState
 
 	function weekIsLocked(name:String):Bool {
 		var leWeek:WeekData = WeekData.weeksLoaded.get(name);
-		return (!leWeek.startUnlocked && leWeek.weekBefore.length > 0 && (!StoryMenuState.weekCompleted.exists(leWeek.weekBefore) || !StoryMenuState.weekCompleted.get(leWeek.weekBefore)));
+		return (!leWeek.startUnlocked && leWeek.weekBefore.length > 0 && (!WeekData.weekCompleted.exists(leWeek.weekBefore) || !WeekData.weekCompleted.get(leWeek.weekBefore)));
 	}
 
 	var instPlaying:Int = -1;
@@ -313,7 +312,7 @@ class FreeplayState extends MusicBeatState
 				destroyFreeplayVocals();
 				FlxG.sound.music.volume = 0;
 
-				Mods.currentModDirectory = songs[curSelected].folder;
+				WeekData.setDirectory(songs[curSelected].folder);
 				var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
 				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
 				if (PlayState.SONG.needsVoices)
@@ -390,12 +389,10 @@ class FreeplayState extends MusicBeatState
 				super.update(elapsed);
 				return;
 			}
-			MusicBeatState.switchState(new PlayState());
+			PlayState.switchToState();
 			if (FlxG.sound.music != null) FlxG.sound.music.stop();
 			destroyFreeplayVocals();
-			#if (MODS_ALLOWED && cpp)
 			DiscordClient.loadModRPC();
-			#end
 		}
 		else if(controls.RESET && !player.playingMusic)
 		{
@@ -494,7 +491,7 @@ class FreeplayState extends MusicBeatState
 				item.alpha = 1;
 		}
 		
-		Mods.currentModDirectory = songs[curSelected].folder;
+		WeekData.setDirectory(songs[curSelected].folder);
 		PlayState.storyWeek = songs[curSelected].week;
 		Difficulty.loadFromWeek();
 		
@@ -581,7 +578,9 @@ class SongMetadata
 		this.week = week;
 		this.songCharacter = songCharacter;
 		this.color = color;
-		this.folder = Mods.currentModDirectory;
+		#if MODS_ALLOWED
+		this.folder =  Mods.currentModDirectory;
 		if(this.folder == null) this.folder = '';
+		#end
 	}
 }

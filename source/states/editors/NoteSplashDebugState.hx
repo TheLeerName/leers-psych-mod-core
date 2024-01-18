@@ -347,8 +347,8 @@ class NoteSplashDebugState extends MusicBeatState
 		for (offGroup in config.offsets)
 			strToSave += '\n' + offGroup[0] + ' ' + offGroup[1];
 
-		var pathSplit:Array<String> = (Paths.path('images/$texturePath.png').split('.png')[0] + '.txt').split(':');
-		var path:String = pathSplit[pathSplit.length-1].trim();
+		var path:String = Paths.imagePath(texturePath);
+		path = path.substring(0, path.lastIndexOf('.')) + '.txt';
 		savedText.text = 'Saved to: $path';
 		File.saveContent(path, strToSave);
 

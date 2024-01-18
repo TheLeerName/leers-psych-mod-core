@@ -1,7 +1,6 @@
 package backend;
 
-import haxe.Json;
-
+#if MODS_ALLOWED
 typedef ModsList = {
 	enabled:Array<String>,
 	disabled:Array<String>,
@@ -11,7 +10,7 @@ typedef ModsList = {
 @:access(backend.Paths)
 class Mods
 {
-	static public var currentModDirectory:String = '';
+	static public var currentModDirectory:String;
 	public static var ignoreModFolders:Array<String> = [
 		'characters',
 		'custom_events',
@@ -48,8 +47,8 @@ class Mods
 
 	inline public static function getModDirectories():Array<String> {
 		var list:Array<String> = [];
-		if(FileSystem.exists(Paths.MODS_DIRECTORY)) {
-			for (folder in FileSystem.readDirectory(Paths.MODS_DIRECTORY)) {
+		if(Paths.fileExistsAbsolute(Paths.MODS_DIRECTORY)) {
+			for (folder in Paths.readDirectory(Paths.MODS_DIRECTORY)) {
 				var path = haxe.io.Path.join([Paths.MODS_DIRECTORY, folder]);
 				if (sys.FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder) && !list.contains(folder)) {
 					list.push(folder);
@@ -61,23 +60,17 @@ class Mods
 
 	public static function getPack(?folder:String = null):Dynamic
 	{
-		#if MODS_ALLOWED
 		if(folder == null) folder = Mods.currentModDirectory;
 
 		var path = Paths.modsPath(folder + '/pack.json');
-		if(FileSystem.exists(path)) {
+		if (Paths.fileExistsAbsolute(path)) {
 			try {
-				#if sys
-				var rawJson:String = File.getContent(path);
-				#else
-				var rawJson:String = Assets.getText(path);
-				#end
-				if(rawJson != null && rawJson.length > 0) return tjson.TJSON.parse(rawJson);
+				var rawJson:String = Paths.text(path);
+				if(rawJson != null && rawJson.length > 0) return Json.parse(rawJson);
 			} catch(e:Dynamic) {
 				trace(e);
 			}
 		}
-		#end
 		return null;
 	}
 
@@ -86,7 +79,6 @@ class Mods
 		if(!updatedOnState) updateModList();
 		var list:ModsList = {enabled: [], disabled: [], all: []};
 
-		#if MODS_ALLOWED
 		try {
 			for (mod in CoolUtil.coolTextFile('modsList.txt'))
 			{
@@ -103,13 +95,11 @@ class Mods
 		} catch(e) {
 			trace(e);
 		}
-		#end
 		return list;
 	}
 	
 	private static function updateModList()
 	{
-		#if MODS_ALLOWED
 		// Find all that are already ordered
 		var list:Array<Array<Dynamic>> = [];
 		var added:Array<String> = [];
@@ -118,7 +108,7 @@ class Mods
 			{
 				var dat:Array<String> = mod.split("|");
 				var folder:String = dat[0];
-				if(folder.trim().length > 0 && FileSystem.exists(Paths.modsPath(folder)) && FileSystem.isDirectory(Paths.modsPath(folder)) && !added.contains(folder))
+				if(folder.trim().length > 0 && Paths.fileExistsAbsolute(Paths.modsPath(folder)) && FileSystem.isDirectory(Paths.modsPath(folder)) && !added.contains(folder))
 				{
 					added.push(folder);
 					list.push([folder, (dat[1] == "1")]);
@@ -131,7 +121,7 @@ class Mods
 		// Scan for folders that aren't on modsList.txt yet
 		for (folder in getModDirectories())
 		{
-			if(folder.trim().length > 0 && FileSystem.exists(Paths.modsPath(folder)) && FileSystem.isDirectory(Paths.modsPath(folder)) &&
+			if(folder.trim().length > 0 && Paths.fileExistsAbsolute(Paths.modsPath(folder)) && FileSystem.isDirectory(Paths.modsPath(folder)) &&
 			!ignoreModFolders.contains(folder.toLowerCase()) && !added.contains(folder))
 			{
 				added.push(folder);
@@ -151,17 +141,16 @@ class Mods
 		File.saveContent('modsList.txt', fileStr);
 		updatedOnState = true;
 		//trace('Saved modsList.txt');
-		#end
+
 	}
 
 	public static function loadTopMod()
 	{
-		Mods.currentModDirectory = '';
+		Mods.currentModDirectory = null;
 		
-		#if MODS_ALLOWED
 		var list:Array<String> = Mods.parseList().enabled;
 		if(list != null && list[0] != null)
 			Mods.currentModDirectory = list[0];
-		#end
 	}
 }
+#end

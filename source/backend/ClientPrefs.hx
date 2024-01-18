@@ -212,9 +212,7 @@ class ClientPrefs {
 		if (FlxG.save.data.mute != null)
 			FlxG.sound.muted = FlxG.save.data.mute;
 
-		#if desktop
 		DiscordClient.check();
-		#end
 
 		// controls on a separate save file
 		var save:FlxSave = new FlxSave();

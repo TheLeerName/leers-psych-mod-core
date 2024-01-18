@@ -1,16 +1,18 @@
 package backend;
 
-import Sys.sleep;
-import lime.app.Application;
+#if DISCORD_ALLOWED
 import hxdiscord_rpc.Discord;
 import hxdiscord_rpc.Types;
+#end
 
 class DiscordClient
 {
 	public static var isInitialized:Bool = false;
 	private static final _defaultID:String = "1191891177520255077";
 	public static var clientID(default, set):String = _defaultID;
+	#if DISCORD_ALLOWED
 	private static var presence:DiscordRichPresence = DiscordRichPresence.create();
+	#end
 
 	public static function check()
 	{
@@ -23,16 +25,19 @@ class DiscordClient
 		if (!isInitialized && ClientPrefs.data.discordRPC)
 			initialize();
 
-		Application.current.window.onClose.add(function() {
+		FlxG.stage.window.onClose.add(function() {
 			if(isInitialized) shutdown();
 		});
 	}
 
 	public dynamic static function shutdown() {
+		#if DISCORD_ALLOWED
 		Discord.Shutdown();
+		#end
 		isInitialized = false;
 	}
-	
+
+	#if DISCORD_ALLOWED
 	private static function onReady(request:cpp.RawConstPointer<DiscordUser>):Void {
 		var requestPtr:cpp.Star<DiscordUser> = cpp.ConstPointer.fromRaw(request).ptr;
 
@@ -51,9 +56,11 @@ class DiscordClient
 	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void {
 		trace('Discord: Disconnected ($errorCode: ${cast(message, String)})');
 	}
+	#end
 
 	public static function initialize()
 	{
+		#if DISCORD_ALLOWED
 		var discordHandlers:DiscordEventHandlers = DiscordEventHandlers.create();
 		discordHandlers.ready = cpp.Function.fromStaticFunction(onReady);
 		discordHandlers.disconnected = cpp.Function.fromStaticFunction(onDisconnected);
@@ -77,10 +84,12 @@ class DiscordClient
 			}
 		});
 		isInitialized = true;
+		#end
 	}
 
 	public static function changePresence(?details:String = 'In the Menus', ?state:Null<String>, ?smallImageKey : String, ?hasStartTimestamp : Bool, ?endTimestamp: Float)
 	{
+		#if DISCORD_ALLOWED
 		var startTimestamp:Float = 0;
 		if (hasStartTimestamp) startTimestamp = Date.now().getTime();
 		if (endTimestamp > 0) endTimestamp = startTimestamp + endTimestamp;
@@ -96,10 +105,11 @@ class DiscordClient
 		updatePresence();
 
 		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
+		#end
 	}
 
 	public static function updatePresence()
-		Discord.UpdatePresence(cpp.RawConstPointer.addressOf(presence));
+		#if DISCORD_ALLOWED Discord.UpdatePresence(cpp.RawConstPointer.addressOf(presence)); #else return; #end
 	
 	public static function resetClientID()
 		clientID = _defaultID;
@@ -118,17 +128,17 @@ class DiscordClient
 		return newID;
 	}
 
-	#if MODS_ALLOWED
 	public static function loadModRPC()
 	{
+		#if MODS_ALLOWED
 		var pack:Dynamic = Mods.getPack();
 		if(pack != null && pack.discordRPC != null && pack.discordRPC != clientID)
 		{
 			clientID = pack.discordRPC;
 			//trace('Changing clientID! $clientID, $_defaultID');
 		}
+		#end
 	}
-	#end
 
 	#if LUA_ALLOWED
 	public static function addLuaCallbacks(lua:State) {

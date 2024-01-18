@@ -1,26 +1,21 @@
 package backend;
 
-import haxe.Json;
-
 import openfl.media.Sound;
 import openfl.system.System;
 import openfl.display.BitmapData;
 import openfl.utils.Assets as OpenFlAssets;
 
-import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
-
-import sys.io.File;
-import sys.FileSystem;
-
-using StringTools;
 
 @:access(flixel.system.frontEnds.BitmapFrontEnd)
 class Paths {
 	/**
 	 * Returns and caches `FlxGraphic` object from relative `key` path
+	 * 
+	 * Can get image with extension `.jpg`! If `.jpg` not found, then will try to get `.png`
 	 * @see `imagePath(key:String):String`
+	 * @see `imageAbsolute(path:String):FlxGraphic`
 	 */
 	public static function image(key:String):FlxGraphic {
 		var path = imagePath(key);
@@ -32,81 +27,59 @@ class Paths {
 		return img;
 	}
 
-	public static function sound(key:String) {
-		var sound = returnSoundAbsolute(soundPath(key));
-		return sound;
-	}
+	public static function sound(key:String):Sound
+		return returnSoundAbsolute(soundPath(key));
+	public static function music(key:String):Sound
+		return returnSoundAbsolute(musicPath(key));
+	public static function voices(song:String):Sound
+		return returnSoundAbsolute(path('songs/${formatToSongPath(song)}/Voices.$SOUND_EXT'));
+	public static function inst(song:String):Sound
+		return returnSoundAbsolute(path('songs/${formatToSongPath(song)}/Inst.$SOUND_EXT'));
 
-	public static function music(key:String) {
-		var sound = returnSoundAbsolute(musicPath(key));
-		return sound;
-	}
-
-	public static function voices(song:String) {
-		var path = path('songs/${formatToSongPath(song)}/Voices.$SOUND_EXT');
-		var sound = returnSoundAbsolute(path);
-		return sound;
-	}
-
-	public static function inst(song:String) {
-		var path = path('songs/${formatToSongPath(song)}/Inst.$SOUND_EXT');
-		var sound = returnSoundAbsolute(path);
-		return sound;
-	}
-
-	inline public static function soundRandom(key:String, min:Int, max:Int):Sound {
+	inline public static function soundRandom(key:String, min:Int, max:Int):Sound
 		return sound(key + FlxG.random.int(min, max));
-	}
 
 	/**
 	 * Returns `null` if not found
 	 */
-	public static function getTextFromFile(key:String, ?ignoreMods:Bool = false):String {
-		var path = path(key, ignoreMods);
-		return text(path);
-	}
+	public static function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
+		return text(path(key, ignoreMods));
+	public static function fileExists(key:String, ?ignoreMods:Bool = false):Bool
+		return fileExistsAbsolute(path(key, ignoreMods));
 
-	public static function fileExists(key:String, ?ignoreMods:Bool = false) {
-		var path = path(key, ignoreMods);
-		return fileExistsAbsolute(path);
-	}
-
-	public static function getAtlas(key:String):FlxAtlasFrames {
+	public static function getAtlas(key:String):FlxAtlasFrames
 		return Paths.fileExists('images/$key.xml') ? getSparrowAtlas(key) : getPackerAtlas(key);
-	}
+	public static function getSparrowAtlas(key:String):FlxAtlasFrames
+		return FlxAtlasFrames.fromSparrow(image(key), getTextFromFile('images/$key.xml'));
+	public static function getPackerAtlas(key:String):FlxAtlasFrames
+		return FlxAtlasFrames.fromSpriteSheetPacker(image(key), getTextFromFile('images/$key.txt'));
 
-	public static function getSparrowAtlas(key:String):FlxAtlasFrames {
-		var image = image(key);
-		var xml = getTextFromFile('images/$key.xml');
-		return FlxAtlasFrames.fromSparrow(image, xml);
-	}
+	/**
+	 * Returns absolute image path from relative path `key`
+	 * 
+	 * Can return image path with extension `.jpg`! If `.jpg` not found, then will try to get `.png`
+	 */
+	inline public static function imagePath(key:String):String
+		return Paths.fileExists('images/$key.jpg') ? path('images/$key.jpg') : path('images/$key.png');
 
-	public static function getPackerAtlas(key:String):FlxAtlasFrames {
-		var image = image(key);
-		var txt = getTextFromFile('images/$key.txt');
-		return FlxAtlasFrames.fromSpriteSheetPacker(image, txt);
-	}
-
-	inline static public function txtPath(key:String)
+	inline static public function txtPath(key:String):String
 		return path('data/$key.txt');
-	inline static public function xmlPath(key:String)
+	inline static public function xmlPath(key:String):String
 		return path('data/$key.xml');
-	inline static public function jsonPath(key:String)
+	inline static public function jsonPath(key:String):String
 		return path('data/$key.json');
-	inline static public function luaPath(key:String)
+	inline static public function luaPath(key:String):String
 		return path('$key.lua');
-	inline public static function soundPath(key:String)
+	inline public static function soundPath(key:String):String
 		return path('sounds/$key.$SOUND_EXT');
-	inline public static function musicPath(key:String)
+	inline public static function musicPath(key:String):String
 		return path('music/$key.$SOUND_EXT');
-	inline public static function imagePath(key:String)
-		return path('images/$key.$IMAGE_EXT');
-	inline public static function font(key:String)
+	inline public static function font(key:String):String
 		return path('fonts/$key');
-	inline public static function video(key:String)
+	inline public static function video(key:String):String
 		return path('videos/$key.$VIDEO_EXT');
 
-	inline static public function formatToSongPath(path:String) {
+	inline static public function formatToSongPath(path:String):String {
 		var invalidChars = ~/[~&\\;:<>#]/;
 		var hideChars = ~/[.,'"%?!]/;
 
@@ -114,31 +87,20 @@ class Paths {
 		return hideChars.split(path).join("").toLowerCase();
 	}
 
-	#if SHARED_DIRECTORY
 	/**
 	 * Converts relative `key` path to absolute
 	 * 
 	 * For example key = `"flixel.txt"`, then it will return in exists-order:
-	 * - `"mods/<Mods.currentModDirectory>/flixel.txt"`
-	 * - `"mods/flixel.txt"`
+	 * - `"mods/<Mods.currentModDirectory>/flixel.txt"` (if `MODS_ALLOWED`)
+	 * - `"mods/flixel.txt"` (if `MODS_ALLOWED`)
 	 * - `"assets/<currentLevel>/flixel.txt"`
-	 * - `"assets/shared/flixel.txt"`
-	 * - `"assets/flixel.txt"` (if others not found)
+	 * - `"assets/shared/flixel.txt"` (if `SHARED_DIRECTORY`)
+	 * - `"assets/flixel.txt"`
 	 */
-	#else
-	/**
-	 * Converts relative `key` path to absolute
-	 * 
-	 * For example key = `"flixel.txt"`, then it will return in exists-order:
-	 * - `"mods/<Mods.currentModDirectory>/flixel.txt"`
-	 * - `"mods/flixel.txt"`
-	 * - `"assets/<currentLevel>/flixel.txt"`
-	 * - `"assets/flixel.txt"` (if others not found)
-	 */
-	#end
 	public static function path(file:String, ?ignoreMods:Bool = false):String {
 		var levelPath:String = "";
 
+		#if MODS_ALLOWED
 		if (!ignoreMods) {
 			levelPath = modsPath(Mods.currentModDirectory + '/' + file);
 			if (Mods.currentModDirectory != null && fileExistsAbsolute(levelPath))
@@ -148,6 +110,7 @@ class Paths {
 			if (fileExistsAbsolute(levelPath))
 				return levelPath;
 		}
+		#end
 
 		levelPath = preloadPath(currentLevel + '/' + file);
 		if (currentLevel != null && fileExistsAbsolute(levelPath))
@@ -222,13 +185,13 @@ class Paths {
 		if(spriteJson != null)
 		{
 			changedAtlasJson = true;
-			spriteJson = File.getContent(spriteJson);
+			spriteJson = Paths.text(spriteJson);
 		}
 
 		if(animationJson != null) 
 		{
 			changedAnimJson = true;
-			animationJson = File.getContent(animationJson);
+			animationJson = Paths.text(animationJson);
 		}
 
 		// is folder or image path
@@ -252,7 +215,7 @@ class Paths {
 						break;
 					}
 				}
-				else if(Paths.fileExists('images/$originalPath/spritemap$st.png'))
+				else if(fileExistsAbsolute(imagePath('$originalPath/spritemap$st')))
 				{
 					//trace('found Sprite PNG');
 					changedImage = true;
@@ -286,7 +249,7 @@ class Paths {
 	{
 		var onAssets:Bool = false;
 		var path:String = Paths.getPath(path, TEXT, true);
-		if(FileSystem.exists(path) || (onAssets = true && Assets.exists(path, TEXT)))
+		if(#if sys FileSystem.exists(path) || #end (onAssets = true && Assets.exists(path, TEXT)))
 		{
 			//trace('Found text: $path');
 			return !onAssets ? File.getContent(path) : Assets.getText(path);
@@ -296,7 +259,7 @@ class Paths {
 	#end
 
 
-	inline static var IMAGE_EXT = "png";
+	//inline static var IMAGE_EXT = "png"; // not used cuz it can load jpg lol
 	inline static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline static var VIDEO_EXT = "mp4";
 
@@ -304,7 +267,9 @@ class Paths {
 	#if SHARED_DIRECTORY
 	inline static var SHARED_DIRECTORY:String = "shared";
 	#end
+	#if MODS_ALLOWED
 	inline static var MODS_DIRECTORY:String = "mods";
+	#end
 
 	public static var currentLevel:String;
 
@@ -315,24 +280,6 @@ class Paths {
 			trace('Current asset folder: $currentLevel');
 		}
 	}
-
-	public static var ignoreModFolders:Array<String> = [
-		'characters',
-		'custom_events',
-		'custom_notetypes',
-		'data',
-		'songs',
-		'music',
-		'sounds',
-		'shaders',
-		'videos',
-		'images',
-		'stages',
-		'weeks',
-		'fonts',
-		'scripts',
-		'achievements'
-	];
 
 	public static var currentTrackedSounds:Map<String, Sound> = [];
 
@@ -351,24 +298,23 @@ class Paths {
 		return openflSound('$ASSETS_DIRECTORY/sounds/error.ogg');
 	}
 
-	inline public static function preloadPath(file:String = '') {
+	inline public static function preloadPath(file:String = ''):String
 		return '$ASSETS_DIRECTORY/$file';
-	}
+	inline public static function modsPath(file:String = ''):String
+		return #if MODS_ALLOWED '$MODS_DIRECTORY/$file' #else preloadPath(file) #end;
 
-	inline public static function modsPath(file:String = '') {
-		return '$MODS_DIRECTORY/$file';
-	}
-
-	public static function text(key:String) {
+	public static function text(key:String):String {
+		#if sys
 		if (FileSystem.exists(key))
 			return File.getContent(key);
+		#end
 		if (OpenFlAssets.exists(key))
 			return OpenFlAssets.getText(key);
 
 		return null;
 	}
 
-	public static function imageAbsolute(path:String) {
+	public static function imageAbsolute(path:String):FlxGraphic {
 		if (FlxG.bitmap._cache.exists(path))
 			return FlxG.bitmap._cache.get(path);
 
@@ -390,9 +336,11 @@ class Paths {
 		return null;
 	}
 
-	public static function bitmapData(key:String) {
+	public static function bitmapData(key:String):BitmapData {
+		#if sys
 		if (FileSystem.exists(key))
 			return BitmapData.fromFile(key);
+		#end
 		if (OpenFlAssets.exists(key))
 			return OpenFlAssets.getBitmapData(key, false);
 
@@ -400,26 +348,28 @@ class Paths {
 	}
 
 	public static function openflSound(key:String):Sound {
+		#if sys
 		if (FileSystem.exists(key))
 			return Sound.fromFile(key);
+		#end
 		if (OpenFlAssets.exists(key))
 			return OpenFlAssets.getSound(key, false);
 
 		return null;
 	}
 
-	public static function fileExistsAbsolute(key:String) {
+	public static function fileExistsAbsolute(key:String):Bool {
 		try {
-			if(FileSystem.exists(key))
-				return true;
-			if(OpenFlAssets.exists(key))
-				return true;
+			#if sys
+			if(FileSystem.exists(key)) return true;
+			#end
+			if(OpenFlAssets.exists(key)) return true;
 		}
 		return false;
 	}
 
 	public static function readDirectory(path:String):Array<String>
-		return fileExistsAbsolute(path) ? FileSystem.readDirectory(path) : [];
+		return #if sys fileExistsAbsolute(path) ? FileSystem.readDirectory(path) : #end [];
 
 	public static function getAllFolders(?add:String = ''):Array<String> {
 		var dirs:Array<String> = [
@@ -453,14 +403,11 @@ class Paths {
 		return dirs;
 	}
 
-	public static function mergeAllTextsNamed(path:String, allowDuplicates:Bool = false) {
+	public static function mergeAllTextsNamed(path:String, allowDuplicates:Bool = false):Array<String> {
 		var mergedList = [];
-		for (file in Paths.getAllFolders()) {
-			var list:Array<String> = CoolUtil.coolTextFile('$file/$path');
-			for (value in list)
-				if((allowDuplicates || !mergedList.contains(value)) && value.length > 0)
-					mergedList.push(value);
-		}
+		for (file in Paths.getAllFolders()) for (value in CoolUtil.coolTextFile(file + path))
+			if((allowDuplicates || !mergedList.contains(value)) && value.length > 0)
+				mergedList.push(value);
 		return mergedList;
 	}
 }

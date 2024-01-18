@@ -15,6 +15,8 @@ Currently uses Psych Engine 0.7.2h
 - Changed FPS Counter to display GPU memory usage
 - CompileTime macro as mod version
 
+## Builded on [Psych Engine 0.7.2h](https://github.com/ShadowMario/FNF-PsychEngine/tree/0.7.2h)
+
 ## Building
 1. Install Haxe [4.3.2](https://haxe.org/download/version/4.3.2/) 
 2. Run command: `haxe setup.hxml`

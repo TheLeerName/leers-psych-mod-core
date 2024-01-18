@@ -1,10 +1,10 @@
 package objects;
 
 #if ACHIEVEMENTS_ALLOWED
-import openfl.events.Event;
-import openfl.geom.Matrix;
-import flash.display.BitmapData;
 import openfl.Lib;
+import openfl.geom.Matrix;
+import openfl.events.Event;
+import openfl.display.BitmapData;
 
 class AchievementPopup extends openfl.display.Sprite {
 	public var onFinish:Void->Void = null;
@@ -31,7 +31,7 @@ class AchievementPopup extends openfl.display.Sprite {
 		if(achievement != null) Mods.currentModDirectory = achievement.mod != null ? achievement.mod : '';
 		#end
 
-		if(Paths.fileExists('images/$image-pixel.png')) {
+		if(Paths.fileExistsAbsolute(Paths.imagePath('$image-pixel'))) {
 			graphic = Paths.image('$image-pixel');
 			hasAntialias = false;
 		}

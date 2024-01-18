@@ -5,7 +5,7 @@ package hxcodec.vlc;
 #end
 import hxcodec.vlc.Types;
 
-@:buildXml('<include name="${haxelib:hxCodec}/project/Build.xml" />')
+@:buildXml('<include name="${HXCODEC_DIR}/project/Build.xml" />')
 @:include("vlc/vlc.h")
 @:unreflective
 extern class LibVLC

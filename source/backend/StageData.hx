@@ -1,9 +1,5 @@
 package backend;
 
-import openfl.utils.Assets;
-import haxe.Json;
-import backend.Song;
-
 typedef StageFile = {
 	var directory:String;
 	var defaultZoom:Float;
@@ -44,7 +40,7 @@ class StageData {
 
 	public static function getStageFile(stage:String):StageFile {
 		var rawJson = Paths.getTextFromFile('stages/$stage.json');
-		return cast tjson.TJSON.parse(rawJson);
+		return cast Json.parse(rawJson);
 	}
 
 	public static function vanillaSongStage(songName):String

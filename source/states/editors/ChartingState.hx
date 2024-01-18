@@ -1,7 +1,6 @@
 package states.editors;
 
 import flash.geom.Rectangle;
-import haxe.Json;
 import haxe.format.JsonParser;
 import haxe.io.Bytes;
 
@@ -19,12 +18,10 @@ import flixel.ui.FlxButton;
 
 import flixel.util.FlxSort;
 import lime.media.AudioBuffer;
-import lime.utils.Assets;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import openfl.media.Sound;
 import openfl.net.FileReference;
-import openfl.utils.Assets as OpenFlAssets;
 
 import backend.Song;
 import backend.Section;
@@ -906,11 +903,11 @@ class ChartingState extends MusicBeatState
 		for (dir in Paths.getAllFolders('custom_events')) {
 			for (file in Paths.readDirectory(dir)) {
 				var path = haxe.io.Path.join([dir, file]);
-				if (!FileSystem.isDirectory(path) && file != 'readme.txt' && file.endsWith('.txt')) {
+				if (file != 'readme.txt' && file.endsWith('.txt')) {
 					var fileToCheck:String = file.substr(0, file.length - 4);
 					if(!eventPushed.contains(fileToCheck)) {
 						eventPushed.push(fileToCheck);
-						eventStuff.push([fileToCheck, File.getContent(path)]);
+						eventStuff.push([fileToCheck, Paths.text(path)]);
 					}
 				}
 			}
@@ -1308,7 +1305,7 @@ class ChartingState extends MusicBeatState
 		try
 		{
 			var file:Dynamic = Paths.voices(currentSongName);
-			if ((Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) && file != null)
+			if ((Std.isOfType(file, Sound) || Paths.fileExistsAbsolute(file)) && file != null)
 			{
 				vocals.loadEmbedded(file);
 				vocals.autoDestroy = false;
@@ -1684,7 +1681,7 @@ class ChartingState extends MusicBeatState
 				if(vocals != null) vocals.stop();
 
 				//if(_song.stage == null) _song.stage = stageDropDown.selectedLabel;
-				MusicBeatState.switchState(new PlayState());
+				PlayState.switchToState();
 			}
 
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {

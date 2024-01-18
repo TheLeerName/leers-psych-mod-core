@@ -1,9 +1,9 @@
 package backend;
 
 #if ACHIEVEMENTS_ALLOWED
-import objects.AchievementPopup;
 import haxe.Exception;
-import haxe.Json;
+
+import objects.AchievementPopup;
 
 #if LUA_ALLOWED
 import psychlua.FunkinLua;
@@ -200,16 +200,16 @@ class Achievements {
 
 		_sortID = _originalLength-1;
 
-		loadAchievementJson(Paths.path('data/achievements.json'));
+		loadAchievementJson(Paths.jsonPath('achievements'));
 	}
 
 	inline static function loadAchievementJson(path:String, addMods:Bool = true)
 	{
 		var retVal:Array<Dynamic> = null;
-		if(FileSystem.exists(path)) {
+		if(Paths.fileExistsAbsolute(path)) {
 			try {
-				var rawJson:String = File.getContent(path).trim();
-				if(rawJson != null && rawJson.length > 0) retVal = tjson.TJSON.parse(rawJson); //Json.parse('{"achievements": $rawJson}').achievements;
+				var rawJson:String = Paths.text(path).trim();
+				if(rawJson != null && rawJson.length > 0) retVal = Json.parse(rawJson); //Json.parse('{"achievements": $rawJson}').achievements;
 				
 				if(addMods && retVal != null)
 				{

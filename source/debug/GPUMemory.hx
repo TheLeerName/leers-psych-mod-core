@@ -29,8 +29,15 @@ class GPUMemory {
 		if (usageTracker == null) return;
 
 		usageTracker.close();
-		Sys.command('taskkill', ['/F', '/PID', usageTracker.getPid() + '']); // WTF POWERSHELL NOT CLOSING WITH CLOSE FUNC
+		__closeProcess(usageTracker.getPid());
 		usageTracker = null;
+		trace('GPU memory tracking stopped');
+		#end
+	}
+
+	@:noCompletion static function __closeProcess(pid:Int) {
+		#if windows
+		Sys.command('taskkill /F /PID ${pid} >nul 2>&1'); // WTF POWERSHELL NOT CLOSING WITH CLOSE FUNC
 		#end
 	}
 
@@ -43,10 +50,20 @@ class GPUMemory {
 		#if windows
 		if (usageTracker != null) return 0;
 
+		if (FlxG.save.data.lastPID_gpuUsageTracker != null) {
+			__closeProcess(FlxG.save.data.lastPID_gpuUsageTracker);
+			FlxG.save.data.lastPID_gpuUsageTracker = null;
+		}
+
 		// very cool thing!!!
 		// https://stackoverflow.com/a/73496338
 		usageTracker = new Process('powershell', ["Get-Counter -Counter '\\GPU Process Memory(pid_" + Std.string(untyped __cpp__('GetCurrentProcessId()')) + "*)\\Dedicated Usage' -Continuous | Foreach-Object {$_.CounterSamples[0].CookedValue}"]);
 		FlxG.stage.window.onClose.add(__close);
+
+		FlxG.save.data.lastPID_gpuUsageTracker = usageTracker.getPid();
+		FlxG.save.flush();
+
+		trace('GPU memory tracking started');
 
 		sys.thread.Thread.create(() -> {
 			while(usageTracker != null) {

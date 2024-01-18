@@ -1,7 +1,6 @@
 package psychlua;
 
 import flixel.util.FlxSave;
-import openfl.utils.Assets;
 
 //
 // Things to trivialize some dumb stuff like splitting strings on older Lua
@@ -162,29 +161,17 @@ class ExtraFunctions
 		});
 		Lua_helper.add_callback(lua, "deleteFile", function(path:String, ?ignoreModFolders:Bool = false)
 		{
+			#if sys
 			try {
 				FileSystem.deleteFile(Paths.path(path, ignoreModFolders));
 			} catch (e:Dynamic) {
 				FunkinLua.luaTrace("deleteFile: Error trying to delete " + path + ": " + e, false, false, FlxColor.RED);
 			}
+			#end
 			return false;
 		});
-		Lua_helper.add_callback(lua, "getTextFromFile", function(path:String, ?ignoreModFolders:Bool = false) {
-			return Paths.getTextFromFile(path, ignoreModFolders);
-		});
-		Lua_helper.add_callback(lua, "directoryFileList", function(folder:String) {
-			var list:Array<String> = [];
-			#if sys
-			if(FileSystem.exists(folder)) {
-				for (folder in FileSystem.readDirectory(folder)) {
-					if (!list.contains(folder)) {
-						list.push(folder);
-					}
-				}
-			}
-			#end
-			return list;
-		});
+		Lua_helper.add_callback(lua, "getTextFromFile", Paths.getTextFromFile);
+		Lua_helper.add_callback(lua, "directoryFileList", Paths.readDirectory);
 
 		// String tools
 		Lua_helper.add_callback(lua, "stringStartsWith", function(str:String, start:String) {

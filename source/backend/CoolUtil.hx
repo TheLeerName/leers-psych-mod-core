@@ -1,8 +1,5 @@
 package backend;
 
-import openfl.utils.Assets;
-import lime.utils.Assets as LimeAssets;
-
 class CoolUtil
 {
 	inline public static function quantize(f:Float, snap:Float){
@@ -15,17 +12,10 @@ class CoolUtil
 	inline public static function capitalize(text:String)
 		return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
 
-	inline public static function coolTextFile(path:String):Array<String>
-	{
-		var daList:String = null;
-		#if (sys && MODS_ALLOWED)
-		var formatted:Array<String> = path.split(':'); //prevent "shared:", "preload:" and other library names on file path
-		path = formatted[formatted.length-1];
-		if(FileSystem.exists(path)) daList = File.getContent(path);
-		#else
-		if(Assets.exists(path)) daList = Assets.getText(path);
-		#end
-		return daList != null ? listFromString(daList) : [];
+	inline public static function coolTextFile(path:String):Array<String> {
+		var daList:Array<String> = [];
+		if (Paths.fileExistsAbsolute(path)) daList = listFromString(Paths.text(path));
+		return daList;
 	}
 
 	inline public static function colorFromString(color:String):FlxColor
@@ -160,5 +150,13 @@ class CoolUtil
 			default:
 				text.borderStyle = NONE;
 		}
+	}
+
+	public static function getPackagePath(cl:Dynamic):String {
+		if (cl is Class) {} else
+			var cl:Class<Dynamic> = cast Type.getClass(cl);
+
+		var typeof:String = cast Type.typeof(cl);
+		return typeof.substring(typeof.indexOf('(') + 1, typeof.indexOf(')'));
 	}
 }

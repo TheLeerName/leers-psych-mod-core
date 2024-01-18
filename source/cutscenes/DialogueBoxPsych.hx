@@ -1,8 +1,5 @@
 package cutscenes;
 
-import haxe.Json;
-import openfl.utils.Assets;
-
 import objects.TypedAlphabet;
 import cutscenes.DialogueCharacter;
 
@@ -371,13 +368,8 @@ class DialogueBoxPsych extends FlxSpriteGroup
 	}
 
 	public static function parseDialogue(path:String):DialogueFile {
-		#if MODS_ALLOWED
-		if(FileSystem.exists(path))
-		{
-			return cast Json.parse(File.getContent(path));
-		}
-		#end
-		return cast Json.parse(Assets.getText(path));
+		var rawJson = Paths.text(path);
+		return rawJson != null ? cast Json.parse(rawJson) : null;
 	}
 
 	public static function updateBoxOffsets(box:FlxSprite) { //Had to make it static because of the editors

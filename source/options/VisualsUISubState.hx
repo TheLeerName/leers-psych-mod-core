@@ -148,7 +148,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		addOption(option);
 		#end
 
-		#if desktop
+		#if DISCORD_ALLOWED
 		var option:Option = new Option('Discord Rich Presence',
 			"Uncheck this to prevent accidental leaks, it will hide the Application from your \"Playing\" box on Discord",
 			'discordRPC',
@@ -207,7 +207,7 @@ class VisualsUISubState extends BaseOptionsMenu
 	{
 		var skin:String = Note.defaultNoteSkin;
 		var customSkin:String = skin + Note.getNoteSkinPostfix();
-		if(Paths.fileExists('images/$customSkin.png')) skin = customSkin;
+		if(Paths.fileExistsAbsolute(Paths.imagePath(customSkin))) skin = customSkin;
 
 		note.texture = skin; //Load texture and anims
 		note.reloadNote();

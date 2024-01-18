@@ -5,7 +5,6 @@ import backend.Highscore;
 import backend.Song;
 
 import openfl.Lib;
-import openfl.utils.Assets;
 import openfl.display.BitmapData;
 import flixel.FlxBasic;
 import flixel.FlxObject;
@@ -39,8 +38,6 @@ import psychlua.ModchartSprite;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
-
-import haxe.Json;
 
 class FunkinLua {
 	public static var Function_Stop:Dynamic = "##PSYCHLUA_FUNCTIONSTOP";
@@ -191,7 +188,9 @@ class FunkinLua {
 		set('lowQuality', ClientPrefs.data.lowQuality);
 		set('shadersEnabled', ClientPrefs.data.shaders);
 		set('scriptName', scriptName);
+		#if MODS_ALLOWED
 		set('currentModDirectory', Mods.currentModDirectory);
+		#end
 
 		// Noteskin/Splash
 		set('noteSkin', ClientPrefs.data.noteSkin);
@@ -458,7 +457,7 @@ class FunkinLua {
 			PlayState.SONG = Song.loadFromJson(poop, name);
 			PlayState.storyDifficulty = difficultyNum;
 			game.persistentUpdate = false;
-			MusicBeatState.switchState(new PlayState());
+			PlayState.switchToState();
 
 			FlxG.sound.music.pause();
 			FlxG.sound.music.volume = 0;
@@ -834,14 +833,16 @@ class FunkinLua {
 			else
 				MusicBeatState.switchState(new FreeplayState());
 
-			#if desktop DiscordClient.resetClientID(); #end
+			DiscordClient.resetClientID();
 
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			PlayState.changedDifficulty = false;
 			PlayState.chartingMode = false;
 			game.transitioning = true;
 			FlxG.camera.followLerp = 0;
+			#if MODS_ALLOWED
 			Mods.loadTopMod();
+			#end
 			return true;
 		});
 		Lua_helper.add_callback(lua, "getSongPosition", function() {
@@ -1315,12 +1316,7 @@ class FunkinLua {
 
 			luaTrace('startDialogue: Trying to load dialogue: ' + path);
 
-			#if MODS_ALLOWED
-			if(FileSystem.exists(path))
-			#else
-			if(Assets.exists(path))
-			#end
-			{
+			if (Paths.fileExistsAbsolute(path)) {
 				var shit:DialogueFile = DialogueBoxPsych.parseDialogue(path);
 				if(shit.dialogue.length > 0) {
 					game.startDialogue(shit, music);
@@ -1341,7 +1337,7 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "startVideo", function(videoFile:String) {
 			#if VIDEOS_ALLOWED
-			if(FileSystem.exists(Paths.video(videoFile))) {
+			if(Paths.fileExistsAbsolute(Paths.video(videoFile))) {
 				game.startVideo(videoFile);
 				return true;
 			} else {
@@ -1501,7 +1497,7 @@ class FunkinLua {
 			return closed;
 		});
 
-		#if desktop DiscordClient.addLuaCallbacks(lua); #end
+		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
 		#if SScript HScript.implement(this); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 		#if flxanimate FlxAnimateFunctions.implement(this); #end
@@ -1513,7 +1509,7 @@ class FunkinLua {
 		DeprecatedFunctions.implement(this);
 
 		try{
-			var isString:Bool = !FileSystem.exists(scriptName);
+			var isString:Bool = !Paths.fileExistsAbsolute(scriptName);
 			var result:Dynamic = null;
 			if(!isString)
 				result = LuaL.dofile(lua, scriptName);

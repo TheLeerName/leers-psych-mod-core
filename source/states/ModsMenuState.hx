@@ -1,5 +1,6 @@
 package states;
 
+#if MODS_ALLOWED
 import backend.WeekData;
 import backend.Mods;
 
@@ -7,8 +8,6 @@ import flixel.ui.FlxButton;
 import flixel.FlxBasic;
 import flixel.graphics.FlxGraphic;
 import flash.geom.Rectangle;
-import lime.utils.Assets;
-import haxe.Json;
 
 import flixel.util.FlxSpriteUtil;
 import objects.AttachedSprite;
@@ -316,7 +315,7 @@ class ModsMenuState extends MusicBeatState
 			{
 				//MusicBeatState.switchState(new TitleState());
 				TitleState.initialized = false;
-				TitleState.closedState = false;
+				// TitleState.closedState = false;
 				FlxG.sound.music.fadeOut(0.3);
 				if(FreeplayState.vocals != null)
 				{
@@ -829,7 +828,7 @@ class ModItem extends FlxSpriteGroup
 			try
 			{
 				//trace('trying to load settings: $folder');
-				settings = tjson.TJSON.parse(data);
+				settings = Json.parse(data);
 			}
 			catch(e:Dynamic)
 			{
@@ -859,12 +858,17 @@ class ModItem extends FlxSpriteGroup
 
 		var isPixel = false;
 		var bmp = null;
-		if (Paths.fileExistsAbsolute(Paths.modsPath('$folder/pack-pixel.png'))) {
-			bmp = Paths.imageAbsolute(Paths.modsPath('$folder/pack-pixel.png'));
-			isPixel = true;
+		for (ext in ['jpg', 'png']) {
+			if (Paths.fileExistsAbsolute(Paths.modsPath('$folder/pack-pixel.$ext'))) {
+				bmp = Paths.imageAbsolute(Paths.modsPath('$folder/pack-pixel.$ext'));
+				isPixel = true;
+				break;
+			}
+			else if (Paths.fileExistsAbsolute(Paths.modsPath('$folder/pack.$ext'))) {
+				bmp = Paths.imageAbsolute(Paths.modsPath('$folder/pack.$ext'));
+				break;
+			}
 		}
-		else
-			bmp = Paths.imageAbsolute(Paths.modsPath('$folder/pack.png'));
 
 		if(bmp != null)
 		{
@@ -1024,3 +1028,4 @@ class MenuButton extends FlxSpriteGroup
 		spr.y = bg.height/2 - spr.height/2;
 	}
 }
+#end
