@@ -6,6 +6,7 @@ import sys.io.File;
 class ProjectCustomNodes {
 	public static function init() {
 		var output:String = Compiler.getOutput();
+		if (output == '_') return;
 		output = output.substring(0, output.lastIndexOf('/') + 1) + 'bin';
 
 		function defined(el:Xml) {

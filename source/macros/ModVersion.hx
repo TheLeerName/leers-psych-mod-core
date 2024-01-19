@@ -9,6 +9,9 @@ class ModVersion {
 		var curDate = Date.now();
 		var ymd = DateTools.format(curDate, "%Y%m%d");
 		var buildDir = #if debug 'export/debug/' #else 'export/release/' #end;
+		if (!FileSystem.exists(buildDir))
+			FileSystem.createDirectory(buildDir);
+
 		var buildNumber:Int = 1;
 		if (FileSystem.exists(buildDir + '.build'))
 			buildNumber = Std.parseInt(File.getContent(buildDir + '.build'));

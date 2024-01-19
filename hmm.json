@@ -36,11 +36,6 @@
 			"version": "4.3.2"
 		},
 		{
-			"name": "hxCodec",
-			"type": "haxelib",
-			"version": "3.0.2"
-		},
-		{
 			"name": "SScript",
 			"type": "haxelib",
 			"version": "8.1.6"
