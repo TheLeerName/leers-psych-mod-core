@@ -120,6 +120,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool');
 		option.onChange = Main.fpsVar.resetTextFormat;
 		addOption(option);
+		#end
 
 		#if windows
 		var option:Option = new Option('Memory Counter:',
@@ -129,7 +130,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Show both', 'Show used', 'Show RAM', 'Show GPU', 'None']);
 		option.onChange = Main.fpsVar.resetTextFormat;
 		addOption(option);
-		#end
 		#end
 
 		var option:Option = new Option('Pause Screen Song:',

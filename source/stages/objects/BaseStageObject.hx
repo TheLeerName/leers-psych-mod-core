@@ -10,17 +10,21 @@ class BaseStageObject {
 
 	// init stuff
 	function onCreate() {}
-	function eventEarlyTrigger(event:String) {}
-	function eventPushed(event:String, value1:String, value2:String) {}
 	function onStartCountdown() {} // set stopCountdown to true to stop it
-	function onCountdownTick(counter:Int) {}
+	function onCountdownTick(tick:Countdown, counter:Int) {}
 	function onCountdownStarted() {}
 	function onSongStart() {}
 	function onCreatePost() {}
 
+	// event stuff
+	function eventEarlyTrigger(event:String, value1:String, value2:String, strumTime:Float) {}
+	function onEventPushed(event:String, value1:String, value2:String, strumTime:Float) {}
+	function onEvent(event:String, value1:String, value2:String, strumTime:Float) {}
+
 	// updatin stuff
 	function onUpdate(elapsed:Float) {}
 	function onUpdatePost(elapsed:Float) {}
+	function preUpdateScore(miss:Bool) {}
 	function onUpdateScore(miss:Bool) {}
 	function onStepHit() {}
 	function onBeatHit() {}
@@ -29,7 +33,6 @@ class BaseStageObject {
 	function onResume() {}
 	function onPause() {} // set stopPause to true to stop it
 	function onMoveCamera(char:String) {}
-	function onEvent(eventName:String, value1:String, value2:String) {}
 
 	// dialogue stuff
 	function onNextDialogue(dialogueCount:Float) {}
@@ -44,15 +47,19 @@ class BaseStageObject {
 
 	// note pressing/missing stuff
 	function onSpawnNote(note:Note) {}
+	function onKeyPressPre(key:Int) {}
 	function onKeyPress(key:Int) {}
+	function onKeyReleasePre(key:Int) {}
 	function onKeyRelease(key:Int) {}
 	function opponentNoteHit(note:Note) {}
+	function opponentNoteHitPost(note:Note) {}
 	function goodNoteHit(note:Note) {}
+	function goodNoteHitPost(note:Note) {}
 	function onGhostTap(key:Int) {}
 	function noteMissPress(noteData:Int) {}
 	function noteMiss(note:Note) {}
 
-	// useless functions but it need to be here cuz i using Reflect stuff in callOnLuas
+	// useless functions but it need to be here cuz i using Reflect stuff in callStageFunction
 	function onTimerCompleted(tag:String, loops:Int, loopsLeft:Int) {}
 	function onTweenCompleted(tag:String) {}
 	function onSoundFinished(tag:String) {}

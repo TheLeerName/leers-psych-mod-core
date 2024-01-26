@@ -69,6 +69,7 @@
 	<section if="USE_OWN_HXCODEC">
 		<haxedef name="HXCODEC_DIR" value="${projectDirectory}/hxCodec" />
 		<source name="hxCodec" />
+		<haxedef name="hxCodec" value="3.0.2" />
 		<assets_windows path="hxCodec/project/vlc/dll/Windows" rename=""/>
 	</section>
 

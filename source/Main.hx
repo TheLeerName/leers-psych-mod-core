@@ -24,7 +24,7 @@ import lime.graphics.Image;
 	#define GAMEMODE_AUTO
 ')
 #end
-
+@:build(macros.Defines.add())
 class Main extends Sprite
 {
 	var game = {

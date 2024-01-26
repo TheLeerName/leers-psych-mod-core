@@ -7,6 +7,8 @@ import openfl.text.TextFormat;
 import flixel.FlxG;
 import flixel.util.FlxStringUtil;
 
+import states.MainMenuState;
+
 /**
 	The FPS class provides an easy-to-use monitor to display
 	the current frame rate of an OpenFL project
@@ -47,25 +49,30 @@ class FPSCounter extends TextField
 		multiline = true;
 		text = "";
 
-		GPUMemory.init();
+		GPUStats.init();
 		resetTextFormat();
 	}
 
 	var deltaTimeout:Float = 0.0;
 
+	@:noCompletion var pressedF3(default, set):Bool = false;
+	@:noCompletion inline function set_pressedF3(pressedF3:Bool):Bool {
+		this.pressedF3 = pressedF3;
+		resetTextFormat();
+		return pressedF3;
+	}
+
 	// Event Handlers
 	private override function __enterFrame(deltaTime:Float):Void
 	{
-		if (deltaTimeout > 1000) {
-			deltaTimeout = 0.0;
-			return;
-		}
+		if (FlxG.keys.justPressed.F3) pressedF3 = !pressedF3;
 
-		final now:Float = haxe.Timer.stamp() * 1000;
+		var now:Float = haxe.Timer.stamp();
 		times.push(now);
-		while (times[0] < now - 1000) times.shift();
+		while (times[0] < now - 1000)
+			times.shift();
 
-		currentFPS = times.length < FlxG.updateFramerate ? times.length : FlxG.updateFramerate;
+		currentFPS = currentFPS < FlxG.updateFramerate ? times.length : FlxG.updateFramerate;		
 		updateText();
 		deltaTimeout += deltaTime;
 	}
@@ -78,19 +85,59 @@ class FPSCounter extends TextField
 	public dynamic function resetTextFormat() {
 		var lines:Array<String> = [];
 		#if windows
-		if (ClientPrefs.data.showFPS)
-			lines.push('FPS: %fps%');
+		if (pressedF3)
+			lines = [
+				'%file% v%modVer% (%modVer%/%psychVer%)',
+				'%fps% fps T: %maxFPS% %quality% %antialiasing%',
+				'RAM: %ram% GPU: %gpuUsgMem% %caching%',
+				'GPU: %gpuUsg%% (%gpuUsgGlobal%%) %shaders%',
+				'',
+				'XY: %mouseX% / %mouseY%',
+				'',
+				'haxe: %haxe%',
+				'lime: %lime%',
+				'openfl: %openfl%',
+				'flixel: %flixel%',
+				'flixel-ui: %flixel-ui%',
+				'flixel-addons: %flixel-addons%',
+				#if tjson
+				'tjson: %tjson%',
+				#end
+				#if LUA_ALLOWED
+				'linc_luajit: %linc_luajit%',
+				'%lua%',
+				'%luajit%',
+				#end
+				#if HSCRIPT_ALLOWED
+				'SScript: %SScript%',
+				#end
+				#if VIDEOS_ALLOWED
+				'hxCodec: %hxCodec%',
+				#end
+				#if DISCORD_ALLOWED
+				'hxdiscord_rpc: %hxdiscord_rpc%',
+				#end
+				#if flxanimate
+				'flxanimate: %flxanimate%'
+				#end
+			];
+		else {
+			if (ClientPrefs.data.showFPS)
+				lines.push('FPS: %fps%');
 
-		switch(ClientPrefs.data.memoryCounter) {
-			case 'Show used':
-				lines.push(ClientPrefs.data.cacheOnGPU ? 'GPU: %gpu%' : 'RAM: %ram%');
-			case 'Show both':
-				lines.push('RAM: %ram%');
-				lines.push('GPU: %gpu%');
-			case 'Show RAM':
-				lines.push('RAM: %ram%');
-			case 'Show GPU':
-				lines.push('GPU: %gpu%');
+			switch(ClientPrefs.data.memoryCounter) {
+				case 'Show used':
+					lines.push(ClientPrefs.data.cacheOnGPU ? 'GPU: %gpu%' : 'RAM: %gpuUsgMem%');
+				case 'Show both':
+					lines.push('RAM: %ram%');
+					lines.push('GPU: %gpuUsgMem%');
+				case 'Show RAM':
+					lines.push('RAM: %ram%');
+				case 'Show GPU':
+					lines.push('GPU: %gpuUsgMem%');
+			}
+			lines.push('v' + states.MainMenuState.modVersion);
+			lines.push('F3 to expand');
 		}
 		#else
 		if (ClientPrefs.data.showFPS) {
@@ -98,18 +145,64 @@ class FPSCounter extends TextField
 			lines.push('Memory: %ram%');
 		}
 		#end
-		lines.push('v' + states.MainMenuState.modVersion);
+
 		textFormat = lines.join('\n');
 		updateText();
 	}
 
 	public dynamic function updateText():Void { // so people can override it in hscript
-		text = textFormat
-		.replace('%fps%', currentFPS + '')
-		.replace('%ram%', FlxStringUtil.formatBytes(memoryMegas))
-		.replace('%gpu%', FlxStringUtil.formatBytes(GPUMemory.usage));
 
-		textColor = currentFPS < FlxG.drawFramerate * 0.5 ? 0xFFFF0000 : 0xFFFFFFFF;
+		var d = Main.defines;
+		var replaces = [
+			'fps' => currentFPS + '',
+			'ram' => FlxStringUtil.formatBytes(memoryMegas),
+			#if windows
+			'gpuUsgMem' => FlxStringUtil.formatBytes(GPUStats.memoryUsage),
+			'file' => FlxG.stage.application.meta.get('file'),
+			'modVer' => MainMenuState.modVersion,
+			'psychVer' => MainMenuState.psychEngineVersion,
+			'maxFPS' => ClientPrefs.data.framerate + '',
+			'quality' => (ClientPrefs.data.lowQuality ? 'low' : 'high') + 'Quality',
+			'antialiasing' => (ClientPrefs.data.antialiasing ? 'a' : 'noA') + 'ntialiasing',
+			'shaders' => (ClientPrefs.data.shaders ? 's' : 'noS') + 'haders',
+			'caching' => (ClientPrefs.data.cacheOnGPU ? 'gpu' : 'ram') + 'Caching',
+			'gpuUsg' => Std.int(GPUStats.usage) + '',
+			'gpuUsgGlobal' => Std.int(GPUStats.globalUsage) + '',
+			'mouseX' => FlxG.mouse.screenX + '',
+			'mouseY' => FlxG.mouse.screenY + '',
+			'haxe' => d.get('haxe'),
+			'lime' => d.get('lime'),
+			'openfl' => d.get('openfl'),
+			'flixel' => d.get('flixel'),
+			'flixel-ui' => d.get('flixel-ui'),
+			'flixel-addons' => d.get('flixel-addons'),
+			#if tjson
+			'tjson' => d.get('tjson'),
+			#end
+			#if LUA_ALLOWED
+			'linc_luajit' => d.get('linc_luajit'),
+			'lua' => llua.Lua.version(),
+			'luajit' => llua.Lua.versionJIT(),
+			#end
+			#if HSCRIPT_ALLOWED
+			'SScript' => d.get('SScript'),
+			#end
+			#if VIDEOS_ALLOWED
+			'hxCodec' => d.get('hxCodec'),
+			#end
+			#if DISCORD_ALLOWED
+			'hxdiscord_rpc' => d.get('hxdiscord_rpc'),
+			#end
+			#if flxanimate
+			'flxanimate' => d.get('flxanimate'),
+			#end
+			#end
+		];
+
+		text = textFormat;
+		for (f => r in replaces) text = text.replace('%$f%', r);
+
+		textColor = (currentFPS < FlxG.drawFramerate * 0.5 && !pressedF3) ? 0xFFFF0000 : 0xFFFFFFFF;
 	}
 
 	inline function get_memoryMegas():Float
