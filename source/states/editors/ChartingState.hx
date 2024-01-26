@@ -1350,12 +1350,12 @@ class ChartingState extends MusicBeatState
 		}
 
 		vocals = new FlxSound();
-		vocals.loadEmbedded(getVoicesPlayer());
+		vocals.loadEmbedded(Paths.getVoicesPlayer(currentSongName, characterData.vocalsP1));
 		vocals.autoDestroy = false;
 		FlxG.sound.list.add(vocals);
 
 		opponentVocals = new FlxSound();
-		opponentVocals.loadEmbedded(getVoicesOpponent());
+		opponentVocals.loadEmbedded(Paths.getVoicesOpponent(currentSongName, characterData.vocalsP2));
 		opponentVocals.autoDestroy = false;
 		FlxG.sound.list.add(opponentVocals);
 
@@ -1375,30 +1375,6 @@ class ChartingState extends MusicBeatState
 				curTime += (60 / _song.bpm) * 4000;
 			}
 		}
-	}
-
-	/**
-	 * Firstly trying to find Voices-Player.ogg, if not found returns Voices.ogg as openfl.media.Sound
-	 */
-	function getVoicesPlayer() {
-		var path = Paths.voicesPath(currentSongName, (characterData.vocalsP1 == null || characterData.vocalsP1.length < 1) ? 'Player' : characterData.vocalsP1);
-		if (Paths.fileExistsAbsolute(path))
-			return Paths.openflSound(path);
-
-		path = Paths.voicesPath(currentSongName);
-		if (Paths.fileExistsAbsolute(path))
-			return Paths.openflSound(path);
-		return null;
-	}
-
-	/**
-	 * Firstly trying to find Voices-Opponent.ogg, if not found returns null
-	 */
-	function getVoicesOpponent() {
-		var path = Paths.voicesPath(currentSongName, (characterData.vocalsP2 == null || characterData.vocalsP2.length < 1) ? 'Opponent' : characterData.vocalsP2);
-		if (Paths.fileExistsAbsolute(path))
-			return Paths.openflSound(path);
-		return null;
 	}
 
 	var playtesting:Bool = false;

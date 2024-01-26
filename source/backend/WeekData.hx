@@ -134,7 +134,7 @@ class WeekData {
 
 	public static function setDirectory(?folder:String) {
 		#if MODS_ALLOWED
-		Mods.currentModDirectory = folder;
+		Mods.currentModDirectory = folder.length > 0 ? folder : null;
 		#end
 	}
 }

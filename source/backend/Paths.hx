@@ -98,6 +98,26 @@ class Paths {
 		return hideChars.split(path).join("").toLowerCase();
 	}
 
+	/** Firstly trying to find Voices-Player.ogg, if not found returns Voices.ogg as openfl.media.Sound, if not found returns null */
+	public static function getVoicesPlayer(songName:String, vocalsP:String):Sound {
+		var path = voicesPath(songName, (vocalsP == null || vocalsP.length < 1) ? 'Player' : vocalsP);
+		if (fileExistsAbsolute(path))
+			return openflSound(path);
+
+		path = voicesPath(songName);
+		if (fileExistsAbsolute(path))
+			return openflSound(path);
+		return null;
+	}
+
+	/** * Firstly trying to find Voices-Opponent.ogg, if not found returns null */
+	public static function getVoicesOpponent(songName:String, vocalsP:String):Sound {
+		var path = voicesPath(songName, (vocalsP == null || vocalsP.length < 1) ? 'Opponent' : vocalsP);
+		if (fileExistsAbsolute(path))
+			return openflSound(path);
+		return null;
+	}
+
 	/**
 	 * Converts relative `key` path to absolute
 	 * 

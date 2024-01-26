@@ -277,6 +277,9 @@ class PlayState extends MusicBeatState
 		//trace('Playback Rate: ' + playbackRate);
 		Paths.clearStoredMemory();
 
+		// for lua
+		instance = this;
+
 		startCallback = startCountdown;
 		endCallback = endSong;
 
@@ -387,8 +390,7 @@ class PlayState extends MusicBeatState
 		// "GLOBAL" SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		for (folder in Paths.getAllFolders('scripts'))
-			for (file in Paths.readDirectory(folder))
-			{
+			for (file in Paths.readDirectory(folder)) {
 				#if LUA_ALLOWED
 				if(file.toLowerCase().endsWith('.lua'))
 					new FunkinLua('$folder/$file');
@@ -1177,17 +1179,10 @@ class PlayState extends MusicBeatState
 
 		vocals = new FlxSound();
 		opponentVocals = new FlxSound();
-		try
-		{
-			if (songData.needsVoices) {
-				var playerVocals = Paths.voices(songData.song, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
-				vocals.loadEmbedded(playerVocals != null ? playerVocals : Paths.voices(songData.song));
-
-				var oppVocals = Paths.voices(songData.song, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
-				if(oppVocals != null) opponentVocals.loadEmbedded(oppVocals);
-			}
+		if (songData.needsVoices) {
+			vocals.loadEmbedded(Paths.getVoicesPlayer(songData.song, boyfriend.vocalsFile));
+			opponentVocals.loadEmbedded(Paths.getVoicesOpponent(songData.song, dad.vocalsFile));
 		}
-		catch(e:Dynamic) {}
 
 		#if FLX_PITCH
 		vocals.pitch = playbackRate;
