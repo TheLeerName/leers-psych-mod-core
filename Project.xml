@@ -80,19 +80,26 @@
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="lime" version="8.1.1" />
-	<haxelib name="openfl" version="9.3.2" />
+	<log unless="${haxe >= 4.3.0}" error="Haxe version ${haxe} is not compatible with this code (expected version 4.3.2+ as in building guide)" />
+	<log unless="${haxe >= 4.3.2}" warn="Haxe version ${haxe} may not be compatible with this code (expected version 4.3.2+ as in building guide)" />
 
-	<haxelib name="flixel" version="5.5.0"/>
-	<haxelib name="flixel-ui" version="2.5.0"/>
+	<!-- btw i improved haxelib node so we can use it as setup dependencies list -->
+	<!-- also btw branch and commit its the same -->
+
+	<haxelib name="lime"          version="8.1.1" />
+	<haxelib name="openfl"        version="9.3.2" />
+
+	<haxelib name="flixel"        version="5.5.0"/>
+	<haxelib name="flixel-ui"     version="2.5.0"/>
 	<haxelib name="flixel-addons" version="3.2.1"/>
-	<haxelib name="tjson" version="1.4.0"/>
+	<haxelib name="tjson"         version="1.4.0"/>
 
-	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
-	<haxelib name="SScript" version="8.1.6" if="HSCRIPT_ALLOWED"/>
-	<haxelib name="hxCodec" version="3.0.2" if="VIDEOS_ALLOWED" unless="USE_OWN_HXCODEC"/>
-	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
-	<haxelib name="flxanimate"/>
+	<haxelib name="SScript"       version="8.1.6" if="HSCRIPT_ALLOWED"/>
+	<haxelib name="hxCodec"       version="3.0.2" if="VIDEOS_ALLOWED" unless="USE_OWN_HXCODEC"/>
+
+	<haxelib name="linc_luajit"   version="git" url="https://github.com/superpowers04/linc_luajit" branch="8c20c7a" if="LUA_ALLOWED"/>
+	<haxelib name="hxdiscord_rpc" version="git" url="https://github.com/MAJigsaw77/hxdiscord_rpc"  branch="fb39442" if="DISCORD_ALLOWED"/>
+	<haxelib name="flxanimate"    version="git" url="https://github.com/ShadowMario/flxanimate"    branch="6d11b11"/>
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 

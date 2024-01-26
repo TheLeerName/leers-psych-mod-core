@@ -3,7 +3,7 @@
 2. Install [Git](https://git-scm.com/download/)
 3. Go to [this](#setting-up-visual-studio-code-for-source-code-editing) if you wanna use VS Code for editing
 4. Open cmd/powershell/terminal in folder where `Project.xml`
-5. Run command: on Windows `haxe setup-windows.hxml`, on other platforms `haxe setup.hxml`
+5. Run command: `haxe setup.hxml`
 6. Run command: `lime test <target>`, replacing `<target>` with the platform you want to build to (`windows`, `mac`, `linux`) (i.e. `lime test windows`)
 7. Now wait bunch of time (next compiles will be a much faster)
 8. To send build to someone just go to folder: `export/release/<target>/bin` (if you added `-debug` flag then `export/debug/<target>/bin`)
