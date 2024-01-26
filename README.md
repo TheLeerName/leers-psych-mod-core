@@ -23,8 +23,4 @@ Currently uses [Psych Engine 0.7.3](https://github.com/ShadowMario/FNF-PsychEngi
 - allow compilation and work without MODS_ALLOWED
 - removed hxcpp-debug-server lib
 
-## Building
-1. Install Haxe [4.3.2](https://haxe.org/download/version/4.3.2/)
-2. Install [Git](https://git-scm.com/download/)
-3. Run command: `haxe setup.hxml`
-4. Profit!
+### [BUILDING](setup/building.md)

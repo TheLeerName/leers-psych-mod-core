@@ -26,14 +26,17 @@ class Main {
 			switch (data.type) {
 				case "install", "haxelib": // for libraries only available in the haxe package manager
 					var version:String = data.version == null ? "" : data.version;
-					Sys.command('haxelib --quiet install ${data.name} ${version}');
+					Sys.command('haxelib --quiet --always install ${data.name} ${version}');
 				case "git": // for libraries that contain git repositories
 					var ref:String = data.ref == null ? "" : data.ref;
-					Sys.command('haxelib --quiet git ${data.name} ${data.url} ${data.ref}');
+					Sys.command('haxelib --quiet --always git ${data.name} ${data.url} ${data.ref}');
 				default: // and finally, throw an error if the library has no type
 					Sys.println('[PSYCH ENGINE SETUP]: Unable to resolve library of type "${data.type}" for library "${data.name}"');
 			}
 		}
+
+		Sys.println('Running lime setup via haxelib...');
+		Sys.command('haxelib run lime setup');
 
 		#if windows
 		Sys.println('Installing VS Community libraries...');
@@ -41,7 +44,7 @@ class Main {
 			Sys.command('curl.exe -s https://download.visualstudio.microsoft.com/download/pr/3105fcfe-e771-41d6-9a1c-fc971e7d03a7/8eb13958dc429a6e6f7e0d6704d43a55f18d02a253608351b6bf6723ffdaf24e/vs_Community.exe -O');
 		Sys.command('vs_Community.exe --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041 -p');
 		#else
-		Sys.command('haxelib --quiet install hxCodec 3.0.2');
+		Sys.command('haxelib --quiet --always install hxCodec 3.0.2');
 		#end
 
 		Sys.println('Finished!');
