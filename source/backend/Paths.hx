@@ -81,7 +81,7 @@ class Paths {
 	inline public static function musicPath(key:String):String
 		return path('music/$key.$SOUND_EXT');
 	inline public static function voicesPath(song:String, postfix:String = null):String
-		return path('songs/${formatToSongPath(song)}/Voices' + postfix == null ? '' : '-$postfix' + '.$SOUND_EXT');
+		return path('songs/${formatToSongPath(song)}/Voices' + (postfix == null ? '' : '-$postfix') + '.$SOUND_EXT');
 	inline public static function instPath(song:String):String
 		return path('songs/${formatToSongPath(song)}/Inst.$SOUND_EXT');
 
@@ -102,11 +102,11 @@ class Paths {
 	public static function getVoicesPlayer(songName:String, vocalsP:String):Sound {
 		var path = voicesPath(songName, (vocalsP == null || vocalsP.length < 1) ? 'Player' : vocalsP);
 		if (fileExistsAbsolute(path))
-			return openflSound(path);
+			return returnSoundAbsolute(path);
 
 		path = voicesPath(songName);
 		if (fileExistsAbsolute(path))
-			return openflSound(path);
+			return returnSoundAbsolute(path);
 		return null;
 	}
 
@@ -114,7 +114,7 @@ class Paths {
 	public static function getVoicesOpponent(songName:String, vocalsP:String):Sound {
 		var path = voicesPath(songName, (vocalsP == null || vocalsP.length < 1) ? 'Opponent' : vocalsP);
 		if (fileExistsAbsolute(path))
-			return openflSound(path);
+			return returnSoundAbsolute(path);
 		return null;
 	}
 
@@ -176,11 +176,11 @@ class Paths {
 	 */
 	public static function clearStoredMemory() {
 		for (key => graph in FlxG.bitmap._cache)
-			if (graph != null)
+			if (!dumpExclusions.contains(key) && graph != null)
 				removeFromMemory(graph);
 
 		for (key => sound in currentTrackedSounds)
-			if (OpenFlAssets.cache.hasSound(key))
+			if (!dumpExclusions.contains(key) && OpenFlAssets.cache.hasSound(key))
 				OpenFlAssets.cache.removeSound(key);
 
 		currentTrackedSounds.clear();
@@ -197,7 +197,7 @@ class Paths {
 	public static function clearUnusedMemory():Int {
 		var count:Int = 0;
 		for (key => graph in FlxG.bitmap._cache)
-			if (graph != null && graph.useCount <= 0) {
+			if (!dumpExclusions.contains(key) && graph != null && graph.useCount <= 0) {
 				removeFromMemory(graph);
 				count++;
 			}
@@ -289,6 +289,9 @@ class Paths {
 	}*/
 	#end
 
+	public static var dumpExclusions:Array<String> = [
+		'assets/music/freakyMenu.$SOUND_EXT'
+	];
 
 	//inline static var IMAGE_EXT = "png"; // not used cuz it can load jpg lol
 	inline static var SOUND_EXT = #if web "mp3" #else "ogg" #end;

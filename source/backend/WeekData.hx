@@ -73,20 +73,20 @@ class WeekData {
 		weeksList = [];
 		weeksLoaded.clear();
 
-		var directories:Array<String> = Paths.getAllFolders('weeks');
+		var directories:Array<String> = Paths.getAllFolders();
 		for (i in 0...directories.length) {
-			var dir:String = directories[i];
+			var dir:String = directories[i] + 'weeks';
 			if(Paths.fileExistsAbsolute(dir)) {
 				for (file in Paths.readDirectory(dir)) {
 					var path = '$dir/$file';
 					if (file.endsWith('.json'))
-						addWeek(file.substr(0, file.length - 5), path, directories[i], i, directories.length);
+						addWeek(file.substr(0, file.length - 5), path, directories[i]);
 				}
 			}
 		}
 	}
 
-	private static function addWeek(weekToCheck:String, path:String, directory:String, i:Int, length:Int)
+	private static function addWeek(weekToCheck:String, path:String, directory:String)
 	{
 		if(!weeksLoaded.exists(weekToCheck))
 		{
@@ -94,12 +94,10 @@ class WeekData {
 			if(week != null)
 			{
 				var weekFile:WeekData = new WeekData(week, weekToCheck);
-				if(i >= length)
-				{
-					#if MODS_ALLOWED
+				#if MODS_ALLOWED
+				if(directory.contains(Paths.modsPath()))
 					weekFile.folder = directory.substring(Paths.modsPath().length, directory.length-1);
-					#end
-				}
+				#end
 				if((PlayState.isStoryMode && !weekFile.hideStoryMode) || (!PlayState.isStoryMode && !weekFile.hideFreeplay))
 				{
 					weeksLoaded.set(weekToCheck, weekFile);

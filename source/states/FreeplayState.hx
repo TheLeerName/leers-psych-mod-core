@@ -377,8 +377,9 @@ class FreeplayState extends MusicBeatState
 			{
 				trace('ERROR! $e');
 
+				var err = '[file_contents,' + Paths.preloadPath('data/');
 				var errorStr:String = e.toString();
-				if(errorStr.startsWith('[file_contents,assets/data/')) errorStr = 'Missing file: ' + errorStr.substring(34, errorStr.length-1); //Missing chart
+				if(errorStr.startsWith(err)) errorStr = 'Missing file: ' + errorStr.substring(err.length, errorStr.length-1); //Missing chart
 				missingText.text = 'ERROR WHILE LOADING CHART:\n$errorStr';
 				missingText.screenCenter(Y);
 				missingText.visible = true;
@@ -390,7 +391,7 @@ class FreeplayState extends MusicBeatState
 				return;
 			}
 			PlayState.switchToState();
-			if (FlxG.sound.music != null) FlxG.sound.music.stop();
+			FlxG.sound.music.volume = 0;
 			destroyFreeplayVocals();
 			DiscordClient.loadModRPC();
 		}

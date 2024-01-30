@@ -90,7 +90,11 @@ class Song
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong {
 		var formattedFolder:String = Paths.formatToSongPath(folder);
 		var formattedSong:String = Paths.formatToSongPath(jsonInput);
-		var rawJson = Paths.text(Paths.jsonPath('$formattedFolder/$formattedSong'));
+		var path = Paths.jsonPath('$formattedFolder/$formattedSong');
+		if (!Paths.fileExistsAbsolute(path))
+			throw '[file_contents,$path]';
+
+		var rawJson = Paths.text(path);
 
 		var songJson:Dynamic = parseJSONshit(rawJson);
 		onLoadJson(songJson);

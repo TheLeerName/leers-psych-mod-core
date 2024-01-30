@@ -255,6 +255,14 @@ class PlayState extends MusicBeatState
 
 		var stages:Map<String, Class<BaseStage>> = [
 			'stage' => stages.StageWeek1, //Week 1
+			'spooky' => stages.Spooky,
+			'philly' => stages.Philly,
+			'limo' => stages.Limo,
+			'mall' => stages.Mall,
+			'mallEvil' => stages.MallEvil,
+			'school' => stages.School,
+			'schoolEvil' => stages.SchoolEvil,
+			'tank' => stages.Tank,
 		];
 
 		if(SONG.stage == null || SONG.stage.length < 1)
@@ -332,7 +340,7 @@ class PlayState extends MusicBeatState
 			stageData = StageData.dummy();
 		}
 
-		Paths.setCurrentLevel('week_assets/' + stageData.directory);
+		Paths.setCurrentLevel(stageData.directory != null && stageData.directory.length > 0 ? 'week_assets/' + stageData.directory : null);
 
 		defaultCamZoom = stageData.defaultZoom;
 
@@ -617,7 +625,6 @@ class PlayState extends MusicBeatState
 		cachePopUpScore();
 
 		super.create();
-		Paths.clearUnusedMemory();
 
 		if(eventNotes.length < 1) checkEventNote();
 	}
@@ -1095,12 +1102,8 @@ class PlayState extends MusicBeatState
 	{
 		if(time < 0) time = 0;
 
-		FlxG.sound.music.pause();
-		opponentVocals.pause();
-
 		FlxG.sound.music.time = time;
 		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
-		FlxG.sound.music.play();
 
 		if (Conductor.songPosition <= vocals.length)
 		{
@@ -1111,8 +1114,7 @@ class PlayState extends MusicBeatState
 			opponentVocals.pitch = playbackRate;
 			#end
 		}
-		vocals.play();
-		opponentVocals.play();
+
 		Conductor.songPosition = time;
 	}
 
@@ -1179,10 +1181,13 @@ class PlayState extends MusicBeatState
 
 		vocals = new FlxSound();
 		opponentVocals = new FlxSound();
-		if (songData.needsVoices) {
-			vocals.loadEmbedded(Paths.getVoicesPlayer(songData.song, boyfriend.vocalsFile));
-			opponentVocals.loadEmbedded(Paths.getVoicesOpponent(songData.song, dad.vocalsFile));
+		try {
+			if (songData.needsVoices) {
+				vocals.loadEmbedded(Paths.getVoicesPlayer(songData.song, boyfriend.vocalsFile));
+				opponentVocals.loadEmbedded(Paths.getVoicesOpponent(songData.song, dad.vocalsFile));
+			}
 		}
+		catch(e:Dynamic) {}
 
 		#if FLX_PITCH
 		vocals.pitch = playbackRate;
