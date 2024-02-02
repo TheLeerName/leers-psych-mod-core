@@ -40,6 +40,7 @@ class StageData {
 
 	public static function getStageFile(stage:String):StageFile {
 		var rawJson = Paths.getTextFromFile('stages/$stage.json');
+		if (rawJson == null) return null;
 		return cast Json.parse(rawJson);
 	}
 

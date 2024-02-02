@@ -1,7 +1,9 @@
 package stages;
 
-import stages.events.BaseEvent;
-import stages.notetypes.BaseNoteType;
+import flixel.FlxBasic;
+import flixel.FlxObject;
+
+import objects.Character;
 
 enum Countdown
 {
@@ -14,12 +16,51 @@ enum Countdown
 
 // IM TIRED FROM PLAYSTATE.HX 9000 LINES
 // now without stupid buggy macro ehehe - Leer
-@:allow(stages.objects.BaseStageObject)
-@:allow(states.PlayState)
-class BaseStage extends PlayState {
-	var game(get, never):BaseStage;
+@:access(backend.MusicBeatState)
+class BaseStage {
+	var game(get, never):PlayState;
+
+	var curBeat(get, never):Int;
+	var curStep(get, never):Int;
+	var curSection(get, never):Int;
+
+	var controls(get, never):Controls;
+
+	var paused(get, never):Bool;
+	var songName(get, never):String;
 	var isStoryMode(get, never):Bool;
 	var seenCutscene(get, never):Bool;
+	var inCutscene(get, set):Bool;
+	var canPause(get, set):Bool;
+	var members(get, never):Dynamic;
+
+	var boyfriend(get, never):Character;
+	var dad(get, never):Character;
+	var gf(get, never):Character;
+	var boyfriendGroup(get, never):FlxSpriteGroup;
+	var dadGroup(get, never):FlxSpriteGroup;
+	var gfGroup(get, never):FlxSpriteGroup;
+	
+	var camGame(get, never):FlxCamera;
+	var camHUD(get, never):FlxCamera;
+	var camOther(get, never):FlxCamera;
+
+	var defaultCamZoom(get, set):Float;
+	var camFollow(get, never):FlxObject;
+
+	var stopCountdown(get, set):Bool;
+	var stopRecalculateRating(get, set):Bool;
+	var stopPause(get, set):Bool;
+	var stopEndSong(get, set):Bool;
+	var stopGameOver(get, set):Bool;
+
+	function add(object:FlxBasic) game.add(object);
+	function remove(object:FlxBasic) game.remove(object);
+	function insert(position:Int, object:FlxBasic) game.insert(position, object);
+
+	function addBehindGF(obj:FlxBasic) insert(members.indexOf(game.gfGroup), obj);
+	function addBehindBF(obj:FlxBasic) insert(members.indexOf(game.boyfriendGroup), obj);
+	function addBehindDad(obj:FlxBasic) insert(members.indexOf(game.dadGroup), obj);
 
 	//Fix for the Chart Editor on Base Game stages
 	function setDefaultGF(name:String) {
@@ -33,6 +74,11 @@ class BaseStage extends PlayState {
 	//start/end callback functions
 	function setStartCallback(myfn:Void->Void) PlayState.instance.startCallback = myfn;
 	function setEndCallback(myfn:Void->Void) PlayState.instance.endCallback = myfn;
+
+	function startCountdown() return PlayState.instance.startCountdown();
+	function endSong() return PlayState.instance.endSong();
+	function moveCameraSection() moveCameraSection();
+	function moveCamera(isDad:Bool) moveCamera(isDad);
 
 	// init stuff
 	function onCreate() {}
@@ -95,37 +141,56 @@ class BaseStage extends PlayState {
 	function onCustomSubstateUpdatePost(name:String, elapsed:Float) {}
 	function onCustomSubstateDestroy(name:String) {}
 
-
 	// backend shit
-	static var instance:BaseStage;
-
-	static var stageObjects:Array<BaseStageObject> = [];
+	function getLoadTraceFormat()
+		return 'stage loaded successfully: %packagepath%';
 
 	public function new() {
-		super();
-		instance = this;
+		trace(getLoadTraceFormat().replace('%packagepath%', CoolUtil.getPackagePath(this).replace('stages.', '')));
 	}
 
-	static function initNoteType(noteType:String):BaseNoteType {
-		var cl = Type.resolveClass('stages.notetypes.$noteType');
-		return cl != null ? Type.createInstance(cl, []) : null;
-	}
+	inline function get_game():PlayState return PlayState.instance;
 
-	static function initEvent(event:String):BaseEvent {
-		var cl = Type.resolveClass('stages.events.$event');
-		return cl != null ? Type.createInstance(cl, []) : null;
-	}
+	inline function get_curBeat():Int return game.curBeat;
+	inline function get_curStep():Int return game.curStep;
+	inline function get_curSection():Int return game.curSection;
 
-	override function callStageFunction(event:String, args:Array<Dynamic>) {
-		var stageFunc = Reflect.field(this, event);
-		if (stageFunc != null) {
-			for (obj in stageObjects) Reflect.callMethod(obj, Reflect.field(obj, event), args);
-			Reflect.callMethod(this, stageFunc, args);
-		}
-		else trace('bro $event is null i cant call it!!!!');
-	}
+	inline function get_controls():Controls return Controls.instance;
 
-	inline function get_game():BaseStage return this;
-	inline function get_isStoryMode():Bool return PlayState.isStoryMode;
-	inline function get_seenCutscene():Bool return PlayState.seenCutscene;
+	inline function get_paused() return game.paused;
+	inline function get_songName() return game.songName;
+	inline function get_isStoryMode() return PlayState.isStoryMode;
+	inline function get_seenCutscene() return PlayState.seenCutscene;
+	inline function get_inCutscene() return game.inCutscene;
+	inline function set_inCutscene(value:Bool) return game.inCutscene = value;
+	inline function get_canPause() return game.canPause;
+	inline function set_canPause(value:Bool) return game.canPause = value;
+	inline function get_members() return game.members;
+
+	inline function get_boyfriend():Character return game.boyfriend;
+	inline function get_dad():Character return game.dad;
+	inline function get_gf():Character return game.gf;
+
+	inline function get_boyfriendGroup():FlxSpriteGroup return game.boyfriendGroup;
+	inline function get_dadGroup():FlxSpriteGroup return game.dadGroup;
+	inline function get_gfGroup():FlxSpriteGroup return game.gfGroup;
+	
+	inline function get_camGame():FlxCamera return game.camGame;
+	inline function get_camHUD():FlxCamera return game.camHUD;
+	inline function get_camOther():FlxCamera return game.camOther;
+
+	inline function get_defaultCamZoom():Float return game.defaultCamZoom;
+	inline function set_defaultCamZoom(value:Float):Float return game.defaultCamZoom = value;
+	inline function get_camFollow():FlxObject return game.camFollow;
+
+	inline function get_stopCountdown():Bool return game.stopCountdown;
+	inline function set_stopCountdown(v:Bool):Bool return game.stopCountdown = v;
+	inline function get_stopRecalculateRating():Bool return game.stopRecalculateRating;
+	inline function set_stopRecalculateRating(v:Bool):Bool return game.stopRecalculateRating = v;
+	inline function get_stopPause():Bool return game.stopPause;
+	inline function set_stopPause(v:Bool):Bool return game.stopPause = v;
+	inline function get_stopEndSong():Bool return game.stopEndSong;
+	inline function set_stopEndSong(v:Bool):Bool return game.stopEndSong = v;
+	inline function get_stopGameOver():Bool return game.stopGameOver;
+	inline function set_stopGameOver(v:Bool):Bool return game.stopGameOver = v;
 }

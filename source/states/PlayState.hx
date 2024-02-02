@@ -54,10 +54,15 @@ import tea.SScript;
 #end
 
 import stages.*;
+import stages.events.BaseEvent;
+import stages.notetypes.BaseNoteType;
+import stages.objects.BaseStageObject;
 
 /**
  * This is where all the Gameplay stuff happens and is managed
  */
+@:allow(stages.BaseStage)
+@:access(stages.BaseStage)
 class PlayState extends MusicBeatState
 {
 	public static var STRUM_X = 42;
@@ -247,12 +252,22 @@ class PlayState extends MusicBeatState
 	public var stopEndSong:Bool = false;
 	public var stopGameOver:Bool = false;
 
-	function callStageFunction(event:String, args:Array<Dynamic>) {}
 	// Psych 0.7 system
 	// commonly not 0.7 system but looks like so, ill name it "lua x source"
-	public static function switchToState() {
-		@:privateAccess BaseStage.stageObjects = [];
+	public var stage:BaseStage;
+	public var stageObjects:Array<BaseStageObject> = [];
+	function callStageFunction(event:String, ?args:Array<Dynamic>) {
+		if (stage == null) return;
+		args = args ?? [];
+		var stageFunc = Reflect.field(stage, event);
+		if (stageFunc != null) {
+			for (obj in stageObjects) Reflect.callMethod(obj, Reflect.field(obj, event), args);
+			Reflect.callMethod(stage, stageFunc, args);
+		}
+		else trace('bro $event is null i cant call it!!!!');
+	}
 
+	function initStage() {
 		var stages:Map<String, Class<BaseStage>> = [
 			'stage' => stages.StageWeek1, //Week 1
 			'spooky' => stages.Spooky,
@@ -265,19 +280,20 @@ class PlayState extends MusicBeatState
 			'tank' => stages.Tank,
 		];
 
-		if(SONG.stage == null || SONG.stage.length < 1)
-			SONG.stage = StageData.vanillaSongStage(Paths.formatToSongPath(SONG.song));
-		curStage = SONG.stage;
+		if (stages.exists(curStage))
+			stage = Type.createInstance(stages.get(curStage), []);
 
-		var state = stages.exists(curStage) ? Type.createInstance(stages.get(curStage), []) : new BaseStage();
-		MusicBeatState.switchState(state);
+		callStageFunction('onCreate');
 	}
 
-	public function new() {
-		super();
+	function initNoteType(noteType:String):BaseNoteType {
+		var cl = Type.resolveClass('stages.notetypes.$noteType');
+		return cl != null ? Type.createInstance(cl, []) : null;
+	}
 
-		// for lua
-		instance = this;
+	function initEvent(event:String):BaseEvent {
+		var cl = Type.resolveClass('stages.events.$event');
+		return cl != null ? Type.createInstance(cl, []) : null;
 	}
 
 	override public function create()
@@ -334,6 +350,9 @@ class PlayState extends MusicBeatState
 
 		GameOverSubstate.resetVariables();
 		songName = Paths.formatToSongPath(SONG.song);
+		if(SONG.stage == null || SONG.stage.length < 1)
+			SONG.stage = StageData.vanillaSongStage(Paths.formatToSongPath(SONG.song));
+		curStage = SONG.stage;
 
 		var stageData:StageFile = StageData.getStageFile(curStage);
 		if(stageData == null) { //Stage couldn't be found, create a dummy stage for preventing a crash
@@ -378,8 +397,7 @@ class PlayState extends MusicBeatState
 		dadGroup = new FlxSpriteGroup(DAD_X, DAD_Y);
 		gfGroup = new FlxSpriteGroup(GF_X, GF_Y);
 
-		callStageFunction('onCreate', []);
-		trace('stage loaded successfully: ' + CoolUtil.getPackagePath(this));
+		initStage();
 
 		if(isPixelStage) {
 			introSoundsSuffix = '-pixel';
@@ -572,11 +590,11 @@ class PlayState extends MusicBeatState
 		#if HSCRIPT_ALLOWED
 		for (notetype in noteTypes) {
 			startHScriptsNamed('custom_notetypes/' + notetype + '.hx');
-			BaseStage.initNoteType(notetype);
+			initNoteType(notetype);
 		}
 		for (event in eventsPushed) {
 			startHScriptsNamed('custom_events/' + event + '.hx');
-			BaseStage.initEvent(event);
+			initEvent(event);
 		}
 		#end
 		noteTypes = null;
@@ -584,7 +602,7 @@ class PlayState extends MusicBeatState
 
 		if(eventNotes.length > 1)
 		{
-			for (event in eventNotes) event.strumTime -= _eventEarlyTrigger(event);
+			for (event in eventNotes) event.strumTime -= eventEarlyTrigger(event);
 			eventNotes.sort(sortByTime);
 		}
 
@@ -606,8 +624,8 @@ class PlayState extends MusicBeatState
 		startCallback();
 		RecalculateRating();
 
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, _onKeyPress);
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, _onKeyRelease);
+		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
+		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 
 		//PRECACHING THINGS THAT GET USED FREQUENTLY TO AVOID LAGSPIKES
 		if(ClientPrefs.data.hitsoundVolume > 0) Paths.sound('hitsound');
@@ -1354,7 +1372,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	function _eventEarlyTrigger(event:EventNote):Float {
+	function eventEarlyTrigger(event:EventNote):Float {
 		var returnedValue:Null<Float> = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2, event.strumTime], true, [], [0]);
 		if(returnedValue != null && returnedValue != 0 && returnedValue != LuaUtils.Function_Continue) {
 			return returnedValue;
@@ -1668,10 +1686,10 @@ class PlayState extends MusicBeatState
 							if(daNote.mustPress)
 							{
 								if(cpuControlled && !daNote.blockHit && daNote.canBeHit && (daNote.isSustainNote || daNote.strumTime <= Conductor.songPosition))
-									_goodNoteHit(daNote);
+									goodNoteHit(daNote);
 							}
 							else if (daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
-								_opponentNoteHit(daNote);
+								opponentNoteHit(daNote);
 
 							if(daNote.isSustainNote && strum.sustainReduce) daNote.clipToStrumNote(strum);
 
@@ -1679,7 +1697,7 @@ class PlayState extends MusicBeatState
 							if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
 							{
 								if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
-									_noteMiss(daNote);
+									noteMiss(daNote);
 
 								daNote.active = daNote.visible = false;
 								invalidateNote(daNote);
@@ -2282,7 +2300,7 @@ class PlayState extends MusicBeatState
 					PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
 					FlxG.sound.music.stop();
 
-					PlayState.switchToState();
+					MusicBeatState.switchState(new PlayState());
 				}
 			}
 			else
@@ -2493,7 +2511,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public var strumsBlocked:Array<Bool> = [];
-	private function _onKeyPress(event:KeyboardEvent):Void
+	private function onKeyPress(event:KeyboardEvent):Void
 	{
 
 		var eventKey:FlxKey = event.keyCode;
@@ -2547,12 +2565,12 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
-			_goodNoteHit(funnyNote);
+			goodNoteHit(funnyNote);
 		}
 		else if(shouldMiss)
 		{
 			callOnScripts('onGhostTap', [key]);
-			_noteMissPress(key);
+			noteMissPress(key);
 		}
 
 		// Needed for the  "Just the Two of Us" achievement.
@@ -2581,7 +2599,7 @@ class PlayState extends MusicBeatState
 		return FlxSort.byValues(FlxSort.ASCENDING, a.strumTime, b.strumTime);
 	}
 
-	private function _onKeyRelease(event:KeyboardEvent):Void
+	private function onKeyRelease(event:KeyboardEvent):Void
 	{
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = getKeyFromEvent(keysArray, eventKey);
@@ -2656,7 +2674,7 @@ class PlayState extends MusicBeatState
 						var released:Bool = !holdArray[n.noteData];
 
 						if (!released)
-							_goodNoteHit(n);
+							goodNoteHit(n);
 					}
 				}
 			}
@@ -2676,7 +2694,7 @@ class PlayState extends MusicBeatState
 					keyReleased(i);
 	}
 
-	function _noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
+	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		//Dupe note remove
 		notes.forEachAlive(function(note:Note) {
 			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1)
@@ -2688,7 +2706,7 @@ class PlayState extends MusicBeatState
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('noteMiss', [daNote]);
 	}
 
-	function _noteMissPress(direction:Int = 1):Void //You pressed a key when there was no notes to press for this key
+	function noteMissPress(direction:Int = 1):Void //You pressed a key when there was no notes to press for this key
 	{
 		if(ClientPrefs.data.ghostTapping) return; //fuck it
 
@@ -2778,7 +2796,7 @@ class PlayState extends MusicBeatState
 		vocals.volume = 0;
 	}
 
-	function _opponentNoteHit(note:Note):Void
+	function opponentNoteHit(note:Note):Void
 	{
 		var result:Dynamic = callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) callOnHScript('opponentNoteHit', [note]);
@@ -2818,7 +2836,7 @@ class PlayState extends MusicBeatState
 		if (!note.isSustainNote) invalidateNote(note);
 	}
 
-	public function _goodNoteHit(note:Note):Void
+	public function goodNoteHit(note:Note):Void
 	{
 		if(note.wasGoodHit) return;
 		if(cpuControlled && note.ignoreNote) return;
@@ -2836,7 +2854,7 @@ class PlayState extends MusicBeatState
 			FlxG.sound.play(Paths.sound(note.hitsound), ClientPrefs.data.hitsoundVolume);
 
 		if(note.hitCausesMiss) {
-			_noteMiss(note);
+			noteMiss(note);
 			if(!note.noteSplashData.disabled && !note.isSustainNote) spawnNoteSplashOnNote(note);
 			if(!note.isSustainNote) invalidateNote(note);
 			return;
@@ -2933,8 +2951,8 @@ class PlayState extends MusicBeatState
 			hscriptArray.pop();
 		#end
 
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, _onKeyPress);
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, _onKeyRelease);
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		FlxG.animationTimeScale = 1;
 		#if FLX_PITCH FlxG.sound.music.pitch = 1; #end
 		Note.globalRgbShaders = [];

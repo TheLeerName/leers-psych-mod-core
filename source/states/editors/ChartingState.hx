@@ -1757,7 +1757,7 @@ class ChartingState extends MusicBeatState
 				if(opponentVocals != null) opponentVocals.stop();
 
 				//if(_song.stage == null) _song.stage = stageDropDown.selectedLabel;
-				PlayState.switchToState();
+				MusicBeatState.switchState(new PlayState());
 			}
 
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {

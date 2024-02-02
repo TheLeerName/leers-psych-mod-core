@@ -10,7 +10,7 @@ class ModVersion {
 		var ymd = DateTools.format(curDate, "%Y%m%d");
 		var buildNumber:Int = 0;
 
-		if (Compiler.getOutput() != '_') {
+		if (Context.getDefines().exists('no_console')) {
 			var buildDir = #if debug 'export/debug/' #else 'export/release/' #end;
 			if (!FileSystem.exists(buildDir))
 				FileSystem.createDirectory(buildDir);

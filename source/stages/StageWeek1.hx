@@ -33,7 +33,7 @@ class StageWeek1 extends BaseStage {
 	var dadbattleLight:BGSprite;
 	var dadbattleFog:DadBattleFog;
 	override function onCreate() {
-		makeStage(this);
+		makeStage(game);
 	}
 
 	override function onEventPushed(name:String, v1:String, v2:String, time:Float) {
