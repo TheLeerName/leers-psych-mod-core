@@ -15,7 +15,7 @@ class ModVersion {
 			if (!FileSystem.exists(buildDir))
 				FileSystem.createDirectory(buildDir);
 
-			var build = File.getContent(buildDir + '.builddate').split('\n') ?? [ymd, buildNumber + ''];
+			var build = FileSystem.exists(buildDir + '.builddate') ? File.getContent(buildDir + '.builddate').split('\n') : [ymd, buildNumber + ''];
 
 			buildNumber = Std.parseInt(build[1]) ?? 0;
 			if (build[0] == ymd)
