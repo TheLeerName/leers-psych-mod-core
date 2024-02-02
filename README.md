@@ -2,7 +2,9 @@
 Currently uses [Psych Engine 0.7.3](https://github.com/ShadowMario/FNF-PsychEngine/tree/0.7.3)
 
 ## Changes
-- Changed building guide to be better
+- Changed building guide to be a MORE better
+1. Uses libs from project.xml as hmm.json
+2. Warns or throws error if your haxe is outdated
 - Removed useless files like `assets/exclude` and things from `art`
 - Libs uses only one specific version
 - Fully rewritten Paths.hx
@@ -22,5 +24,10 @@ Currently uses [Psych Engine 0.7.3](https://github.com/ShadowMario/FNF-PsychEngi
 - support of loading .jpg images
 - allow compilation and work without MODS_ALLOWED
 - removed hxcpp-debug-server lib
+- press F3 everywhere to see more info in fps counter
+- GPUStats class
+- Main.defines map
+- allows drawing window border in dark mode
+- has cool api for changing border/caption/text color of window, see backend.native.Windows (will work only if player has windows 11 tho)
 
 ### [BUILDING](setup/building.md)
