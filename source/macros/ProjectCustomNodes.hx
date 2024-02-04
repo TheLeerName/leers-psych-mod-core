@@ -5,7 +5,7 @@ import sys.io.File;
 
 class ProjectCustomNodes {
 	public static function init() {
-		if (Context.getDefines().exists('no_console')) return;
+		if (!Context.getDefines().exists('no_console')) return;
 
 		var output:String = Compiler.getOutput();
 		output = output.substring(0, output.lastIndexOf('/') + 1) + 'bin';
