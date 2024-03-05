@@ -41,20 +41,21 @@ class DiscordClient
 	private static function onReady(request:cpp.RawConstPointer<DiscordUser>):Void {
 		var requestPtr:cpp.Star<DiscordUser> = cpp.ConstPointer.fromRaw(request).ptr;
 
+		var user = cast(requestPtr.username, String);
 		if (Std.parseInt(cast(requestPtr.discriminator, String)) != 0) //New Discord IDs/Discriminator system
-			trace('(Discord) Connected to User (${cast(requestPtr.username, String)}#${cast(requestPtr.discriminator, String)})');
-		else //Old discriminators
-			trace('(Discord) Connected to User (${cast(requestPtr.username, String)})');
+			user += '#${cast(requestPtr.discriminator, String)}';
+
+		trace('Connected to User: ' + user.toCMD(WHITE_BOLD));
 
 		changePresence();
 	}
 
 	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void {
-		trace('Discord: Error ($errorCode: ${cast(message, String)})');
+		trace('Error!'.toCMD(RED) + ' ($errorCode: ${cast(message, String)})');
 	}
 
 	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void {
-		trace('Discord: Disconnected ($errorCode: ${cast(message, String)})');
+		trace('Disconnected!'.toCMD(RED) + ' ($errorCode: ${cast(message, String)})');
 	}
 	#end
 
@@ -67,7 +68,7 @@ class DiscordClient
 		discordHandlers.errored = cpp.Function.fromStaticFunction(onError);
 		Discord.Initialize(clientID, cpp.RawPointer.addressOf(discordHandlers), 1, null);
 
-		if(!isInitialized) trace("Discord Client initialized");
+		if(!isInitialized) trace("Discord Client initialized".toCMD(GREEN));
 
 		sys.thread.Thread.create(() ->
 		{

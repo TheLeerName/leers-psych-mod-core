@@ -14,6 +14,8 @@ class StrumNote extends FlxSprite
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
 	public var sustainReduce:Bool = true;
 	private var player:Int;
+
+	@:noCompletion var prefs:SaveVariables = ClientPrefs.data;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -32,8 +34,8 @@ class StrumNote extends FlxSprite
 		rgbShader.enabled = false;
 		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) useRGBShader = false;
 		
-		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[leData];
-		if(PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixel[leData];
+		var arr:Array<FlxColor> = prefs.arrowRGB[leData];
+		if(PlayState.isPixelStage) arr = prefs.arrowRGBPixel[leData];
 		
 		if(leData <= arr.length)
 		{
@@ -55,7 +57,8 @@ class StrumNote extends FlxSprite
 		else skin = Note.defaultNoteSkin;
 
 		var customSkin:String = skin + Note.getNoteSkinPostfix();
-		if(Paths.fileExistsAbsolute(Paths.imagePath(customSkin))) skin = customSkin;
+		if (Paths.fileExistsAbsolute(Paths.imagePath('noteSkins/noteTypes/$customSkin'))) skin = 'noteSkins/noteTypes/$customSkin';
+		else if (Paths.fileExistsAbsolute(Paths.imagePath(customSkin))) skin = customSkin;
 
 		texture = skin; //Load texture and anims
 		scrollFactor.set();
@@ -66,12 +69,15 @@ class StrumNote extends FlxSprite
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
 
+		var skin:String = texture;
+		if (Paths.fileExistsAbsolute(Paths.imagePath('noteSkins/noteTypes/$skin'))) skin = 'noteSkins/noteTypes/$skin';
+
 		if(PlayState.isPixelStage)
 		{
-			loadGraphic(Paths.image('pixelUI/' + texture));
+			loadGraphic(Paths.image('pixelUI/' + skin));
 			width = width / 4;
 			height = height / 5;
-			loadGraphic(Paths.image('pixelUI/' + texture), true, Math.floor(width), Math.floor(height));
+			loadGraphic(Paths.image('pixelUI/' + skin), true, Math.floor(width), Math.floor(height));
 
 			antialiasing = false;
 			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
@@ -102,13 +108,12 @@ class StrumNote extends FlxSprite
 		}
 		else
 		{
-			frames = Paths.getSparrowAtlas(texture);
+			frames = Paths.getSparrowAtlas(skin);
 			animation.addByPrefix('green', 'arrowUP');
 			animation.addByPrefix('blue', 'arrowDOWN');
 			animation.addByPrefix('purple', 'arrowLEFT');
 			animation.addByPrefix('red', 'arrowRIGHT');
 
-			antialiasing = ClientPrefs.data.antialiasing;
 			setGraphicSize(Std.int(width * 0.7));
 
 			switch (Math.abs(noteData) % 4)

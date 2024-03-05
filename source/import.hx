@@ -63,5 +63,10 @@ import flixel.tweens.FlxTween;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 
-using StringTools;
+using shaders.Shaders;
+import shaders.Shaders;
 #end
+
+using StringTools;
+using backend.StaticExtensions;
+import backend.StaticExtensions;

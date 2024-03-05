@@ -28,7 +28,7 @@ class ModVersion {
 			File.saveContent(buildDir + '.builddate', build[0] + '\n' + buildNumber);
 
 			// its like yearmonthday.build_number
-			trace('$ymd.$buildNumber');
+			Sys.println('Current version: '.toCMD(YELLOW_BOLD) + '$ymd.$buildNumber'.toCMD(YELLOW));
 		}
 		return MacroUtils.addString('modVersion', '$ymd.$buildNumber', 'public static');
 	}

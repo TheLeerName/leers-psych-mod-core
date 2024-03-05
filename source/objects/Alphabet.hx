@@ -97,7 +97,7 @@ class Alphabet extends FlxSpriteGroup
 			var letter:AlphaCharacter = letters[i];
 			if(letter != null)
 			{
-				letter.kill();
+				letter.destroy();
 				letters.remove(letter);
 				remove(letter);
 			}
@@ -346,7 +346,6 @@ class AlphaCharacter extends FlxSprite
 	{
 		super(x, y);
 		image = 'alphabet';
-		antialiasing = ClientPrefs.data.antialiasing;
 	}
 	
 	public var curLetter:Letter = null;

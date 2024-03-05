@@ -13,9 +13,10 @@ class CoolUtil
 		return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
 
 	inline public static function coolTextFile(path:String):Array<String> {
-		var daList:Array<String> = [];
-		if (Paths.fileExistsAbsolute(path)) daList = listFromString(Paths.text(path));
-		return daList;
+		var relPath:String = Paths.path(path);
+		if (Paths.fileExistsAbsolute(relPath)) path = relPath;
+
+		return listFromString(Paths.text(path));
 	}
 
 	inline public static function colorFromString(color:String):FlxColor
@@ -32,10 +33,12 @@ class CoolUtil
 	inline public static function listFromString(string:String):Array<String>
 	{
 		var daList:Array<String> = [];
-		daList = string.trim().split('\n');
+		if (string != null) {
+			daList = string.trim().split('\n');
 
-		for (i in 0...daList.length)
-			daList[i] = daList[i].trim();
+			for (i in 0...daList.length)
+				daList[i] = daList[i].trim();
+		}
 
 		return daList;
 	}

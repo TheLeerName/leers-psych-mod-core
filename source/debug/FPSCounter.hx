@@ -32,6 +32,11 @@ class FPSCounter extends TextField
 	 */
 	public var textFormat:String;
 
+	public var lowFPSColor:FlxColor = FlxColor.RED;
+	public var normalColor:FlxColor = FlxColor.WHITE;
+
+	@:noCompletion var prefs:SaveVariables = ClientPrefs.data;
+
 	@:noCompletion private var times:Array<Float> = [];
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
@@ -122,12 +127,12 @@ class FPSCounter extends TextField
 				#end
 			];
 		else {
-			if (ClientPrefs.data.showFPS)
+			if (prefs.showFPS)
 				lines.push('FPS: %fps%');
 
-			switch(ClientPrefs.data.memoryCounter) {
+			switch(prefs.memoryCounter) {
 				case 'Show used':
-					lines.push(ClientPrefs.data.cacheOnGPU ? 'GPU: %gpu%' : 'RAM: %gpuUsgMem%');
+					lines.push(prefs.cacheOnGPU ? 'GPU: %gpu%' : 'RAM: %gpuUsgMem%');
 				case 'Show both':
 					lines.push('RAM: %ram%');
 					lines.push('GPU: %gpuUsgMem%');
@@ -140,7 +145,7 @@ class FPSCounter extends TextField
 			lines.push('F3 to expand');
 		}
 		#else
-		if (ClientPrefs.data.showFPS) {
+		if (prefs.showFPS) {
 			lines.push('FPS: %fps%');
 			lines.push('Memory: %ram%');
 		}
@@ -157,15 +162,15 @@ class FPSCounter extends TextField
 			'fps' => currentFPS + '',
 			'ram' => FlxStringUtil.formatBytes(memoryMegas),
 			#if windows
-			'gpuUsgMem' => FlxStringUtil.formatBytes(GPUStats.memoryUsage),
+			'gpuUsgMem' => (GPUStats.errorMessage == null ? FlxStringUtil.formatBytes(GPUStats.memoryUsage) : 'Error!'),
 			'file' => FlxG.stage.application.meta.get('file'),
 			'modVer' => MainMenuState.modVersion,
 			'psychVer' => MainMenuState.psychEngineVersion,
-			'maxFPS' => ClientPrefs.data.framerate + '',
-			'quality' => (ClientPrefs.data.lowQuality ? 'low' : 'high') + 'Quality',
-			'antialiasing' => (ClientPrefs.data.antialiasing ? 'a' : 'noA') + 'ntialiasing',
-			'shaders' => (ClientPrefs.data.shaders ? 's' : 'noS') + 'haders',
-			'caching' => (ClientPrefs.data.cacheOnGPU ? 'gpu' : 'ram') + 'Caching',
+			'maxFPS' => prefs.framerate + '',
+			'quality' => (prefs.lowQuality ? 'low' : 'high') + 'Quality',
+			'antialiasing' => (prefs.antialiasing ? 'a' : 'noA') + 'ntialiasing',
+			'shaders' => (prefs.shaders ? 's' : 'noS') + 'haders',
+			'caching' => (prefs.cacheOnGPU ? 'gpu' : 'ram') + 'Caching',
 			'gpuUsg' => Std.int(GPUStats.usage) + '',
 			'gpuUsgGlobal' => Std.int(GPUStats.globalUsage) + '',
 			'mouseX' => FlxG.mouse.screenX + '',
@@ -200,9 +205,13 @@ class FPSCounter extends TextField
 		];
 
 		text = textFormat;
+		#if windows
+		if (pressedF3 && GPUStats.errorMessage != null)
+			text += '\n\nGPU stats tracking failed! ' + GPUStats.errorMessage;
+		#end
 		for (f => r in replaces) text = text.replace('%$f%', r);
 
-		textColor = (currentFPS < FlxG.drawFramerate * 0.5 && !pressedF3) ? 0xFFFF0000 : 0xFFFFFFFF;
+		textColor = (currentFPS < FlxG.drawFramerate * 0.5 && !pressedF3) ? lowFPSColor : normalColor;
 	}
 
 	inline function get_memoryMegas():Float

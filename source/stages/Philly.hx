@@ -17,7 +17,7 @@ class Philly extends BaseStage {
 	var curLightEvent:Int = -1;
 
 	override function onCreate() {
-		if(!ClientPrefs.data.lowQuality) {
+		if(!prefs.lowQuality) {
 			var bg:BGSprite = new BGSprite('philly/sky', -100, 0, 0.1, 0.1);
 			add(bg);
 		}
@@ -34,7 +34,7 @@ class Philly extends BaseStage {
 		add(phillyWindow);
 		phillyWindow.alpha = 0;
 
-		if(!ClientPrefs.data.lowQuality) {
+		if(!prefs.lowQuality) {
 			var streetBehind:BGSprite = new BGSprite('philly/behindTrain', -40, 50);
 			add(streetBehind);
 		}
@@ -64,7 +64,7 @@ class Philly extends BaseStage {
 				phillyGlowGradient = new PhillyGlowGradient(-400, 225); //This shit was refusing to properly load FlxGradient so fuck it
 				phillyGlowGradient.visible = false;
 				insert(members.indexOf(blammedLightsBlack) + 1, phillyGlowGradient);
-				if(!ClientPrefs.data.flashing) phillyGlowGradient.intendedAlpha = 0.7;
+				if(!prefs.flashing) phillyGlowGradient.intendedAlpha = 0.7;
 
 				Paths.image('philly/particle'); //precache philly glow particle image
 				phillyGlowParticles = new FlxTypedGroup<PhillyGlowParticle>();
@@ -117,7 +117,7 @@ class Philly extends BaseStage {
 						if(phillyGlowGradient.visible)
 						{
 							doFlash();
-							if(ClientPrefs.data.camZooms)
+							if(prefs.camZooms)
 							{
 								FlxG.camera.zoom += 0.5;
 								camHUD.zoom += 0.1;
@@ -143,7 +143,7 @@ class Philly extends BaseStage {
 						if(!phillyGlowGradient.visible)
 						{
 							doFlash();
-							if(ClientPrefs.data.camZooms)
+							if(prefs.camZooms)
 							{
 								FlxG.camera.zoom += 0.5;
 								camHUD.zoom += 0.1;
@@ -155,7 +155,7 @@ class Philly extends BaseStage {
 							phillyGlowGradient.visible = true;
 							phillyGlowParticles.visible = true;
 						}
-						else if(ClientPrefs.data.flashing)
+						else if(prefs.flashing)
 						{
 							var colorButLower:FlxColor = color;
 							colorButLower.alphaFloat = 0.25;
@@ -163,7 +163,7 @@ class Philly extends BaseStage {
 						}
 
 						var charColor:FlxColor = color;
-						if(!ClientPrefs.data.flashing) charColor.saturation *= 0.5;
+						if(!prefs.flashing) charColor.saturation *= 0.5;
 						else charColor.saturation *= 0.75;
 
 						for (who in chars)
@@ -181,7 +181,7 @@ class Philly extends BaseStage {
 						phillyStreet.color = color;
 
 					case 2: // spawn particles
-						if(!ClientPrefs.data.lowQuality)
+						if(!prefs.lowQuality)
 						{
 							var particlesNum:Int = FlxG.random.int(8, 12);
 							var width:Float = (2000 / particlesNum);
@@ -202,7 +202,7 @@ class Philly extends BaseStage {
 
 	function doFlash() {
 		var color:FlxColor = FlxColor.WHITE;
-		if(!ClientPrefs.data.flashing) color.alphaFloat = 0.5;
+		if(!prefs.flashing) color.alphaFloat = 0.5;
 
 		FlxG.camera.flash(color, 0.15, null, true);
 	}
@@ -222,7 +222,6 @@ class PhillyGlowGradient extends FlxSprite
 		scrollFactor.set(0, 0.75);
 		setGraphicSize(2000, originalHeight);
 		updateHitbox();
-		antialiasing = ClientPrefs.data.antialiasing;
 	}
 
 	override function update(elapsed:Float)
@@ -257,6 +256,7 @@ class PhillyGlowParticle extends FlxSprite
 	var lifeTime:Float = 0;
 	var decay:Float = 0;
 	var originalScale:Float = 1;
+
 	public function new(x:Float, y:Float, color:FlxColor)
 	{
 		super(x, y);
@@ -277,7 +277,6 @@ class PhillyGlowParticle extends FlxSprite
 		scrollFactor.set(FlxG.random.float(0.3, 0.75), FlxG.random.float(0.65, 0.75));
 		velocity.set(FlxG.random.float(-40, 40), FlxG.random.float(-175, -250));
 		acceleration.set(FlxG.random.float(-10, 10), 25);
-		antialiasing = ClientPrefs.data.antialiasing;
 	}
 
 	override function update(elapsed:Float)
@@ -302,7 +301,6 @@ class PhillyTrain extends BGSprite
 	{
 		super(image, x, y);
 		active = true; //Allow update
-		antialiasing = ClientPrefs.data.antialiasing;
 
 		this.sound = new FlxSound().loadEmbedded(Paths.sound(sound));
 		FlxG.sound.list.add(this.sound);

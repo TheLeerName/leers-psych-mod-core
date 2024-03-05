@@ -1,5 +1,6 @@
 package;
 
+import backend.native.Windows;
 import flixel.FlxGame;
 
 import openfl.Lib;
@@ -8,6 +9,8 @@ import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 
 import debug.FPSCounter;
+
+import backend.AudioUtil;
 
 //crash handler stuff
 #if CRASH_HANDLER
@@ -38,6 +41,8 @@ class Main extends Sprite
 	};
 
 	public static var fpsVar:FPSCounter;
+
+	public static var isDarkMode(default, null):Bool = false;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -90,9 +95,49 @@ class Main extends Sprite
 		}
 
 		#if windows
-		backend.native.Windows.allowDarkMode();
+		// cuz idk if it will work on other platforms
+		// cool improving of trace() thing! - TheLeerName
+		// useful batch btw! 
+		haxe.Log.trace = (v:Dynamic, ?infos:haxe.PosInfos) -> {
+			// so its like: [03:17:48] [debug/GPUStats:75] Traced string yeah
+			// and colors are: blue           cyan            basic (white)
+
+			var time = ('[' + DateTools.format(Date.now(), '%H:%M:%S') + ']').toCMD(BLUE);
+			var path = ('[' + infos.fileName.substring(infos.fileName.indexOf('/') + 1, infos.fileName.length - 3) + ':' + infos.lineNumber + ']').toCMD(CYAN);			var str = '$time $path $v';
+			#if js
+			if (js.Syntax.typeof(untyped console) != "undefined" && (untyped console).log != null)
+				(untyped console).log(str);
+			#elseif lua
+			untyped __define_feature__("use._hx_print", _hx_print(str));
+			#elseif sys
+			Sys.println(str);
+			#else
+			throw new haxe.exceptions.NotImplementedException()
+			#end
+		}
 		#end
-	
+
+		#if windows
+		var time:Float = 0; var prev:Float = -1;
+		addEventListener(Event.ENTER_FRAME, e -> {
+			time += FlxG.elapsed;
+			if (Std.int(prev) != Std.int(time)) {
+				isDarkMode = Windows.allowDarkMode();
+				AudioUtil.checkForDisconnect();
+			}
+			prev = time;
+		});
+
+		var folder = Paths.preloadPath('fonts/');
+		var count:Int = 0;
+		for (f in Paths.readDirectory(folder)) {
+			var font = openfl.text.Font.fromFile(folder + f);
+			openfl.text.Font.registerFont(font);
+			count++;
+		}
+		trace('Caching fonts completed ($count found)'.toCMD(GREEN));
+		#end
+
 		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
 		Controls.instance = new Controls();
 		ClientPrefs.loadDefaultKeys();

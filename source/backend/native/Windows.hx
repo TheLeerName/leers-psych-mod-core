@@ -18,12 +18,47 @@ class Windows {
 	public static function changeWallpaper(path:String):Bool
 		return false;
 
-	/** Allows drawing window frame in dark mode, works on Windows 10 build 17763 or greater. */
+	/** Allows drawing window frame in dark mode, works on Windows 10 build 17763 or greater.
+	 * @return Is dark mode allowed?
+	*/
 	@:functionCode('
-		int darkMode = enable ? 1 : 0;
+		DWORD val;
+		DWORD valSize = sizeof(val);
+		RegGetValue(HKEY_CURRENT_USER, "SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Themes\\\\Personalize\\\\", "AppsUseLightTheme", RRF_RT_DWORD, nullptr, &val, &valSize);
+		int darkMode = val == 0 ? 1 : 0;
+
 		if (S_OK != DwmSetWindowAttribute(GetActiveWindow(), 19, &darkMode, sizeof(darkMode)))
 			DwmSetWindowAttribute(GetActiveWindow(), 20, &darkMode, sizeof(darkMode));
-	') public static function allowDarkMode(enable:Bool = true) {}
+
+		return darkMode == 1;
+	') public static function allowDarkMode():Bool return false;
+
+
+	/**
+	 * Removes minimize and maximize buttons of current window
+	 * @see https://stackoverflow.com/a/46145911
+	 */
+	 @:functionCode('
+	 HWND hwnd = GetActiveWindow();
+	 DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+	 style &= ~WS_MINIMIZEBOX;
+	 style &= ~WS_MAXIMIZEBOX;
+	 SetWindowLong(hwnd, GWL_STYLE, style);
+	 SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_FRAMECHANGED);
+	') public static function removeMaximizeMinimizeButtons() {}
+
+	/**
+	 * Adds minimize and maximize buttons to current window
+	 * @see https://stackoverflow.com/a/46145911
+	 */
+	@:functionCode('
+		HWND hwnd = GetActiveWindow();
+		DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+		style |= WS_MINIMIZEBOX;
+		style |= WS_MAXIMIZEBOX;
+		SetWindowLong(hwnd, GWL_STYLE, style);
+		SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_FRAMECHANGED);
+	') public static function addMaximizeMinimizeButtons() {}
 
 
 	/** Changes window border color, works on Windows 11 build 22000 or greater. */

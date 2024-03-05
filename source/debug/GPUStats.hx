@@ -30,6 +30,8 @@ class GPUStats {
 	/** `true` if GPU stats tracking is running. */
 	static var wasStarted:Bool = false;
 
+	static var errorMessage:String;
+
 	/**
 	 * Starts tracking GPU stats, can be gotten with static variables in this class.
 	 * 
@@ -39,6 +41,7 @@ class GPUStats {
 		#if windows
 		wasStarted = true;
 
+		var first = true;
 		// very cool thing!!!
 		// https://stackoverflow.com/a/73496338
 		var pid = Std.string(untyped __cpp__('GetCurrentProcessId()'));
@@ -50,11 +53,13 @@ class GPUStats {
 				if (err.length > 0) {
 					err = err.substring(err.indexOf('CategoryInfo          : ') + 24);
 					err = err.substring(0, err.indexOf('\r\n'));
-					trace('GPU stats tracking failed');
-					trace(err);
+					trace('Can\'t get values from tracking! '.toCMD(RED_BOLD) + err.toCMD(RED));
+					errorMessage = err;
 					wasStarted = false;
 					return;
-				}
+				} else if (first)
+					trace('Tracking started'.toCMD(GREEN));
+				first = false;
 
 				var num:Array<String> = tr.stdout.readAll().toString().replace(',', '.').split('\r\n');
 				var sum:Float = 0;
@@ -72,8 +77,9 @@ class GPUStats {
 			}, true);
 		});
 
-		trace('GPU stats tracking started');
 		return 1;
+		#else
+		trace('Can\'t start tracking! '.toCMD(YELLOW_BOLD) + 'Not supported by target'.toCMD(YELLOW));
 		#end
 		return 0;
 	}
@@ -83,7 +89,7 @@ class GPUStats {
 	 */
 	static function close() {
 		if (!wasStarted) return;
-		trace('GPU stats tracking stopped');
+		trace('Tracking stopped'.toCMD(RED));
 		wasStarted = false;
 	}
 }

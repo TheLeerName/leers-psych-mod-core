@@ -22,7 +22,7 @@ class Paths {
 
 		var img = imageAbsolute(path);
 		if (img == null)
-			trace('oh no image $key returning null NOOOO');
+			trace('oh no image returning null NOOOO '.toCMD(RED_BOLD) + key.toCMD(RED));
 
 		return img;
 	}
@@ -162,9 +162,11 @@ class Paths {
 	 * WARNING: can crash game if this graphic is used! Use `graph.useCount` variable to avoid this
 	 */
 	public static function removeFromMemory(graph:FlxGraphic) {
+		if (graph == null) return;
 		var key = FlxG.bitmap.findKeyForBitmap(graph.bitmap);
 		OpenFlAssets.cache.removeBitmapData(key);
 		FlxG.bitmap._cache.remove(key);
+		currentTrackedImages.remove(key);
 		graph.destroy();
 	}
 
@@ -174,7 +176,7 @@ class Paths {
 	 * WARNING: can crash game if some of bitmaps are used!
 	 * @see `clearUnusedMemory()`
 	 */
-	public static function clearStoredMemory() {
+	public static function clearStoredMemory(?_:Dynamic) {
 		for (key => graph in FlxG.bitmap._cache)
 			if (!dumpExclusions.contains(key) && graph != null)
 				removeFromMemory(graph);
@@ -194,7 +196,7 @@ class Paths {
 	 * Currently cant clear unused sounds :(
 	 * @return Count of cleared assets
 	 */
-	public static function clearUnusedMemory():Int {
+	public static function clearUnusedMemory(?_:Dynamic):Int {
 		var count:Int = 0;
 		for (key => graph in FlxG.bitmap._cache)
 			if (!dumpExclusions.contains(key) && graph != null && graph.useCount <= 0) {
@@ -293,6 +295,8 @@ class Paths {
 		'assets/music/freakyMenu.$SOUND_EXT'
 	];
 
+	public static var imageReplacer:BitmapData;
+
 	//inline static var IMAGE_EXT = "png"; // not used cuz it can load jpg lol
 	inline static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline static var VIDEO_EXT = "mp4";
@@ -311,10 +315,11 @@ class Paths {
 		currentLevel = null;
 		if (lvl != null && lvl.length > 0 #if SHARED_DIRECTORY && lvl != SHARED_DIRECTORY #end) {
 			currentLevel = lvl;
-			trace('Current asset folder: $currentLevel');
+			trace('Current asset folder: ' + currentLevel.toCMD(WHITE_BOLD));
 		}
 	}
 
+	public static var currentTrackedImages:Array<String> = [];
 	public static var currentTrackedSounds:Map<String, Sound> = [];
 
 	public static function returnSoundAbsolute(path:String):Sound {
@@ -328,7 +333,7 @@ class Paths {
 			return newSound;
 		}
 
-		trace('oh no sound $path returning null NOOOO');
+		trace('oh no sound returning null NOOOO '.toCMD(RED_BOLD) + path.toCMD(RED));
 		return openflSound('$ASSETS_DIRECTORY/sounds/error.ogg');
 	}
 
@@ -353,7 +358,7 @@ class Paths {
 			return FlxG.bitmap._cache.get(path);
 
 		if (fileExistsAbsolute(path)) {
-			var bitmap = bitmapData(path);
+			var bitmap = imageReplacer != null ? imageReplacer : bitmapData(path);
 			if (ClientPrefs.data.cacheOnGPU) {
 				var texture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
 				texture.uploadFromBitmapData(bitmap);
@@ -362,6 +367,7 @@ class Paths {
 				bitmap.disposeImage();
 				bitmap = BitmapData.fromTexture(texture);
 			}
+			currentTrackedImages.push(path);
 			var graphic = FlxG.bitmap.add(bitmap, false, path);
 			graphic.persist = true;
 			return graphic;

@@ -33,6 +33,8 @@ class Option
 	public var defaultKeys:Keybind = null; //Only used in keybind type
 	public var keys:Keybind = null; //Only used in keybind type
 
+	@:noCompletion var prefs:SaveVariables = ClientPrefs.data;
+
 	public function new(name:String, description:String = '', variable:String, type:String = 'bool', ?options:Array<String> = null)
 	{
 		this.name = name;
@@ -95,7 +97,7 @@ class Option
 
 	dynamic public function getValue():Dynamic
 	{
-		var value = Reflect.getProperty(ClientPrefs.data, variable);
+		var value = Reflect.getProperty(prefs, variable);
 		if(type == 'keybind') return !Controls.instance.controllerMode ? value.keyboard : value.gamepad;
 		return value;
 	}
@@ -104,12 +106,12 @@ class Option
 	{
 		if(type == 'keybind')
 		{
-			var keys = Reflect.getProperty(ClientPrefs.data, variable);
+			var keys = Reflect.getProperty(prefs, variable);
 			if(!Controls.instance.controllerMode) keys.keyboard = value;
 			else keys.gamepad = value;
 			return value;
 		}
-		return Reflect.setProperty(ClientPrefs.data, variable, value);
+		return Reflect.setProperty(prefs, variable, value);
 	}
 
 	private function get_text()

@@ -4,8 +4,7 @@ import flixel.FlxSubState;
 
 class MusicBeatSubstate extends FlxSubState
 {
-	public function new()
-	{
+	public function new() {
 		super();
 	}
 
@@ -22,8 +21,15 @@ class MusicBeatSubstate extends FlxSubState
 	private var curDecBeat:Float = 0;
 	private var controls(get, never):Controls;
 
-	inline function get_controls():Controls
-		return Controls.instance;
+	@:noCompletion function get_controls() return Controls.instance;
+
+	/** Shortcut of `prefs` */
+	public var prefs(get, never):SaveVariables;
+	@:noCompletion function get_prefs() return ClientPrefs.data;
+
+	/** Shortcut of `prefs.gameplaySettings`/`ClientPrefs.gameplaySettings` */
+	public var gameplayPrefs(get, never):GameplaySettings;
+	@:noCompletion function get_gameplayPrefs() return ClientPrefs.gameplaySettings;
 
 	override function update(elapsed:Float)
 	{
@@ -94,7 +100,7 @@ class MusicBeatSubstate extends FlxSubState
 	{
 		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
 
-		var shit = ((Conductor.songPosition - ClientPrefs.data.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
+		var shit = ((Conductor.songPosition - prefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
 		curDecStep = lastChange.stepTime + shit;
 		curStep = lastChange.stepTime + Math.floor(shit);
 	}

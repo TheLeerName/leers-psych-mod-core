@@ -7,80 +7,178 @@ import flixel.input.gamepad.FlxGamepadInputID;
 import states.TitleState;
 
 // Add a variable here and it will get automatically saved
-@:structInit class SaveVariables {
-	public var downScroll:Bool = false;
-	public var middleScroll:Bool = false;
-	public var opponentStrums:Bool = true;
-	public var showFPS:Bool = true;
-	public var memoryCounter:String = 'Show both';
-	public var flashing:Bool = true;
-	public var autoPause:Bool = true;
-	public var antialiasing:Bool = true;
-	public var noteSkin:String = 'Default';
-	public var splashSkin:String = 'Psych';
-	public var splashAlpha:Float = 0.6;
-	public var lowQuality:Bool = false;
-	public var shaders:Bool = true;
-	public var cacheOnGPU:Bool = #if !switch false #else true #end; //From Stilic
-	public var framerate:Int = 60;
-	public var camZooms:Bool = true;
-	public var hideHud:Bool = false;
-	public var noteOffset:Int = 0;
-	public var arrowRGB:Array<Array<FlxColor>> = [
+@:structInit @:publicFields class SaveVariables {
+	// note colors
+
+	/** Note colors for not-pixel stages */
+	var arrowRGB:Array<Array<FlxColor>> = [
 		[0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],
 		[0xFF00FFFF, 0xFFFFFFFF, 0xFF1542B7],
 		[0xFF12FA05, 0xFFFFFFFF, 0xFF0A4447],
 		[0xFFF9393F, 0xFFFFFFFF, 0xFF651038]];
-	public var arrowRGBPixel:Array<Array<FlxColor>> = [
+	/** Note colors for pixel stages */
+	var arrowRGBPixel:Array<Array<FlxColor>> = [
 		[0xFFE276FF, 0xFFFFF9FF, 0xFF60008D],
 		[0xFF3DCAFF, 0xFFF4FFFF, 0xFF003060],
 		[0xFF71E300, 0xFFF6FFE6, 0xFF003100],
 		[0xFFFF884E, 0xFFFFFAF5, 0xFF6C0000]];
 
-	public var ghostTapping:Bool = true;
-	public var timeBarType:String = 'Time Left';
-	public var scoreZoom:Bool = true;
-	public var noReset:Bool = false;
-	public var healthBarAlpha:Float = 1;
-	public var hitsoundVolume:Float = 0;
-	public var pauseMusic:String = 'Tea Time';
-	public var checkForUpdates:Bool = true;
-	public var comboStacking:Bool = true;
-	public var gameplaySettings:Map<String, Dynamic> = [
-		'scrollspeed' => 1.0,
-		'scrolltype' => 'multiplicative', 
-		// anyone reading this, amod is multiplicative speed mod, cmod is constant speed mod, and xmod is bpm based speed mod.
-		// an amod example would be chartSpeed * multiplier
-		// cmod would just be constantSpeed = chartSpeed
-		// and xmod basically works by basing the speed on the bpm.
-		// iirc (beatsPerSecond * (conductorToNoteDifference / 1000)) * noteSize (110 or something like that depending on it, prolly just use note.height)
-		// bps is calculated by bpm / 60
-		// oh yeah and you'd have to actually convert the difference to seconds which I already do, because this is based on beats and stuff. but it should work
-		// just fine. but I wont implement it because I don't know how you handle sustains and other stuff like that.
-		// oh yeah when you calculate the bps divide it by the songSpeed or rate because it wont scroll correctly when speeds exist.
-		// -kade
-		'songspeed' => 1.0,
-		'healthgain' => 1.0,
-		'healthloss' => 1.0,
-		'instakill' => false,
-		'practice' => false,
-		'botplay' => false,
-		'opponentplay' => false
-	];
+	// adjust delay and combo
+	/** Note offset of song, can be usable when you have bluetooth headphones */
+	var noteOffset:Int = 0;
+	/** Combo offsets: [ratingX, ratingY, comboX, comboY] */
+	var comboOffset:Array<Int> = [0, 0, 0, 0];
 
-	public var comboOffset:Array<Int> = [0, 0, 0, 0];
-	public var ratingOffset:Int = 0;
-	public var sickWindow:Int = 45;
-	public var goodWindow:Int = 90;
-	public var badWindow:Int = 135;
-	public var safeFrames:Float = 10;
-	public var guitarHeroSustains:Bool = true;
-	public var discordRPC:Bool = true;
+
+	// graphics
+
+	/** If `true`, disables some background details */
+	var lowQuality:Bool = false;
+	/** Is anti-aliasing allowed? */
+	var antialiasing:Bool = true;
+	/** If `false`, will skip clearing cache on song start */
+	var clearCacheSongStart:Bool = false;
+	/** Is shaders allowed? */
+	var shaders:Bool = true;
+	/** If `true`, allows the GPU to be used for caching textures, decreasing RAM usage */
+	var cacheOnGPU:Bool = #if !switch false #else true #end; //From Stilic
+	/** Draw/update fps cap of game */
+	var framerate:Int = 60;
+
+
+	// visuals and ui
+
+	/** Current note skin */
+	var noteSkin:String = 'Default';
+	/** Current note splash skin */
+	var splashSkin:String = 'Psych';
+	/** Alpha of note splash texture */
+	var splashAlpha:Float = 0.6;
+	/** If `true`, hides most HUD elements */
+	var hideHud:Bool = false;
+	/** Current time bar type */
+	var timeBarType:String = 'Time Left';
+	/** Current design of menus */
+	var logoState:String = 'revisited';
+	/** If `false`, hides most of flashing lights */
+	var flashing:Bool = true;
+	/** If `false`, camera won't zoom in on a beat hit */
+	var camZooms:Bool = true;
+	/** If `false`, score text won't zoom on a note hit */
+	var scoreZoom:Bool = true;
+	/** Alpha of health bar */
+	var healthBarAlpha:Float = 1;
+	/** If `false`, hides fps from counter */
+	var showFPS:Bool = true;
+	/** Current memory counter type */
+	var memoryCounter:String = 'Show both';
+	/** Current pause music */
+	var pauseMusic:String = 'Tea Time';
+	/** If `false`, hides Discord Rich Presence */
+	var discordRPC:Bool = true;
+	/** If `false`, ratings and combo won't stack */
+	var comboStacking:Bool = true;
+
+
+	// gameplay
+
+	/** If `true`, notes go Down instead of Up */
+	var downScroll:Bool = false;
+	/** If `true`, notes get centered */
+	var middleScroll:Bool = false;
+	/** If `false`, opponent notes get hidden */
+	var opponentStrums:Bool = true;
+	/** If `true`, you won't get misses from pressing keys while there are no notes able to be hit */
+	var ghostTapping:Bool = true;
+	/** If `true`, game pauses if screen isn't on focus */
+	var autoPause:Bool = true;
+	/** If `true`, disables reset button */
+	var noReset:Bool = false;
+	/** Volume of hitsounds */
+	var hitsoundVolume:Float = 0;
+	/** How late/early you have to hit for a "Sick!" */
+	var ratingOffset:Int = 0;
+	/** Amount of time you have for hitting a "Sick!" in ms */
+	var sickWindow:Int = 45;
+	/** Amount of time you have for hitting a "Good" in ms */
+	var goodWindow:Int = 90;
+	/** Amount of time you have for hitting a "Bad" in ms */
+	var badWindow:Int = 135;
+	/** Amount of frames you have for hitting a note */
+	var safeFrames:Float = 10;
+	/** If `true`, Hold Notes can't be pressed if you miss, and count as a single Hit/Miss */
+	var guitarHeroSustains:Bool = true;
+
+
+	// other
+
+	/** Gameplay settings, for example `scrollspeed`. Can be accessed with `ClientPrefs.gameplaySettings` too! */
+	var gameplaySettings:GameplaySettings = {};
+	/** Key bindings, can be accessed `ClientPrefs.keyBinds` too! */
+	var keyBinds(get, never):Map<String, Array<FlxKey>>;
+	/** Gamepad bindings, can be accessed `ClientPrefs.gamepadBinds` too! */
+	var gamepadBinds(get, never):Map<String, Array<FlxGamepadInputID>>;
+
+	@:noCompletion function get_keyBinds() return ClientPrefs.keyBinds;
+	@:noCompletion function get_gamepadBinds() return ClientPrefs.gamepadBinds;
+}
+@:structInit @:publicFields class GameplaySettings {
+	/** Current speed of notes */
+	var scrollspeed:Float = 1.0;
+	/** Current type of note speed */
+	var scrolltype:String = 'multiplicative';
+	/** Current playback rate of song, multiplier */
+	var songspeed:Float = 1.0;
+	/** Uses for calculating health gain on note hit, multiplier */
+	var healthgain:Float = 1.0;
+	/** Uses for calculating health loss on note miss, multiplier */
+	var healthloss:Float = 1.0;
+	/** If `true`, note miss insta-kills you */
+	var instakill:Bool = false;
+	/** If `true`, enables practice mode */
+	var practice:Bool = false;
+	/** If `true`, game will hit notes automatically */
+	var botplay:Bool = false;
+	/** Does nothing in our mod as in psych lol */
+	var opponentplay:Bool = false;
+
+	@:noCompletion private var fields(default, never):Array<String> = [];
+
+	function new() {
+		for (f in Reflect.fields(this))
+			if (f != 'fields' && !Reflect.isFunction(Reflect.getProperty(this, f)))
+				fields.push(f);
+	}
+
+	function set(key:String, value:Dynamic) {
+		if (!fields.contains(key)) return;
+		Reflect.setProperty(this, key, value);
+	}
+
+	function get(key:String):Dynamic {
+		if (!fields.contains(key)) return null;
+		return Reflect.getProperty(this, key);
+	}
+
+	function exists(key:String):Bool
+		return fields.contains(key);
+
+	function toMap():Map<String, Dynamic> {
+		var map:Map<String, Dynamic> = [];
+		for (f in fields) map.set(f, Reflect.getProperty(this, f));
+		return map;
+	}
+
+	function fromMap(map:Map<String, Dynamic>) {
+		if (map != null) for (k => v in map) if (v != null) set(k, v);
+	}
 }
 
 class ClientPrefs {
+	/** Client preferences, can be accessed in states with `prefs` */
 	public static var data:SaveVariables = {};
 	public static var defaultData:SaveVariables = {};
+	public static var gameplaySettings(get, never):GameplaySettings;
 
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
@@ -154,8 +252,11 @@ class ClientPrefs {
 	}
 
 	public static function saveSettings() {
-		for (key in Reflect.fields(data))
+		var no = ['gameplaySettings', 'keyBinds', 'gamepadBinds'];
+		for (key in Reflect.fields(data)) if (!no.contains(key))
 			Reflect.setField(FlxG.save.data, key, Reflect.field(data, key));
+
+		FlxG.save.data.gameplaySettings = gameplaySettings.toMap();
 
 		#if ACHIEVEMENTS_ALLOWED Achievements.save(); #end
 		FlxG.save.flush();
@@ -172,15 +273,17 @@ class ClientPrefs {
 	public static function loadPrefs() {
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 
-		for (key in Reflect.fields(data))
-			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key))
-				Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));
-		
+		var no = ['gameplaySettings', 'keyBinds', 'gamepadBinds'];
+		for (key in Reflect.fields(data)) if (!no.contains(key) && Reflect.hasField(FlxG.save.data, key))
+			Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));
+
+		gameplaySettings.fromMap(FlxG.save.data.gameplaySettings);
+
 		if(Main.fpsVar != null)
 			Main.fpsVar.visible = data.showFPS;
 
 		#if (!html5 && !switch)
-		FlxG.autoPause = ClientPrefs.data.autoPause;
+		FlxG.autoPause = data.autoPause;
 
 		if(FlxG.save.data.framerate == null) {
 			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
@@ -198,19 +301,14 @@ class ClientPrefs {
 			FlxG.drawFramerate = data.framerate;
 			FlxG.updateFramerate = data.framerate;
 		}
-
-		if(FlxG.save.data.gameplaySettings != null)
-		{
-			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
-			for (name => value in savedMap)
-				data.gameplaySettings.set(name, value);
-		}
 		
 		// flixel automatically saves your volume!
 		if(FlxG.save.data.volume != null)
 			FlxG.sound.volume = FlxG.save.data.volume;
 		if (FlxG.save.data.mute != null)
 			FlxG.sound.muted = FlxG.save.data.mute;
+
+		FlxSprite.defaultAntialiasing = FlxG.save.data.antialiasing;
 
 		DiscordClient.check();
 
@@ -254,4 +352,6 @@ class ClientPrefs {
 		FlxG.sound.volumeDownKeys = turnOn ? TitleState.volumeDownKeys : [];
 		FlxG.sound.volumeUpKeys = turnOn ? TitleState.volumeUpKeys : [];
 	}
+
+	@:noCompletion static function get_gameplaySettings():GameplaySettings return data.gameplaySettings;
 }

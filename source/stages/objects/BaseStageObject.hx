@@ -2,7 +2,7 @@ package stages.objects;
 
 class BaseStageObject extends BaseStage {
 	override function getLoadTraceFormat()
-		return 'stage object loaded successfully: %packagepath%';
+		return 'Loaded stage object: ' + '%packagepath%'.toCMD(WHITE_BOLD);
 
 	public function new() {
 		super();

@@ -35,7 +35,7 @@ class ProjectCustomNodes {
 						else
 							rename = '/' + path;
 
-						trace('Copying $path to ${output + rename}');
+						Sys.println(' - ${'Copying folder:'.toCMD(WHITE_BOLD)} $path -> ${output + rename}');
 						Sys.command('robocopy "$path" "${output + rename}" /XF *.mp3 /S /NP /NFL /NDL /NJH /NJS >nul 2>&1');
 					#end
 					case 'section':

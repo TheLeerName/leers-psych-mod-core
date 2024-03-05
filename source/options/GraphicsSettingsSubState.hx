@@ -33,6 +33,12 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 		antialiasingOption = optionsArray.length-1;
 
+		var option:Option = new Option('Clear cache on song start',
+			"If unchecked, will skip clearing cache on song start, decreases loading times by a LOT.",
+			'clearCacheSongStart',
+			'bool');
+		addOption(option);
+
 		var option:Option = new Option('Shaders', //Name
 			"If unchecked, disables shaders.\nIt's used for some visual effects, and also CPU intensive for weaker PCs.", //Description
 			'shaders',
@@ -67,26 +73,23 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 
 	function onChangeAntiAliasing()
 	{
-		for (sprite in members)
-		{
-			var sprite:FlxSprite = cast sprite;
-			if(sprite != null && (sprite is FlxSprite) && !(sprite is FlxText)) {
-				sprite.antialiasing = ClientPrefs.data.antialiasing;
-			}
-		}
+		for (o in members)
+			if(o != null && Reflect.getProperty(o, 'antialiasing') != null)
+				Reflect.setProperty(o, 'antialiasing', prefs.antialiasing);
+		FlxSprite.defaultAntialiasing = prefs.antialiasing;
 	}
 
 	function onChangeFramerate()
 	{
-		if(ClientPrefs.data.framerate > FlxG.drawFramerate)
+		if(prefs.framerate > FlxG.drawFramerate)
 		{
-			FlxG.updateFramerate = ClientPrefs.data.framerate;
-			FlxG.drawFramerate = ClientPrefs.data.framerate;
+			FlxG.updateFramerate = prefs.framerate;
+			FlxG.drawFramerate = prefs.framerate;
 		}
 		else
 		{
-			FlxG.drawFramerate = ClientPrefs.data.framerate;
-			FlxG.updateFramerate = ClientPrefs.data.framerate;
+			FlxG.drawFramerate = prefs.framerate;
+			FlxG.updateFramerate = prefs.framerate;
 		}
 	}
 

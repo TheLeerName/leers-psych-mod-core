@@ -17,6 +17,7 @@ Currently uses [Psych Engine 0.7.3](https://github.com/ShadowMario/FNF-PsychEngi
 - Changed FPS Counter to display GPU memory usage
 - CompileTime macro as mod version
 - DISCORD_ALLOWED define
+- changed discord rpc
 - set specific ver of lime and openfl
 - using my stage system instead psych 0.7+ / states.stages now in stages package
 - CoolUtil.getPackagePath function
@@ -28,6 +29,23 @@ Currently uses [Psych Engine 0.7.3](https://github.com/ShadowMario/FNF-PsychEngi
 - GPUStats class
 - Main.defines map
 - allows drawing window border in dark mode
-- has cool api for changing border/caption/text color of window, see backend.native.Windows (will work only if player has windows 11 tho)
+- has cool api for Windows things like: changing border/caption/text color, removing maximize/minimize buttons, see backend.native.Windows (will work only if player has windows 11 tho)
+- improved `trace`: uses colors of cmd, prints time
+- default audio device switch fix, also traces connected audio device, has some bugs in song but on restart of song all fine!
+- you can access to `ClientPrefs.data` with `prefs` in states/substates/stages!
+- you can access to `ClientPrefs.data.gameplaySettings` with `gameplayPrefs` in states/substates/stages!
+- `Paths.imageReplacer` for your own loading screen things :)
+- `"0.43434".toFloat()` thing, check out static extensions haxe in google
+- `backend.WindowUtil` class
+- antialiasing sets in all sprites by default, i.e. you dont need `sprite.antialiasing = ClientPrefs.data.antialiasing;` shit
+- `Main.fpsVar.normalColor` / `Main.fpsVar.lowFPSColor`
+- fixed `Warning : Potential typo detected (expected similar values are flixel.addons.ui.SortMethod.ID)` shit
+- `shaders.Shaders.BaseEffect` class for simple adding shaders to source
+- enables dark mode of window if it was enabled in system
+- `Clear cache on song start` option in Graphics
+- clears cache on switching to song
+- `skipNextTransOut` / `skipNextTransIn` vars in states
+- added description to all vars in `ClientPrefs.data` / `ClientPrefs.gameplaySettings`
+- rewritten `ClientPrefs.gameplaySettings`: now you can use `ClientPrefs.gameplaySettings.scrollspeed`
 
 ### [BUILDING](setup/building.md)

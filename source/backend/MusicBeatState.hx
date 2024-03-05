@@ -17,12 +17,23 @@ class MusicBeatState extends FlxUIState
 	private var curDecStep:Float = 0;
 	private var curDecBeat:Float = 0;
 	public var controls(get, never):Controls;
-	inline function get_controls() return Controls.instance;
+	@:noCompletion function get_controls() return Controls.instance;
+
+	public var skipNextTransOut(get, set):Bool;
+	public var skipNextTransIn(get, set):Bool;
+
+	/** Shortcut of `prefs` */
+	public var prefs(get, never):SaveVariables;
+	@:noCompletion function get_prefs() return ClientPrefs.data;
+
+	/** Shortcut of `prefs.gameplaySettings` / `ClientPrefs.gameplaySettings` */
+	public var gameplayPrefs(get, never):GameplaySettings;
+	@:noCompletion function get_gameplayPrefs() return ClientPrefs.gameplaySettings;
 
 	var _psychCameraInitialized:Bool = false;
 
 	override function create() {
-		var skip:Bool = FlxTransitionableState.skipNextTransOut;
+		var skip:Bool = skipNextTransOut;
 		#if MODS_ALLOWED Mods.updatedOnState = false; #end
 
 		if(!_psychCameraInitialized) initPsychCamera();
@@ -30,9 +41,9 @@ class MusicBeatState extends FlxUIState
 		super.create();
 
 		if(!skip) {
-			openSubState(new CustomFadeTransition(0.6, true));
+			openSubState(new CustomFadeTransition(0.7, true));
 		}
-		FlxTransitionableState.skipNextTransOut = false;
+		skipNextTransOut = false;
 		timePassedOnState = 0;
 	}
 
@@ -118,28 +129,34 @@ class MusicBeatState extends FlxUIState
 	{
 		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
 
-		var shit = ((Conductor.songPosition - ClientPrefs.data.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
+		var shit = ((Conductor.songPosition - prefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
 		curDecStep = lastChange.stepTime + shit;
 		curStep = lastChange.stepTime + Math.floor(shit);
 	}
 
-	public static function switchState(nextState:FlxState = null) {
+	/** @param dumpCache If `true`, calls `Paths.clearStoredMemory()` on next state pre-create, also increases loading times by a LOT. */
+	public static function switchState(nextState:FlxState = null, ?dumpCache:Bool = false) {
+		if (dumpCache) FlxG.signals.preStateCreate.addOnce(Paths.clearStoredMemory);
+
 		if(nextState == null) nextState = FlxG.state;
-		if(nextState == FlxG.state)
-		{
+		if(nextState == FlxG.state) {
 			resetState();
 			return;
 		}
 
-		if(FlxTransitionableState.skipNextTransIn) FlxG.switchState(nextState);
+		trace('Switching to ' + Type.getClassName(Type.getClass(nextState)).toCMD(WHITE_BOLD));
+
+		var s = getState();
+		if(s.skipNextTransIn) FlxG.switchState(nextState);
 		else startTransition(nextState);
-		FlxTransitionableState.skipNextTransIn = false;
+		s.skipNextTransIn = false;
 	}
 
 	public static function resetState() {
-		if(FlxTransitionableState.skipNextTransIn) FlxG.resetState();
+		var s = getState();
+		if(s.skipNextTransIn) FlxG.resetState();
 		else startTransition();
-		FlxTransitionableState.skipNextTransIn = false;
+		s.skipNextTransIn = false;
 	}
 
 	// Custom made Trans in
@@ -181,4 +198,9 @@ class MusicBeatState extends FlxUIState
 		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
 	}
+
+	@:noCompletion function get_skipNextTransOut():Bool return FlxTransitionableState.skipNextTransOut;
+	@:noCompletion function set_skipNextTransOut(v:Bool):Bool return FlxTransitionableState.skipNextTransOut = v;
+	@:noCompletion function get_skipNextTransIn():Bool return FlxTransitionableState.skipNextTransIn;
+	@:noCompletion function set_skipNextTransIn(v:Bool):Bool return FlxTransitionableState.skipNextTransIn = v;
 }

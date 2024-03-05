@@ -19,6 +19,7 @@ enum Countdown
 @:access(backend.MusicBeatState)
 class BaseStage {
 	var game(get, never):PlayState;
+	var prefs(get, never):SaveVariables;
 
 	var curBeat(get, never):Int;
 	var curStep(get, never):Int;
@@ -54,13 +55,22 @@ class BaseStage {
 	var stopEndSong(get, set):Bool;
 	var stopGameOver(get, set):Bool;
 
-	function add(object:FlxBasic) game.add(object);
-	function remove(object:FlxBasic) game.remove(object);
-	function insert(position:Int, object:FlxBasic) game.insert(position, object);
+	
 
-	function addBehindGF(obj:FlxBasic) insert(members.indexOf(game.gfGroup), obj);
-	function addBehindBF(obj:FlxBasic) insert(members.indexOf(game.boyfriendGroup), obj);
-	function addBehindDad(obj:FlxBasic) insert(members.indexOf(game.dadGroup), obj);
+	function addBGSprite(image:String, x:Float = 0, y:Float = 0, ?scrollX:Float = 1, ?scrollY:Float = 1, ?scaleX:Float = 1, ?scaleY:Float = 1, ?anim:String = null, ?loop:Bool = true):BGSprite {
+		var spr = new BGSprite(image, x, y, scrollX, scrollY, anim == null ? null : [anim], loop);
+		spr.scale.set(scaleX, scaleY);
+		add(spr);
+		return spr;
+	}
+
+	function add(object:FlxBasic):FlxBasic return game.add(object);
+	function remove(object:FlxBasic):FlxBasic return game.remove(object);
+	function insert(position:Int, object:FlxBasic):FlxBasic return game.insert(position, object);
+
+	function addBehindGF(obj:FlxBasic):FlxBasic return insert(members.indexOf(game.gfGroup), obj);
+	function addBehindBF(obj:FlxBasic):FlxBasic return insert(members.indexOf(game.boyfriendGroup), obj);
+	function addBehindDad(obj:FlxBasic):FlxBasic return insert(members.indexOf(game.dadGroup), obj);
 
 	//Fix for the Chart Editor on Base Game stages
 	function setDefaultGF(name:String) {
@@ -143,13 +153,14 @@ class BaseStage {
 
 	// backend shit
 	function getLoadTraceFormat()
-		return 'stage loaded successfully: %packagepath%';
+		return 'Loaded stage: ' + '%packagepath%'.toCMD(WHITE_BOLD);
 
 	public function new() {
 		trace(getLoadTraceFormat().replace('%packagepath%', CoolUtil.getPackagePath(this).replace('stages.', '')));
 	}
 
 	inline function get_game():PlayState return PlayState.instance;
+	inline function get_prefs():SaveVariables return ClientPrefs.data;
 
 	inline function get_curBeat():Int return game.curBeat;
 	inline function get_curStep():Int return game.curStep;

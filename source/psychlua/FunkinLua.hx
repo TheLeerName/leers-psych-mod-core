@@ -9,7 +9,6 @@ import openfl.Lib;
 import openfl.display.BitmapData;
 import flixel.FlxBasic;
 import flixel.FlxObject;
-import flixel.addons.transition.FlxTransitionableState;
 
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
@@ -53,6 +52,8 @@ class FunkinLua {
 
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	@:noCompletion public var prefs:SaveVariables = ClientPrefs.data;
 
 	public function new(scriptName:String) {
 		lua = LuaL.newstate();
@@ -165,31 +166,31 @@ class FunkinLua {
 		set('gfName', PlayState.SONG.gfVersion);
 
 		// Other settings
-		set('downscroll', ClientPrefs.data.downScroll);
-		set('middlescroll', ClientPrefs.data.middleScroll);
-		set('framerate', ClientPrefs.data.framerate);
-		set('ghostTapping', ClientPrefs.data.ghostTapping);
-		set('hideHud', ClientPrefs.data.hideHud);
-		set('timeBarType', ClientPrefs.data.timeBarType);
-		set('scoreZoom', ClientPrefs.data.scoreZoom);
-		set('cameraZoomOnBeat', ClientPrefs.data.camZooms);
-		set('flashingLights', ClientPrefs.data.flashing);
-		set('noteOffset', ClientPrefs.data.noteOffset);
-		set('healthBarAlpha', ClientPrefs.data.healthBarAlpha);
-		set('noResetButton', ClientPrefs.data.noReset);
-		set('lowQuality', ClientPrefs.data.lowQuality);
-		set('shadersEnabled', ClientPrefs.data.shaders);
+		set('downscroll', prefs.downScroll);
+		set('middlescroll', prefs.middleScroll);
+		set('framerate', prefs.framerate);
+		set('ghostTapping', prefs.ghostTapping);
+		set('hideHud', prefs.hideHud);
+		set('timeBarType', prefs.timeBarType);
+		set('scoreZoom', prefs.scoreZoom);
+		set('cameraZoomOnBeat', prefs.camZooms);
+		set('flashingLights', prefs.flashing);
+		set('noteOffset', prefs.noteOffset);
+		set('healthBarAlpha', prefs.healthBarAlpha);
+		set('noResetButton', prefs.noReset);
+		set('lowQuality', prefs.lowQuality);
+		set('shadersEnabled', prefs.shaders);
 		set('scriptName', scriptName);
 		#if MODS_ALLOWED
 		set('currentModDirectory', Mods.currentModDirectory);
 		#end
 
 		// Noteskin/Splash
-		set('noteSkin', ClientPrefs.data.noteSkin);
+		set('noteSkin', prefs.noteSkin);
 		set('noteSkinPostfix', Note.getNoteSkinPostfix());
-		set('splashSkin', ClientPrefs.data.splashSkin);
+		set('splashSkin', prefs.splashSkin);
 		set('splashSkinPostfix', NoteSplash.getSplashSkinPostfix());
-		set('splashAlpha', ClientPrefs.data.splashAlpha);
+		set('splashAlpha', prefs.splashAlpha);
 
 		// build target (windows, mac, linux, etc.)
 		set('buildTarget', LuaUtils.getBuildTarget());
@@ -811,14 +812,11 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "exitSong", function(?skipTransition:Bool = false) {
 			if(skipTransition)
 			{
-				FlxTransitionableState.skipNextTransIn = true;
-				FlxTransitionableState.skipNextTransOut = true;
+				game.skipNextTransIn = true;
+				game.skipNextTransOut = true;
 			}
 
-			if(PlayState.isStoryMode)
-				MusicBeatState.switchState(new StoryMenuState());
-			else
-				MusicBeatState.switchState(new FreeplayState());
+			MusicBeatState.switchState(PlayState.isStoryMode ? new StoryMenuState() : new FreeplayState(), true);
 
 			DiscordClient.resetClientID();
 
@@ -1671,7 +1669,7 @@ class FunkinLua {
 
 	public function initLuaShader(name:String, ?glslVersion:Int = 120)
 	{
-		if(!ClientPrefs.data.shaders) return false;
+		if(!prefs.shaders) return false;
 
 		#if (!flash && sys)
 		if(runtimeShaders.exists(name))

@@ -117,8 +117,8 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 	}
 
 	function onChangeHitsoundVolume()
-		FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.data.hitsoundVolume);
+		FlxG.sound.play(Paths.sound('hitsound'), prefs.hitsoundVolume);
 
 	function onChangeAutoPause()
-		FlxG.autoPause = ClientPrefs.data.autoPause;
+		FlxG.autoPause = prefs.autoPause;
 }

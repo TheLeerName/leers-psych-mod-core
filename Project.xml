@@ -67,7 +67,7 @@
 	<assets path="assets" unless="windows"/>
 
 	<section if="USE_OWN_HXCODEC">
-		<haxedef name="HXCODEC_DIR" value="${projectDirectory}/hxCodec" />
+		<haxedef name="HXCODEC_DIR" value="${project.workingDirectory}/hxCodec" />
 		<source name="hxCodec" />
 		<haxedef name="hxCodec" value="3.0.2" />
 		<assets_windows path="hxCodec/project/vlc/dll/Windows" rename=""/>
@@ -111,10 +111,11 @@
 	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN" />
 
 	<!-- Show debug traces for hxCodec -->
+	<!-- just a little useless
 	<section if="VIDEOS_ALLOWED debug">
 		<haxedef name="HXC_LIBVLC_LOGGING" />
 		<haxedef name="HXC_DEBUG_TRACE" />
-	</section>
+	</section> -->
 
 	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />

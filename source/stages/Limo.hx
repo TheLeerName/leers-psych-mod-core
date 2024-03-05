@@ -27,7 +27,7 @@ class Limo extends BaseStage {
 		var skyBG:BGSprite = new BGSprite('limo/limoSunset', -120, -50, 0.1, 0.1);
 		add(skyBG);
 
-		if(!ClientPrefs.data.lowQuality) {
+		if(!prefs.lowQuality) {
 			limoMetalPole = new BGSprite('gore/metalPole', -500, 220, 0.4, 0.4);
 			add(limoMetalPole);
 
@@ -81,7 +81,7 @@ class Limo extends BaseStage {
 
 	var limoSpeed:Float = 0;
 	override function onUpdate(elapsed:Float) {
-		if(!ClientPrefs.data.lowQuality) {
+		if(!prefs.lowQuality) {
 			grpLimoParticles.forEach(function(spr:BGSprite) {
 				if(spr.animation.curAnim.finished) {
 					spr.kill();
@@ -164,7 +164,7 @@ class Limo extends BaseStage {
 	}
 
 	override function onBeatHit() {
-		if(!ClientPrefs.data.lowQuality) {
+		if(!prefs.lowQuality) {
 			grpLimoDancers.forEach(function(dancer:BackgroundDancer)
 			{
 				dancer.dance();
@@ -235,7 +235,7 @@ class Limo extends BaseStage {
 	}
 
 	function killHenchmen():Void {
-		if(!ClientPrefs.data.lowQuality) {
+		if(!prefs.lowQuality) {
 			if(limoKillingState == WAIT) {
 				limoMetalPole.x = -400;
 				limoMetalPole.visible = true;
@@ -263,7 +263,6 @@ class BackgroundDancer extends FlxSprite
 		animation.addByIndices('danceLeft', 'bg dancer sketch PINK', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
 		animation.addByIndices('danceRight', 'bg dancer sketch PINK', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
 		animation.play('danceLeft');
-		antialiasing = ClientPrefs.data.antialiasing;
 	}
 
 	var danceDir:Bool = false;

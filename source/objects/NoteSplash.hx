@@ -24,6 +24,8 @@ class NoteSplash extends FlxSprite
 	public static var defaultNoteSplash(default, never):String = 'noteSplashes/noteSplashes';
 	public static var configs:Map<String, NoteSplashConfig> = new Map<String, NoteSplashConfig>();
 
+	@:noCompletion var prefs:SaveVariables = ClientPrefs.data;
+
 	public function new(x:Float = 0, y:Float = 0) {
 		super(x, y);
 
@@ -56,7 +58,10 @@ class NoteSplash extends FlxSprite
 		if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
 		else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
 		else texture = defaultNoteSplash + getSplashSkinPostfix();
-		
+
+		if (Paths.fileExistsAbsolute(Paths.imagePath('noteSplashes/$texture')))
+			texture = 'noteSplashes/$texture';
+
 		var config:NoteSplashConfig = null;
 		if(_textureLoaded != texture)
 			config = loadAnims(texture);
@@ -78,12 +83,12 @@ class NoteSplash extends FlxSprite
 			else tempShader = Note.globalRgbShaders[direction];
 		}
 
-		alpha = ClientPrefs.data.splashAlpha;
+		alpha = prefs.splashAlpha;
 		if(note != null) alpha = note.noteSplashData.a;
 		rgbShader.copyValues(tempShader);
 
 		if(note != null) antialiasing = note.noteSplashData.antialiasing;
-		if(PlayState.isPixelStage || !ClientPrefs.data.antialiasing) antialiasing = false;
+		if(PlayState.isPixelStage || !prefs.antialiasing) antialiasing = false;
 
 		_textureLoaded = texture;
 		offset.set(10, 10);
@@ -115,9 +120,10 @@ class NoteSplash extends FlxSprite
 
 	public static function getSplashSkinPostfix()
 	{
+		var prefs = ClientPrefs.data;
 		var skin:String = '';
-		if(ClientPrefs.data.splashSkin != ClientPrefs.defaultData.splashSkin)
-			skin = '-' + ClientPrefs.data.splashSkin.trim().toLowerCase().replace(' ', '_');
+		if(prefs.splashSkin != ClientPrefs.defaultData.splashSkin)
+			skin = '-' + prefs.splashSkin.trim().toLowerCase().replace(' ', '_');
 		return skin;
 	}
 
