@@ -80,8 +80,7 @@ class DiscordClient
 				#end
 				Discord.RunCallbacks();
 
-				// Wait 0.5 seconds until the next loop...
-				Sys.sleep(0.5);
+				Sys.sleep(2);
 			}
 		});
 		isInitialized = true;
