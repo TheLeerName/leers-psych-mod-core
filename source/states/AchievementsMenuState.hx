@@ -57,14 +57,14 @@ class AchievementsMenuState extends MusicBeatState
 			{
 				#if MODS_ALLOWED Mods.currentModDirectory = option.mod; #end
 				var image:String = 'achievements/' + option.name;
-				if(Paths.fileExistsAbsolute(Paths.imagePath('$image-pixel')))
+				if(Paths.existsAbsolute(Paths.imagePath('$image-pixel')))
 				{
 					graphic = Paths.image('$image-pixel');
 					hasAntialias = false;
 				}
 				else graphic = Paths.image(image);
 
-				if(graphic == null) graphic = Paths.image('unknownMod');
+				graphic ??= Paths.image('unknownMod');
 			}
 			else graphic = Paths.image('achievements/lockedachievement');
 

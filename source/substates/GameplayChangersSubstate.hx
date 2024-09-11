@@ -427,9 +427,8 @@ class GameplayOption
 	public function change()
 	{
 		//nothing lol
-		if(onChange != null) {
+		if(onChange != null)
 			onChange();
-		}
 	}
 
 	public function getValue():Dynamic
@@ -447,12 +446,7 @@ class GameplayOption
 	}
 
 	private function get_text()
-	{
-		if(child != null) {
-			return child.text;
-		}
-		return null;
-	}
+		return child?.text;
 	private function set_text(newValue:String = '')
 	{
 		if(child != null) {

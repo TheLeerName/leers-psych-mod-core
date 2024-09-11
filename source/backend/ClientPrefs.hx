@@ -5,6 +5,7 @@ import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 
 import states.TitleState;
+import states.StoryMenuState;
 
 // Add a variable here and it will get automatically saved
 @:structInit @:publicFields class SaveVariables {
@@ -40,7 +41,7 @@ import states.TitleState;
 	var clearCacheSongStart:Bool = false;
 	/** Is shaders allowed? */
 	var shaders:Bool = true;
-	/** If `true`, allows the GPU to be used for caching textures, decreasing RAM usage */
+	/** If checked, textures will be cached on GPU.\nIf GPU is 75% or more full, RAM caching will be used */
 	var cacheOnGPU:Bool = #if !switch false #else true #end; //From Stilic
 	/** Draw/update fps cap of game */
 	var framerate:Int = 60;
@@ -70,8 +71,8 @@ import states.TitleState;
 	var healthBarAlpha:Float = 1;
 	/** If `false`, hides fps from counter */
 	var showFPS:Bool = true;
-	/** Current memory counter type */
-	var memoryCounter:String = 'Show both';
+	/** If `false`, hides memory from counter */
+	var memoryCounter:Bool = true;
 	/** Current pause music */
 	var pauseMusic:String = 'Tea Time';
 	/** If `false`, hides Discord Rich Presence */
@@ -108,6 +109,8 @@ import states.TitleState;
 	var safeFrames:Float = 10;
 	/** If `true`, Hold Notes can't be pressed if you miss, and count as a single Hit/Miss */
 	var guitarHeroSustains:Bool = true;
+	/** Current choosed language */
+	var language:String = 'en-US';
 
 
 	// other
@@ -270,7 +273,11 @@ class ClientPrefs {
 		FlxG.log.add("Settings saved!");
 	}
 
+	public static var initialized:Bool = false;
 	public static function loadPrefs() {
+		if (initialized) return;
+
+		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 
 		var no = ['gameplaySettings', 'keyBinds', 'gamepadBinds'];
@@ -279,16 +286,17 @@ class ClientPrefs {
 
 		gameplaySettings.fromMap(FlxG.save.data.gameplaySettings);
 
-		if(Main.fpsVar != null)
-			Main.fpsVar.visible = data.showFPS;
+		if(FlxG.save.data.fullscreen != null)
+			FlxG.fullscreen = FlxG.save.data.fullscreen;
+		Main.onFullscreenChange.add(() -> {
+			FlxG.save.data.fullscreen = FlxG.fullscreen;
+		});
 
 		#if (!html5 && !switch)
 		FlxG.autoPause = data.autoPause;
 
-		if(FlxG.save.data.framerate == null) {
-			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
-			data.framerate = Std.int(FlxMath.bound(refreshRate, 60, 240));
-		}
+		if(FlxG.save.data.framerate == null)
+			data.framerate = FlxG.stage.application.window.displayMode.refreshRate;
 		#end
 
 		if(data.framerate > FlxG.drawFramerate)
@@ -301,7 +309,10 @@ class ClientPrefs {
 			FlxG.drawFramerate = data.framerate;
 			FlxG.updateFramerate = data.framerate;
 		}
-		
+
+		if (FlxG.save.data.weekCompleted != null)
+			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
+
 		// flixel automatically saves your volume!
 		if(FlxG.save.data.volume != null)
 			FlxG.sound.volume = FlxG.save.data.volume;
@@ -333,11 +344,8 @@ class ClientPrefs {
 		}
 	}
 
-	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic = null, ?customDefaultValue:Bool = false):Dynamic
-	{
-		if(!customDefaultValue) defaultValue = defaultData.gameplaySettings.get(name);
-		return /*PlayState.isStoryMode ? defaultValue : */ (data.gameplaySettings.exists(name) ? data.gameplaySettings.get(name) : defaultValue);
-	}
+	inline public static function getGameplaySetting(name:String, ?uselessArg1:Dynamic = null, ?uselessArg2:Bool = false):Dynamic
+		return gameplaySettings.get(name);
 
 	public static function reloadVolumeKeys()
 	{

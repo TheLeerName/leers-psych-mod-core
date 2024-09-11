@@ -11,7 +11,7 @@ typedef ModsList = {
 class Mods
 {
 	static public var currentModDirectory:String;
-	public static var ignoreModFolders:Array<String> = [
+	public static final ignoreModFolders:Array<String> = [
 		'characters',
 		'custom_events',
 		'custom_notetypes',
@@ -34,23 +34,23 @@ class Mods
 	inline public static function getGlobalMods()
 		return globalMods;
 
-	inline public static function pushGlobalMods() // prob a better way to do this but idc
+	public static function pushGlobalMods() // prob a better way to do this but idc
 	{
-		globalMods = [];
+		globalMods.clearArray();
 		for(mod in parseList().enabled)
 		{
 			var pack:Dynamic = getPack(mod);
-			if(pack != null && pack.runsGlobally) globalMods.push(mod);
+			if(pack?.runsGlobally) globalMods.push(mod);
 		}
 		return globalMods;
 	}
 
-	inline public static function getModDirectories():Array<String> {
+	public static function getModDirectories():Array<String> {
 		var list:Array<String> = [];
-		if(Paths.fileExistsAbsolute(Paths.MODS_DIRECTORY)) {
+		if(Paths.existsAbsolute(Paths.MODS_DIRECTORY)) {
 			for (folder in Paths.readDirectory(Paths.MODS_DIRECTORY)) {
 				var path = haxe.io.Path.join([Paths.MODS_DIRECTORY, folder]);
-				if (sys.FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder) && !list.contains(folder)) {
+				if (Paths.isDirectory(path) && !ignoreModFolders.contains(folder) && !list.contains(folder)) {
 					list.push(folder);
 				}
 			}
@@ -58,24 +58,11 @@ class Mods
 		return list;
 	}
 
-	public static function getPack(?folder:String = null):Dynamic
-	{
-		if(folder == null) folder = Mods.currentModDirectory;
-
-		var path = Paths.modsPath(folder + '/pack.json');
-		if (Paths.fileExistsAbsolute(path)) {
-			try {
-				var rawJson:String = Paths.text(path);
-				if(rawJson != null && rawJson.length > 0) return Json.parse(rawJson);
-			} catch(e:Dynamic) {
-				trace(e);
-			}
-		}
-		return null;
-	}
+	public static function getPack(?folder:String):Dynamic
+		return Json.parse(Paths.text(Paths.modsPath('${folder ?? Mods.currentModDirectory}/pack.json')));
 
 	public static var updatedOnState:Bool = false;
-	inline public static function parseList():ModsList {
+	public static function parseList():ModsList {
 		if(!updatedOnState) updateModList();
 		var list:ModsList = {enabled: [], disabled: [], all: []};
 
@@ -108,7 +95,7 @@ class Mods
 			{
 				var dat:Array<String> = mod.split("|");
 				var folder:String = dat[0];
-				if(folder.trim().length > 0 && Paths.fileExistsAbsolute(Paths.modsPath(folder)) && FileSystem.isDirectory(Paths.modsPath(folder)) && !added.contains(folder))
+				if(folder.trim().length > 0 && Paths.isDirectory(Paths.modsPath(folder)) && !added.contains(folder))
 				{
 					added.push(folder);
 					list.push([folder, (dat[1] == "1")]);
@@ -121,7 +108,7 @@ class Mods
 		// Scan for folders that aren't on modsList.txt yet
 		for (folder in getModDirectories())
 		{
-			if(folder.trim().length > 0 && Paths.fileExistsAbsolute(Paths.modsPath(folder)) && FileSystem.isDirectory(Paths.modsPath(folder)) &&
+			if(folder.trim().length > 0 && Paths.isDirectory(Paths.modsPath(folder)) &&
 			!ignoreModFolders.contains(folder.toLowerCase()) && !added.contains(folder))
 			{
 				added.push(folder);
@@ -138,10 +125,10 @@ class Mods
 			fileStr += values[0] + '|' + (values[1] ? '1' : '0');
 		}
 
-		File.saveContent('modsList.txt', fileStr);
+		if (fileStr.length > 0)
+			Paths.saveFile('modsList.txt', fileStr);
 		updatedOnState = true;
 		//trace('Saved modsList.txt');
-
 	}
 
 	public static function loadTopMod()

@@ -84,7 +84,6 @@ class Limo extends BaseStage {
 		if(!prefs.lowQuality) {
 			grpLimoParticles.forEach(function(spr:BGSprite) {
 				if(spr.animation.curAnim.finished) {
-					spr.kill();
 					grpLimoParticles.remove(spr, true);
 					spr.destroy();
 				}
@@ -182,10 +181,11 @@ class Limo extends BaseStage {
 		if(carTimer != null) carTimer.active = true;
 	}
 
-	override function onPause() {
-		if(!paused) return;
+	override function onPause():FunctionState {
+		if(!paused) return Function_Continue;
 
 		if(carTimer != null) carTimer.active = false;
+		return Function_Continue;
 	}
 
 	override function onEvent(name:String, v1:String, v2:String, time:Float) {

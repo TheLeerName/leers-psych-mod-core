@@ -9,7 +9,6 @@ typedef WeekFile =
 	var weekBefore:String;
 	var storyName:String;
 	var weekName:String;
-	var freeplayColor:Array<Int>;
 	var startUnlocked:Bool;
 	var hiddenUntilUnlocked:Bool;
 	var hideStoryMode:Bool;
@@ -22,7 +21,7 @@ class WeekData {
 	public static var weeksLoaded:Map<String, WeekData> = new Map<String, WeekData>();
 	public static var weeksList:Array<String> = [];
 	public var folder:String = '';
-	
+
 	// JSON variables
 	public var songs:Array<Dynamic>;
 	public var weekCharacters:Array<String>;
@@ -30,7 +29,6 @@ class WeekData {
 	public var weekBefore:String;
 	public var storyName:String;
 	public var weekName:String;
-	public var freeplayColor:Array<Int>;
 	public var startUnlocked:Bool;
 	public var hiddenUntilUnlocked:Bool;
 	public var hideStoryMode:Bool;
@@ -41,13 +39,12 @@ class WeekData {
 
 	public static function createWeekFile():WeekFile {
 		var weekFile:WeekFile = {
-			songs: [["Bopeebo", "dad", [146, 113, 253]], ["Fresh", "dad", [146, 113, 253]], ["Dad Battle", "dad", [146, 113, 253]]],
-			weekCharacters: ['dad', 'bf', 'gf'],
+			songs: [["Bopeebo", "face", [146, 113, 253]], ["Fresh", "face", [146, 113, 253]], ["Dad Battle", "face", [146, 113, 253]]],
+			weekCharacters: ['bf', 'bf', 'gf'],
 			weekBackground: 'stage',
 			weekBefore: 'tutorial',
 			storyName: 'Your New Week',
 			weekName: 'Custom Week',
-			freeplayColor: [146, 113, 253],
 			startUnlocked: true,
 			hiddenUntilUnlocked: false,
 			hideStoryMode: false,
@@ -60,23 +57,23 @@ class WeekData {
 	// HELP: Is there any way to convert a WeekFile to WeekData without having to put all variables there manually? I'm kind of a noob in haxe lmao
 	public function new(weekFile:WeekFile, fileName:String) {
 		// here ya go - MiguelItsOut
-		var thisFields = Reflect.fields(this);
+		var fields = Reflect.fields(this);
 		for (field in Reflect.fields(weekFile))
-			if(thisFields.contains(field)) // Reflect.hasField() won't fucking work :/
+			if(fields.contains(field)) // Reflect.hasField() won't fucking work :/
 				Reflect.setProperty(this, field, Reflect.getProperty(weekFile, field));
 
 		this.fileName = fileName;
 	}
 
-	public static function reloadWeekFiles(isStoryMode:Null<Bool> = false)
+	public static function reloadWeekFiles(?isStoryMode:Bool)
 	{
-		weeksList = [];
+		weeksList.clearArray();
 		weeksLoaded.clear();
 
 		var directories:Array<String> = Paths.getAllFolders();
 		for (i in 0...directories.length) {
 			var dir:String = directories[i] + 'weeks';
-			if(Paths.fileExistsAbsolute(dir)) {
+			if(Paths.existsAbsolute(dir)) {
 				for (file in Paths.readDirectory(dir)) {
 					var path = '$dir/$file';
 					if (file.endsWith('.json'))
@@ -107,13 +104,9 @@ class WeekData {
 		}
 	}
 
-	private static function getWeekFile(path:String):WeekFile {
-		var rawJson:String = Paths.text(path);
-
-		if(rawJson != null && rawJson.length > 0)
-			return cast Json.parse(rawJson);
-		return null;
-	}
+	/** @param path Absolute path to json file. */
+	private static function getWeekFile(path:String):WeekFile
+		return cast Json.parse(Paths.text(path));
 
 	//   FUNCTIONS YOU WILL PROBABLY NEVER NEED TO USE
 
@@ -127,12 +120,12 @@ class WeekData {
 		return weeksLoaded.get(weeksList[PlayState.storyWeek]);
 	}
 
-	public static function setDirectoryFromWeek(?data:WeekData = null)
-		setDirectory(data != null ? data.folder : null);
+	public static function setDirectoryFromWeek(?data:WeekData)
+		setDirectory(data?.folder);
 
 	public static function setDirectory(?folder:String) {
 		#if MODS_ALLOWED
-		Mods.currentModDirectory = folder.length > 0 ? folder : null;
+		Mods.currentModDirectory = folder?.length > 0 ? folder : null;
 		#end
 	}
 }

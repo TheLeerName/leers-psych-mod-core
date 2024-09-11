@@ -44,9 +44,10 @@ class Template extends BaseStage {
 		//timer.active = true;
 		//tween.active = true;
 	}
-	override function onPause() {
+	override function onPause():FunctionState {
 		//timer.active = false;
 		//tween.active = false;
+		return Function_Continue;
 	}
 
 	// For events

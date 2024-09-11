@@ -1,7 +1,7 @@
 package states.editors;
 
+import backend.Highscore;
 import backend.WeekData;
-
 import objects.Character;
 
 import states.MainMenuState;
@@ -12,11 +12,12 @@ class MasterEditorMenu extends MusicBeatState
 	var options:Array<String> = [
 		'Chart Editor',
 		'Character Editor',
+		'Stage Editor',
 		'Week Editor',
 		'Menu Character Editor',
 		'Dialogue Editor',
 		'Dialogue Portrait Editor',
-		'Note Splash Debug'
+		'Note Splash Editor'
 	];
 	private var grpTexts:FlxTypedGroup<Alphabet>;
 	private var directories:Array<String> = [null];
@@ -103,6 +104,8 @@ class MasterEditorMenu extends MusicBeatState
 					MusicBeatState.switchState(new ChartingState());
 				case 'Character Editor':
 					MusicBeatState.switchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
+				case 'Stage Editor':
+					MusicBeatState.switchState(new StageEditorState());
 				case 'Week Editor':
 					MusicBeatState.switchState(new WeekEditorState());
 				case 'Menu Character Editor':
@@ -111,41 +114,22 @@ class MasterEditorMenu extends MusicBeatState
 					MusicBeatState.switchState(new DialogueEditorState());
 				case 'Dialogue Portrait Editor':
 					MusicBeatState.switchState(new DialogueCharacterEditorState());
-				case 'Note Splash Debug':
-					MusicBeatState.switchState(new NoteSplashDebugState());
+				case 'Note Splash Editor':
+					MusicBeatState.switchState(new NoteSplashEditorState());
 			}
 			FlxG.sound.music.volume = 0;
-			FreeplayState.destroyFreeplayVocals();
 		}
-		
-		var bullShit:Int = 0;
-		for (item in grpTexts.members)
-		{
-			item.targetY = bullShit - curSelected;
-			bullShit++;
 
-			item.alpha = 0.6;
-			// item.setGraphicSize(Std.int(item.width * 0.8));
-
-			if (item.targetY == 0)
-			{
-				item.alpha = 1;
-				// item.setGraphicSize(Std.int(item.width));
-			}
+		for (num => item in grpTexts.members) {
+			item.targetY = num - curSelected;
+			item.alpha = item.targetY == 0 ? 1 : 0.6;
 		}
 		super.update(elapsed);
 	}
 
-	function changeSelection(change:Int = 0)
-	{
+	function changeSelection(change:Int = 0) {
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
-
-		curSelected += change;
-
-		if (curSelected < 0)
-			curSelected = options.length - 1;
-		if (curSelected >= options.length)
-			curSelected = 0;
+		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);
 	}
 
 	#if MODS_ALLOWED

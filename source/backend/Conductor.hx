@@ -1,7 +1,5 @@
 package backend;
 
-import backend.Song;
-
 typedef BPMChangeEvent =
 {
 	var stepTime:Int;
@@ -13,7 +11,7 @@ typedef BPMChangeEvent =
 class Conductor
 {
 	public static var bpm(default, set):Float = 100;
-	public static var crochet:Float = ((60 / bpm) * 1000); // beats in milliseconds
+	public static var crochet:Float = calculateCrochet(bpm); // beats in milliseconds
 	public static var stepCrochet:Float = crochet / 4; // steps in milliseconds
 	public static var songPosition:Float = 0;
 	public static var offset:Float = 0;
@@ -96,16 +94,17 @@ class Conductor
 
 	public static function mapBPMChanges(song:SwagSong)
 	{
-		bpmChangeMap = [];
+		bpmChangeMap.clearArray();
 
 		var curBPM:Float = song.bpm;
 		var totalSteps:Int = 0;
 		var totalPos:Float = 0;
 		for (i in 0...song.notes.length)
 		{
-			if(song.notes[i].changeBPM && song.notes[i].bpm != curBPM)
+			var section:SwagSection = song.notes[i];
+			if(section.changeBPM && section.bpm != curBPM)
 			{
-				curBPM = song.notes[i].bpm;
+				curBPM = section.bpm;
 				var event:BPMChangeEvent = {
 					stepTime: totalSteps,
 					songTime: totalPos,
@@ -115,23 +114,22 @@ class Conductor
 				bpmChangeMap.push(event);
 			}
 
-			var deltaSteps:Int = Math.round(getSectionBeats(song, i) * 4);
+			var deltaSteps:Int = Math.round(section.sectionBeats * 4);
 			totalSteps += deltaSteps;
 			totalPos += ((60 / curBPM) * 1000 / 4) * deltaSteps;
 		}
 		//trace("new BPM map BUDDY " + bpmChangeMap);
 	}
 
-	static function getSectionBeats(song:SwagSong, section:Int)
-	{
-		var val:Null<Float> = null;
-		if(song.notes[section] != null) val = song.notes[section].sectionBeats;
-		return val != null ? val : 4;
+	public static function getSectionBeats(?section:SwagSection):Float
+		return section?.sectionBeats ?? 4;
+	public static function getSectionBeatsFromSong(?song:SwagSong, section:Int):Float {
+		song ??= PlayState.SONG;
+		return song.notes?.length > 0 ? getSectionBeats(song.notes[section]) : getSectionBeats();
 	}
 
-	inline public static function calculateCrochet(bpm:Float){
+	inline public static function calculateCrochet(bpm:Float)
 		return (60/bpm)*1000;
-	}
 
 	public static function set_bpm(newBPM:Float):Float {
 		bpm = newBPM;

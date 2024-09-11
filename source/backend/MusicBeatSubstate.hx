@@ -20,14 +20,13 @@ class MusicBeatSubstate extends FlxSubState
 	private var curDecStep:Float = 0;
 	private var curDecBeat:Float = 0;
 	private var controls(get, never):Controls;
-
 	@:noCompletion function get_controls() return Controls.instance;
 
-	/** Shortcut of `prefs` */
+	/** Shortcut of `ClientPrefs.data` */
 	public var prefs(get, never):SaveVariables;
 	@:noCompletion function get_prefs() return ClientPrefs.data;
 
-	/** Shortcut of `prefs.gameplaySettings`/`ClientPrefs.gameplaySettings` */
+	/** Shortcut of `ClientPrefs.data.gameplaySettings`/`ClientPrefs.gameplaySettings` */
 	public var gameplayPrefs(get, never):GameplaySettings;
 	@:noCompletion function get_gameplayPrefs() return ClientPrefs.gameplaySettings;
 
@@ -53,6 +52,9 @@ class MusicBeatSubstate extends FlxSubState
 					rollbackSection();
 			}
 		}
+
+		if (Main.fullscreenAllowed && FlxG.keys.justPressed.F11)
+			FlxG.fullscreen = !FlxG.fullscreen;
 
 		super.update(elapsed);
 	}
@@ -120,11 +122,7 @@ class MusicBeatSubstate extends FlxSubState
 	{
 		//yep, you guessed it, nothing again, dumbass
 	}
-	
-	function getBeatsOnSection()
-	{
-		var val:Null<Float> = 4;
-		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
-		return val == null ? 4 : val;
-	}
+
+	function getBeatsOnSection():Float
+		return Conductor.getSectionBeatsFromSong(curSection);
 }

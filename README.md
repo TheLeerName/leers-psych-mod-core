@@ -1,5 +1,5 @@
 # Leer's Psych Mod Core
-Currently uses [Psych Engine 0.7.3](https://github.com/ShadowMario/FNF-PsychEngine/tree/0.7.3)
+Currently uses [Psych Engine 1.0-prerelease](https://github.com/ShadowMario/FNF-PsychEngine/tree/1f15374)
 
 ## Changes
 - Changed building guide to be a MORE better
@@ -11,7 +11,7 @@ Currently uses [Psych Engine 0.7.3](https://github.com/ShadowMario/FNF-PsychEngi
 - `SHARED_DIRECTORY` define
 - `assets/shared` moved to `assets`
 - `manifest` folder fully eliminated on Windows
-- Uses own [hxCodec 3.0.2](hxCodec), to get rid of `manifest` folder
+- Uses own [hxvlc 1.7.1](hxvlc), to get rid of `manifest` folder
 - Rewritted method for getting dominant color in char editor health icon (GPU caching issues)
 - Added some watches to debug menu in debug build
 - Changed FPS Counter to display GPU memory usage
@@ -49,3 +49,13 @@ Currently uses [Psych Engine 0.7.3](https://github.com/ShadowMario/FNF-PsychEngi
 - rewritten `ClientPrefs.gameplaySettings`: now you can use `ClientPrefs.gameplaySettings.scrollspeed`
 
 ### [BUILDING](setup/building.md)
+- tl;dr - do `haxe setup.hxml`
+- also u can use [this](COMPILE%20[DEV].bat) and [this](PE7.bat), but i dont recommend it lol - TheLeerName
+- to show cached assets in cmd just do `lime test windows -debug -D TRACE_CACHED_ASSETS`
+- to load song in game start just do `lime test windows -debug -DSONG=<song>`
+
+## Known issues
+- `[WARNING] Could not parse frame number of %nameSub% in frame named %name%` => try use full prefix name (before `0001` and etc) in animation.addByPrefix
+- `Bind failed` => do in powershell: `Get-Process Powershell | Where-Object { $_.ID -ne $pid } | Stop-Process`
+- `Type not found : openfl._internal.macros` => remove `export` folder and recompile again
+- some of cpp errors => remove `export` folder and recompile again

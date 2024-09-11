@@ -89,10 +89,7 @@ class PsychCamera extends FlxCamera
 
 			if ((target is FlxSprite))
 			{
-				if (_lastTargetPosition == null)
-				{
-					_lastTargetPosition = FlxPoint.get(target.x, target.y); // Creates this point.
-				}
+				_lastTargetPosition ??= FlxPoint.get(target.x, target.y); // Creates this point.
 				_scrollTarget.x += (target.x - _lastTargetPosition.x) * followLead.x;
 				_scrollTarget.y += (target.y - _lastTargetPosition.y) * followLead.y;
 
@@ -101,7 +98,7 @@ class PsychCamera extends FlxCamera
 			}
 		}
 
-		var mult:Float = followLerp / (1/60) * elapsed;
+		var mult:Float = 1 - Math.exp(-elapsed * followLerp / (1/60));
 		if (mult >= 1)
 		{
 			scroll.copyFrom(_scrollTarget); // no easing

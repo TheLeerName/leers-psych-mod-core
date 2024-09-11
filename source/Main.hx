@@ -1,22 +1,33 @@
 package;
 
-import backend.native.Windows;
-import flixel.FlxGame;
-
 import openfl.Lib;
 import openfl.events.Event;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 
-import debug.FPSCounter;
+import flixel.FlxGame;
+import flixel.util.FlxSignal;
 
 import backend.AudioUtil;
+import backend.Highscore;
+import debug.GPUStats;
+import debug.FPSCounter;
 
 //crash handler stuff
 #if CRASH_HANDLER
-import openfl.events.UncaughtErrorEvent;
-import haxe.CallStack;
+import sys.io.File;
+import sys.FileSystem;
 import haxe.io.Path;
+import haxe.CallStack;
+import openfl.events.UncaughtErrorEvent;
+#end
+
+#if windows
+import backend.native.Windows;
+#end
+
+#if LUA_ALLOWED
+import llua.Lua;
 #end
 
 #if linux
@@ -27,6 +38,15 @@ import lime.graphics.Image;
 	#define GAMEMODE_AUTO
 ')
 #end
+
+enum TitleWindowColorMode {
+	RED_GLOW;
+	RAINBOW;
+	DEFAULT;
+	/** if you wanna set title window color by yourself */
+	DISABLED;
+}
+
 @:build(macros.Defines.add())
 class Main extends Sprite
 {
@@ -43,12 +63,63 @@ class Main extends Sprite
 	public static var fpsVar:FPSCounter;
 
 	public static var isDarkMode(default, null):Bool = false;
+	public static var titleWindowColorMode:TitleWindowColorMode = DEFAULT;
+
+	public static var fullscreenAllowed:Bool = true;
+	public static var onFullscreenChange:FlxSignal = new FlxSignal();
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
 	public static function main():Void
 	{
 		Lib.current.addChild(new Main());
+	}
+
+	/**
+	 * `onFinish` returns:
+	 * - `2` -> video handler not supported by target / `ClientPrefs.data.showVideos` = `false`;
+	 * - `1` -> video not found;
+	 * - `0` -> video finished successfully.
+	 * @return `FunkinVideo` object if video loaded successfully, otherwise `null`
+	*/
+	public static function playVideo(key:String, onFinish:(finishCode:Int)->Void):Null<objects.FunkinVideo> {
+		#if VIDEOS_ALLOWED
+		try {
+			var video = new objects.FunkinVideo();
+			if (!video.load(Paths.video(key))) throw "Not found";
+			video.play();
+
+			if (Main.fpsVar != null) Main.fpsVar.visible = false;
+			if (Main.titleWindowColorMode != DISABLED) Main.titleWindowColorMode = RAINBOW;
+			video.bitmap.onEndReached.add(() -> {
+				if (onFinish != null) onFinish(0);
+				video.destroy();
+				if (Main.titleWindowColorMode != DISABLED) Main.titleWindowColorMode = DEFAULT;
+				if (Main.fpsVar != null) Main.fpsVar.visible = true;
+			}, true);
+
+			return video;
+		} catch(e) {
+			trace('Loading video file of "$key" failed!'.toCMD(RED_BOLD), e.toString().toCMD(RED));
+			if (onFinish != null) onFinish(1);
+
+			return null;
+		}
+		#else
+		FlxG.log.warn('Main.playVideo: Platform not supported for hxvlc!');
+		if (onFinish != null) onFinish(2);
+		return null;
+		#end
+	}
+
+	public static function setFramerate(value:Int) {
+		if(value > FlxG.drawFramerate)
+			FlxG.updateFramerate = FlxG.drawFramerate = value;
+		else
+			FlxG.drawFramerate = FlxG.updateFramerate = value;
+		#if debug
+		@:privateAccess FlxG.game.debugger.stats.fpsGraph.maxValue = value; // we need to update this cuz flixel doesnt do that lol
+		#end
 	}
 
 	public function new()
@@ -80,6 +151,30 @@ class Main extends Sprite
 		setupGame();
 	}
 
+	#if windows
+	static function startOfTrace(fileName:String, lineNumber:Int) {
+		// so its like:    [03:17:48] [debug/GPUStats:75] Traced string yeah
+		// and colors are:    blue           cyan            basic (white)
+		var time = ('[' + DateTools.format(Date.now(), '%H:%M:%S') + ']').toCMD(BLUE);
+		var path = ('[' + (fileName.startsWith('source/') ? fileName.substring(fileName.indexOf('/') + 1, fileName.length - 3) : fileName) + ':' + lineNumber + ']').toCMD(CYAN);
+
+		return '$time $path ';
+	}
+	#end
+
+	public static function println(str:Dynamic) {
+		#if js
+		if (js.Syntax.typeof(untyped console) != "undefined" && (untyped console).log != null)
+			(untyped console).log(str);
+		#elseif lua
+		untyped __define_feature__("use._hx_print", _hx_print(str));
+		#elseif sys
+		Sys.println(str);
+		#else
+		throw new haxe.exceptions.NotImplementedException()
+		#end
+	}
+
 	private function setupGame():Void
 	{
 		var stageWidth:Int = Lib.current.stage.stageWidth;
@@ -97,23 +192,11 @@ class Main extends Sprite
 		#if windows
 		// cuz idk if it will work on other platforms
 		// cool improving of trace() thing! - TheLeerName
-		// useful batch btw! 
+		// useful batch btw!
 		haxe.Log.trace = (v:Dynamic, ?infos:haxe.PosInfos) -> {
-			// so its like: [03:17:48] [debug/GPUStats:75] Traced string yeah
-			// and colors are: blue           cyan            basic (white)
-
-			var time = ('[' + DateTools.format(Date.now(), '%H:%M:%S') + ']').toCMD(BLUE);
-			var path = ('[' + infos.fileName.substring(infos.fileName.indexOf('/') + 1, infos.fileName.length - 3) + ':' + infos.lineNumber + ']').toCMD(CYAN);			var str = '$time $path $v';
-			#if js
-			if (js.Syntax.typeof(untyped console) != "undefined" && (untyped console).log != null)
-				(untyped console).log(str);
-			#elseif lua
-			untyped __define_feature__("use._hx_print", _hx_print(str));
-			#elseif sys
-			Sys.println(str);
-			#else
-			throw new haxe.exceptions.NotImplementedException()
-			#end
+			var v:String = v;
+			if (infos.customParams?.length > 0) v += ' ' + infos.customParams.join(' ');
+			println(startOfTrace(infos.fileName, infos.lineNumber) + v);
 		}
 		#end
 
@@ -126,26 +209,71 @@ class Main extends Sprite
 				AudioUtil.checkForDisconnect();
 			}
 			prev = time;
-		});
 
-		var folder = Paths.preloadPath('fonts/');
-		var count:Int = 0;
-		for (f in Paths.readDirectory(folder)) {
-			var font = openfl.text.Font.fromFile(folder + f);
-			openfl.text.Font.registerFont(font);
-			count++;
-		}
-		trace('Caching fonts completed ($count found)'.toCMD(GREEN));
+			switch(titleWindowColorMode) {
+				case RED_GLOW:
+					var v = Math.sin(time * 5) / 2; // from -0.5 to 0.5
+					if (isDarkMode) Windows.setTextColorFromRGBFloat(1, 0.5 + v, 0.5 + v);
+					else Windows.setTextColorFromRGBFloat(0.5 + v, 0, 0);
+				case RAINBOW:
+					Windows.setTextColor(FlxColor.fromHSB(time * 250, 0.75, 0.75));
+				case DEFAULT:
+					Windows.setTextColor(isDarkMode.toInt() * 0xffffff);
+				// you can add your custom glows here!
+				default:
+			}
+		});
 		#end
 
 		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
 		Controls.instance = new Controls();
 		ClientPrefs.loadDefaultKeys();
-		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
-		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+
+		addChild(new FlxGame(game.width, game.height, game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+		FlxG.cameras.cameraAdded.add(c -> c.filters = []);
+
+		#if debug
+		var classesToRegister:Array<Class<Dynamic>> = [
+			Main,
+			backend.ClientPrefs,
+			Conductor,
+			Controls,
+			CoolUtil,
+			Difficulty,
+			backend.Highscore,
+			backend.Song,
+			Mods,
+			MusicBeatState,
+			MusicBeatSubstate,
+			backend.NullSafeJson,
+			Paths,
+			backend.WeekData,
+			#if windows
+			debug.GPUStats,
+			backend.native.Windows,
+			#end
+			psychlua.LuaUtils,
+			#if !flash
+			shaders.Shaders,
+			#end
+			states.PlayState,
+			util.StaticExtensions
+		];
+		for (cl in classesToRegister) FlxG.game.debugger.console.registerClass(cl);
+		#end
+
+		FlxG.stage.addEventListener("keyDown", event -> {
+			if (event.keyCode == openfl.ui.Keyboard.F11 || (event.altKey && event.keyCode == openfl.ui.Keyboard.ENTER)) {
+				if (fullscreenAllowed)
+					new FlxTimer().start(FlxG.elapsed * 5, tmr -> { onFullscreenChange.dispatch(); });
+				else
+					@:privateAccess FlxG.stage.application.__backend.toggleFullscreen = false; // if setted to false, bro doesnt let toggle fullscreen in only NEXT toggle
+			}
+		});
 
 		#if !mobile
 		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
+		fpsVar.visible = false;
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -160,7 +288,11 @@ class Main extends Sprite
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
 		#end
-		
+
+		FlxG.fixedTimestep = false;
+		FlxG.game.focusLostFramerate = 60;
+		FlxG.keys.preventDefaultKeys = [TAB];
+
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 		#end
@@ -171,7 +303,7 @@ class Main extends Sprite
 		FlxG.signals.gameResized.add(function (w, h) {
 		     if (FlxG.cameras != null) {
 			   for (cam in FlxG.cameras.list) {
-				if (cam != null && cam.filters != null)
+				if (cam?.filters != null)
 					resetSpriteCache(cam.flashSprite);
 			   }
 			}
@@ -210,23 +342,31 @@ class Main extends Sprite
 				case FilePos(s, file, line, column):
 					errMsg += file + " (line " + line + ")\n";
 				default:
-					Sys.println(stackItem);
+					println(stackItem);
 			}
 		}
 
-		errMsg += "\nUncaught Error: " + e.error + "\n\n> Crash Handler written by: sqirra-rng";
+		errMsg += "\nUncaught Error: " + e.error;
+		/*
+		 * remove if you're modding and want the crash log message to contain the link
+		 * please remember to actually modify the link for the github page to report the issues to.
+		*/
+		// ok maybe later - Leer
+		#if officialBuild
+		errMsg += "\nPlease report this error to the GitHub page: https://github.com/ShadowMario/FNF-PsychEngine\n\n> Crash Handler written by: sqirra-rng";
+		#end
 
 		if (!FileSystem.exists("./crash/"))
 			FileSystem.createDirectory("./crash/");
 
-		File.saveContent(path, errMsg + "\n");
+		Paths.saveFile(path, errMsg + "\n");
 
-		Sys.println(errMsg);
-		Sys.println("Crash dump saved in " + Path.normalize(path));
+		println(errMsg);
+		println("Crash dump saved in " + Path.normalize(path));
 
 		FlxG.stage.window.alert(errMsg, "Error!");
 		DiscordClient.shutdown();
-		FlxG.stage.window.close();
+		Sys.exit(1);
 	}
 	#end
 }

@@ -1,5 +1,8 @@
 package cutscenes;
 
+import haxe.Json;
+import lime.utils.Assets;
+
 typedef DialogueAnimArray = {
 	var anim:String;
 	var loop_name:String;
@@ -20,7 +23,7 @@ typedef DialogueCharacterFile = {
 
 class DialogueCharacter extends FlxSprite
 {
-	private static var IDLE_SUFFIX:String = '-IDLE';
+	private static var IDLE_POSTFIX:String = '-IDLE';
 	public static var DEFAULT_CHARACTER:String = 'bf';
 	public static var DEFAULT_SCALE:Float = 0.7;
 
@@ -43,11 +46,15 @@ class DialogueCharacter extends FlxSprite
 		frames = Paths.getSparrowAtlas('dialogue/' + jsonFile.image);
 		reloadAnimations();
 
+		antialiasing = ClientPrefs.data.antialiasing;
 		if(jsonFile.no_antialiasing == true) antialiasing = false;
 	}
 
 	public function reloadCharacterJson(character:String) {
-		var rawJson = Paths.getTextFromFile('images/dialogue/$character.json');
+		var rawJson = Paths.path('images/dialogue/$character.json');
+		if (rawJson == null)
+			rawJson = Paths.path('images/dialogue/$DEFAULT_CHARACTER.json');
+
 		jsonFile = cast Json.parse(rawJson);
 	}
 
@@ -56,7 +63,7 @@ class DialogueCharacter extends FlxSprite
 		if(jsonFile.animations != null && jsonFile.animations.length > 0) {
 			for (anim in jsonFile.animations) {
 				animation.addByPrefix(anim.anim, anim.loop_name, 24, isGhost);
-				animation.addByPrefix(anim.anim + IDLE_SUFFIX, anim.idle_name, 24, true);
+				animation.addByPrefix(anim.anim + IDLE_POSTFIX, anim.idle_name, 24, true);
 				dialogueAnimations.set(anim.anim, anim);
 			}
 		}
@@ -80,7 +87,7 @@ class DialogueCharacter extends FlxSprite
 		dialogueAnimations.get(leAnim).loop_name == dialogueAnimations.get(leAnim).idle_name)) {
 			playIdle = true;
 		}
-		animation.play(playIdle ? leAnim + IDLE_SUFFIX : leAnim, false);
+		animation.play(playIdle ? leAnim + IDLE_POSTFIX : leAnim, false);
 
 		if(dialogueAnimations.exists(leAnim)) {
 			var anim:DialogueAnimArray = dialogueAnimations.get(leAnim);
@@ -99,6 +106,6 @@ class DialogueCharacter extends FlxSprite
 
 	public function animationIsLoop():Bool {
 		if(animation.curAnim == null) return false;
-		return !animation.curAnim.name.endsWith(IDLE_SUFFIX);
+		return !animation.curAnim.name.endsWith(IDLE_POSTFIX);
 	}
 }

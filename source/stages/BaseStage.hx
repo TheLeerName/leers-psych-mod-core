@@ -2,6 +2,7 @@ package stages;
 
 import flixel.FlxBasic;
 import flixel.FlxObject;
+import flixel.util.typeLimit.OneOfTwo;
 
 import objects.Character;
 
@@ -14,12 +15,58 @@ enum Countdown
 	START;
 }
 
+class BaseStage extends BaseStageWithoutDefaultStageObjects {
+	// add here stage objects which will be loaded in any hardcoded stage
+}
+
 // IM TIRED FROM PLAYSTATE.HX 9000 LINES
 // now without stupid buggy macro ehehe - Leer
 @:access(backend.MusicBeatState)
-class BaseStage {
+class BaseStageWithoutDefaultStageObjects {
+	public var name:String;
+
+	public function getPrecacheList():Array<String> return [];
+	public function getStageFile():StageFile return null;
+
+	public function call(event:String, ?args:Array<Dynamic>):FunctionState {
+		var ret = Function_Continue;
+		if (game == null) return ret;
+
+		args ??= [];
+		var stageFunc = Reflect.field(this, event);
+		if (stageFunc != null) {
+			for (obj in stageObjects) {
+				var val = Reflect.callMethod(obj, Reflect.field(obj, event), args);
+				if (val is String && val != Function_Continue) ret = val;
+			}
+			var val = Reflect.callMethod(this, stageFunc, args);
+			if (val is String && val != Function_Continue) ret = val;
+		}
+		else trace('bro $event is null i cant call it!!!!'.toCMD(RED));
+		return ret;
+	}
+
+	public function initNoteType(noteType:String):BaseNoteType {
+		var o = stageObjects.get(noteType);
+		if (o != null) return cast o;
+
+		noteType = noteType.replace(' ', '');
+		var cl = Type.resolveClass('stages.notetypes.$noteType');
+		return cl != null ? Type.createInstance(cl, []) : null;
+	}
+
+	public function initEvent(event:String):BaseEvent {
+		var o = stageObjects.get(event);
+		if (o != null) return cast o;
+
+		event = event.replace(' ', '');
+		var cl = Type.resolveClass('stages.events.$event');
+		return cl != null ? Type.createInstance(cl, []) : null;
+	}
+
 	var game(get, never):PlayState;
 	var prefs(get, never):SaveVariables;
+	public var stageObjects(get, never):Map<String, BaseStageObject>;
 
 	var curBeat(get, never):Int;
 	var curStep(get, never):Int;
@@ -30,7 +77,7 @@ class BaseStage {
 	var paused(get, never):Bool;
 	var songName(get, never):String;
 	var isStoryMode(get, never):Bool;
-	var seenCutscene(get, never):Bool;
+	var seenCutscene(get, set):Bool;
 	var inCutscene(get, set):Bool;
 	var canPause(get, set):Bool;
 	var members(get, never):Dynamic;
@@ -49,14 +96,6 @@ class BaseStage {
 	var defaultCamZoom(get, set):Float;
 	var camFollow(get, never):FlxObject;
 
-	var stopCountdown(get, set):Bool;
-	var stopRecalculateRating(get, set):Bool;
-	var stopPause(get, set):Bool;
-	var stopEndSong(get, set):Bool;
-	var stopGameOver(get, set):Bool;
-
-	
-
 	function addBGSprite(image:String, x:Float = 0, y:Float = 0, ?scrollX:Float = 1, ?scrollY:Float = 1, ?scaleX:Float = 1, ?scaleY:Float = 1, ?anim:String = null, ?loop:Bool = true):BGSprite {
 		var spr = new BGSprite(image, x, y, scrollX, scrollY, anim == null ? null : [anim], loop);
 		spr.scale.set(scaleX, scaleY);
@@ -64,35 +103,35 @@ class BaseStage {
 		return spr;
 	}
 
-	function add(object:FlxBasic):FlxBasic return game.add(object);
-	function remove(object:FlxBasic):FlxBasic return game.remove(object);
-	function insert(position:Int, object:FlxBasic):FlxBasic return game.insert(position, object);
+	function triggerEvent(name:String, value1:OneOfTwo<String, Float>, value2:OneOfTwo<String, Float>)
+		game.triggerEvent(name, cast value1, cast value2);
+	function startCountdown() return game.startCountdown();
+	function endSong() return game.endSong();
 
-	function addBehindGF(obj:FlxBasic):FlxBasic return insert(members.indexOf(game.gfGroup), obj);
-	function addBehindBF(obj:FlxBasic):FlxBasic return insert(members.indexOf(game.boyfriendGroup), obj);
-	function addBehindDad(obj:FlxBasic):FlxBasic return insert(members.indexOf(game.dadGroup), obj);
+	inline function add(object:FlxBasic) return game.add(object);
+	inline function remove(object:FlxBasic) return game.remove(object);
+	inline function insert(position:Int, object:FlxBasic) return game.insert(position, object);
+
+	inline function addBehindGF(obj:FlxBasic) return game.addBehindGF(obj);
+	inline function addBehindBF(obj:FlxBasic) return game.addBehindBF(obj);
+	inline function addBehindDad(obj:FlxBasic) return game.addBehindDad(obj);
 
 	//Fix for the Chart Editor on Base Game stages
 	function setDefaultGF(name:String) {
 		var gfVersion:String = PlayState.SONG.gfVersion;
-		if(gfVersion == null || gfVersion.length < 1) {
+		if(gfVersion.isEmpty()) {
 			gfVersion = name;
 			PlayState.SONG.gfVersion = gfVersion;
 		}
 	}
 
 	//start/end callback functions
-	function setStartCallback(myfn:Void->Void) PlayState.instance.startCallback = myfn;
-	function setEndCallback(myfn:Void->Void) PlayState.instance.endCallback = myfn;
-
-	function startCountdown() return PlayState.instance.startCountdown();
-	function endSong() return PlayState.instance.endSong();
-	function moveCameraSection() moveCameraSection();
-	function moveCamera(isDad:Bool) moveCamera(isDad);
+	inline function setStartCallback(myfn:Void->Void) game.startCallback = myfn;
+	inline function setEndCallback(myfn:Void->Void) game.endCallback = myfn;
 
 	// init stuff
 	function onCreate() {}
-	function onStartCountdown() {} // set stopCountdown to true to stop it
+	function onStartCountdown():FunctionState return Function_Continue;
 	function onCountdownTick(tick:Countdown, counter:Int) {}
 	function onCountdownStarted() {}
 	function onSongStart() {}
@@ -106,14 +145,16 @@ class BaseStage {
 	// updatin stuff
 	function onUpdate(elapsed:Float) {}
 	function onUpdatePost(elapsed:Float) {}
-	function preUpdateScore(miss:Bool) {}
+	function preUpdateScore(miss:Bool):FunctionState return Function_Continue;
 	function onUpdateScore(miss:Bool) {}
 	function onStepHit() {}
 	function onBeatHit() {}
 	function onSectionHit() {}
-	function onRecalculateRating() {} // set stopRecalculateRating to true to stop it
+	function onRecalculateRating():FunctionState return Function_Continue;
 	function onResume() {}
-	function onPause() {} // set stopPause to true to stop it
+	function onPause():FunctionState return Function_Continue;
+	function onChartEditor():FunctionState return Function_Continue;
+	function onCharacterEditor():FunctionState return Function_Continue;
 	function onMoveCamera(char:String) {}
 
 	// dialogue stuff
@@ -121,22 +162,24 @@ class BaseStage {
 	function onSkipDialogue(dialogueCount:Bool) {}
 
 	// end stuff
-	function onEndSong() {} // set stopEndSong to true to stop it
-	function onGameOver() {} // set stopGameOver to true to stop it
+	function onEndSong():FunctionState return Function_Continue;
+	function onGameOver():FunctionState return Function_Continue;
 	function onGameOverStart() {}
 	function onGameOverConfirm(end:Bool) {}
 	function onDestroy() {}
+	/** Calls on quitting PlayState entirely (for example from pause or ending song) */
+	function onQuit() {}
 
 	// note pressing/missing stuff
 	function onSpawnNote(note:Note) {}
-	function onKeyPressPre(key:Int) {}
+	function onKeyPressPre(key:Int):FunctionState return Function_Continue;
 	function onKeyPress(key:Int) {}
-	function onKeyReleasePre(key:Int) {}
+	function onKeyReleasePre(key:Int):FunctionState return Function_Continue;
 	function onKeyRelease(key:Int) {}
+	function opponentNoteHitPre(note:Note) {}
 	function opponentNoteHit(note:Note) {}
-	function opponentNoteHitPost(note:Note) {}
+	function goodNoteHitPre(note:Note) {}
 	function goodNoteHit(note:Note) {}
-	function goodNoteHitPost(note:Note) {}
 	function onGhostTap(key:Int) {}
 	function noteMissPress(noteData:Int) {}
 	function noteMiss(note:Note) {}
@@ -153,55 +196,53 @@ class BaseStage {
 
 	// backend shit
 	function getLoadTraceFormat()
-		return 'Loaded stage: ' + '%packagepath%'.toCMD(WHITE_BOLD);
+		return 'Loaded stage: ' + '%name%'.toCMD(WHITE_BOLD);
 
-	public function new() {
-		trace(getLoadTraceFormat().replace('%packagepath%', CoolUtil.getPackagePath(this).replace('stages.', '')));
+	/** DONT LOAD FLXBASICS OR SUM SHIT IN NEW() */
+	public function new(?blank:Bool = false) {
+		if (!blank) {
+			name = CoolUtil.getClassNameWithoutPath(this);
+			// :trollface:
+			new FlxTimer().start(FlxG.elapsed, _ -> {
+				trace(getLoadTraceFormat().replace('%name%', name));
+			});
+		}
 	}
 
-	inline function get_game():PlayState return PlayState.instance;
-	inline function get_prefs():SaveVariables return ClientPrefs.data;
+	@:noCompletion inline function get_game() return PlayState.instance;
+	@:noCompletion inline function get_prefs() return ClientPrefs.data;
+	@:noCompletion inline function get_stageObjects() return PlayState.stageObjects;
 
-	inline function get_curBeat():Int return game.curBeat;
-	inline function get_curStep():Int return game.curStep;
-	inline function get_curSection():Int return game.curSection;
+	@:noCompletion inline function get_curBeat() return game.curBeat;
+	@:noCompletion inline function get_curStep() return game.curStep;
+	@:noCompletion inline function get_curSection() return game.curSection;
 
-	inline function get_controls():Controls return Controls.instance;
+	@:noCompletion inline function get_controls() return Controls.instance;
 
-	inline function get_paused() return game.paused;
-	inline function get_songName() return game.songName;
-	inline function get_isStoryMode() return PlayState.isStoryMode;
-	inline function get_seenCutscene() return PlayState.seenCutscene;
-	inline function get_inCutscene() return game.inCutscene;
-	inline function set_inCutscene(value:Bool) return game.inCutscene = value;
-	inline function get_canPause() return game.canPause;
-	inline function set_canPause(value:Bool) return game.canPause = value;
-	inline function get_members() return game.members;
+	@:noCompletion inline function get_paused() return game.paused;
+	@:noCompletion inline function get_songName() return game.songName;
+	@:noCompletion inline function get_isStoryMode() return PlayState.isStoryMode;
+	@:noCompletion inline function get_seenCutscene() return PlayState.seenCutscene;
+	@:noCompletion inline function set_seenCutscene(value:Bool) return PlayState.seenCutscene = value;
+	@:noCompletion inline function get_inCutscene() return game.inCutscene;
+	@:noCompletion inline function set_inCutscene(value:Bool) return game.inCutscene = value;
+	@:noCompletion inline function get_canPause() return game.canPause;
+	@:noCompletion inline function set_canPause(value:Bool) return game.canPause = value;
+	@:noCompletion inline function get_members() return game.members;
 
-	inline function get_boyfriend():Character return game.boyfriend;
-	inline function get_dad():Character return game.dad;
-	inline function get_gf():Character return game.gf;
+	@:noCompletion inline function get_boyfriend() return game.boyfriend;
+	@:noCompletion inline function get_dad() return game.dad;
+	@:noCompletion inline function get_gf() return game.gf;
 
-	inline function get_boyfriendGroup():FlxSpriteGroup return game.boyfriendGroup;
-	inline function get_dadGroup():FlxSpriteGroup return game.dadGroup;
-	inline function get_gfGroup():FlxSpriteGroup return game.gfGroup;
+	@:noCompletion inline function get_boyfriendGroup() return game.boyfriendGroup;
+	@:noCompletion inline function get_dadGroup() return game.dadGroup;
+	@:noCompletion inline function get_gfGroup() return game.gfGroup;
 	
-	inline function get_camGame():FlxCamera return game.camGame;
-	inline function get_camHUD():FlxCamera return game.camHUD;
-	inline function get_camOther():FlxCamera return game.camOther;
+	@:noCompletion inline function get_camGame() return FlxG.camera;
+	@:noCompletion inline function get_camHUD() return game.camHUD;
+	@:noCompletion inline function get_camOther()return game.camOther;
 
-	inline function get_defaultCamZoom():Float return game.defaultCamZoom;
-	inline function set_defaultCamZoom(value:Float):Float return game.defaultCamZoom = value;
-	inline function get_camFollow():FlxObject return game.camFollow;
-
-	inline function get_stopCountdown():Bool return game.stopCountdown;
-	inline function set_stopCountdown(v:Bool):Bool return game.stopCountdown = v;
-	inline function get_stopRecalculateRating():Bool return game.stopRecalculateRating;
-	inline function set_stopRecalculateRating(v:Bool):Bool return game.stopRecalculateRating = v;
-	inline function get_stopPause():Bool return game.stopPause;
-	inline function set_stopPause(v:Bool):Bool return game.stopPause = v;
-	inline function get_stopEndSong():Bool return game.stopEndSong;
-	inline function set_stopEndSong(v:Bool):Bool return game.stopEndSong = v;
-	inline function get_stopGameOver():Bool return game.stopGameOver;
-	inline function set_stopGameOver(v:Bool):Bool return game.stopGameOver = v;
+	@:noCompletion inline function get_defaultCamZoom() return game.defaultCamZoom;
+	@:noCompletion inline function set_defaultCamZoom(value:Float) return game.defaultCamZoom = value;
+	@:noCompletion inline function get_camFollow() return game.camFollow;
 }

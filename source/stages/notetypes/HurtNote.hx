@@ -1,6 +1,11 @@
 package stages.notetypes;
 
 class HurtNote extends BaseNoteType {
+	override function getPrecacheList():Array<String> return [
+		'./images/noteSplashes/noteSplashes-electric.png',
+		'./shared/sounds/cancelMenu.ogg'
+	];
+
 	override function onCreate() {
 		setupNote(note -> {
 			note.ignoreNote = note.mustPress;
@@ -14,9 +19,9 @@ class HurtNote extends BaseNoteType {
 			note.rgbShader.b = 0xFF990022;
 
 			// splash data and colors
-			note.noteSplashData.r = 0xFFFF0000;
-			note.noteSplashData.g = 0xFF101010;
-			note.noteSplashData.texture = 'noteSplashes/noteSplashes-electric';
+			//noteSplashData.r = 0xFFFF0000;
+			//noteSplashData.g = 0xFF101010;
+			note.noteSplashData.texture = 'noteSplashes-electric';
 
 			// gameplay data
 			note.lowPriority = true;
@@ -34,9 +39,10 @@ class HurtNote extends BaseNoteType {
 		//game.healthDrop += 0.00025;
 		//game.dropTime = 10;
 
-		if(game.boyfriend.animation.getByName('hurt') != null) {
-			game.boyfriend.playAnim('hurt', true);
-			game.boyfriend.specialAnim = true;
+		if(note.hitCausesMiss && !note.noMissAnimation && boyfriend.hasAnimation('hurt'))
+		{
+			boyfriend.playAnim('hurt', true);
+			boyfriend.specialAnim = true;
 		}
 	}
 }

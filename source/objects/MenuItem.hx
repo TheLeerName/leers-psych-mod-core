@@ -28,7 +28,6 @@ class MenuItem extends FlxSprite
 	{
 		super.update(elapsed);
 
-		y = FlxMath.lerp(y, (targetY * 120) + 480, FlxMath.bound(elapsed * 10.2, 0, 1));
 		if (isFlashing)
 		{
 			_flashingElapsed += elapsed;

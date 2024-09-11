@@ -85,8 +85,8 @@ class CreditsState extends MusicBeatState
 				if(creditsStuff[i][1] != null && creditsStuff[i][1].length > 0)
 				{
 					var fileName = 'credits/' + creditsStuff[i][1];
-					if (Paths.fileExistsAbsolute(Paths.imagePath(fileName))) str = fileName;
-					else if (Paths.fileExistsAbsolute(Paths.imagePath('$fileName-pixel'))) str = fileName + '-pixel';
+					if (Paths.existsAbsolute(Paths.imagePath(fileName))) str = fileName;
+					else if (Paths.existsAbsolute(Paths.imagePath('$fileName-pixel'))) str = fileName + '-pixel';
 				}
 
 				var icon:AttachedSprite = new AttachedSprite(str);
@@ -260,9 +260,9 @@ class CreditsState extends MusicBeatState
 		if(folder != null && folder.trim().length > 0) creditsFile = Paths.modsPath(folder + '/data/credits.txt');
 		else creditsFile = Paths.modsPath('data/credits.txt');
 
-		if (FileSystem.exists(creditsFile))
+		if (Paths.existsAbsolute(creditsFile))
 		{
-			var firstarray:Array<String> = File.getContent(creditsFile).split('\n');
+			var firstarray:Array<String> = Paths.text(creditsFile).split('\n');
 			for(i in firstarray)
 			{
 				var arr:Array<String> = i.replace('\\n', '\n').split("::");

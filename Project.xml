@@ -24,22 +24,18 @@
 	<define name="HSCRIPT_ALLOWED" if="desktop" />
 	<define name="LUA_ALLOWED" if="desktop" />
 	<define name="ACHIEVEMENTS_ALLOWED" />
+	<define name="TRANSLATIONS_ALLOWED" />
+	<define name="IRIS_DEBUG"/>
 	<define name="DISCORD_ALLOWED" if="cpp"/>
-	<define name="USE_OWN_HXCODEC" if="VIDEOS_ALLOWED windows" unless="32bits"/> <!-- needed for eliminating manifest folder -->
+	<define name="VIDEOS_ALLOWED" if="windows || linux || android" unless="32bits"/>
 	<define name="PSYCH_WATERMARKS"/> <!-- DELETE THIS TO REMOVE WATERMARKS/DEV NAMES ON TITLE SCREEN -->
 	<define name="SHARED_DIRECTORY" />
 	<define name="CRASH_HANDLER" if="desktop release" />
 
-	<section if="officialBuild">
-		<define name="TITLE_SCREEN_EASTER_EGG"/>
-		<define name="CHECK_FOR_UPDATES" if="desktop"/>
-		<define name="VIDEOS_ALLOWED" if="windows || linux || android" unless="32bits"/> <!-- IF YOU WANT TO USE VIDEOS ON YOUR SOURCE MOD, GET THIS LINE OUTSIDE OF THE SECTION -->
-	</section>
-
 	<!-- ____________________________ Window Settings ___________________________ -->
 
 	<!--These window settings apply to all targets-->
-	<window width="1280" height="720" fps="" background="#000000" hardware="true" vsync="false" />
+	<window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" />
 
 	<!--HTML5-specific-->
 	<window if="html5" resizable="true" />
@@ -61,47 +57,39 @@
 
 	<classpath name="source" />
 
-	<!-- __________________________ Game Assets & Etc. __________________________ -->
-
-	<assets_windows path="assets"/>
-	<assets path="assets" unless="windows"/>
-
-	<section if="USE_OWN_HXCODEC">
-		<haxedef name="HXCODEC_DIR" value="${project.workingDirectory}/hxCodec" />
-		<source name="hxCodec" />
-		<haxedef name="hxCodec" value="3.0.2" />
-		<assets_windows path="hxCodec/project/vlc/dll/Windows" rename=""/>
-	</section>
-
-	<section if="MODS_ALLOWED">
-		<assets_windows path="example_mods" rename="mods"/>
-		<assets path='example_mods' rename='mods' unless="windows"/>
-	</section>
-
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<log unless="${haxe >= 4.3.0}" error="Haxe version ${haxe} is not compatible with this code (expected version 4.3.2+ as in building guide)" />
-	<log unless="${haxe >= 4.3.2}" warn="Haxe version ${haxe} may not be compatible with this code (expected version 4.3.2+ as in building guide)" />
+	<log unless="${haxe >= 4.3.0}" error="Haxe ${haxe} is not compatible! Recommended to use Haxe 4.3.2 or higher" />
+	<log unless="${haxe >= 4.3.2}" warn="Haxe ${haxe} may not be compatible! Recommended to use Haxe 4.3.2 or higher" />
 
 	<!-- btw i improved haxelib node so we can use it as setup dependencies list -->
 	<!-- also btw branch and commit its the same -->
 
-	<haxelib name="lime"          version="8.1.1" />
-	<haxelib name="openfl"        version="9.3.2" />
+	<haxelib name="hxcpp-debug-server" version="1.2.4" />
+	<haxelib name="hxcpp"              version="4.3.2" />
+	<haxelib name="lime"               version="8.1.2" />
+	<haxelib name="openfl"             version="9.3.3" />
 
-	<haxelib name="flixel"        version="5.5.0"/>
-	<haxelib name="flixel-ui"     version="2.5.0"/>
-	<haxelib name="flixel-addons" version="3.2.1"/>
-	<haxelib name="tjson"         version="1.4.0"/>
+	<haxelib name="flixel"             version="5.6.2"/>
+	<haxelib name="flixel-addons"      version="3.2.3"/>
+	<haxelib name="tjson"              version="1.4.0"/>
 
-	<haxelib name="SScript"       version="8.1.6" if="HSCRIPT_ALLOWED"/>
-	<haxelib name="hxCodec"       version="3.0.2" if="VIDEOS_ALLOWED" unless="USE_OWN_HXCODEC"/>
+	<haxelib name="hscript-iris"       version="1.0.2" if="HSCRIPT_ALLOWED"/>
+	<haxelib name="hxvlc"              version="1.7.1"  if="VIDEOS_ALLOWED"/>
 
-	<haxelib name="linc_luajit"   version="git" url="https://github.com/superpowers04/linc_luajit" branch="8c20c7a" if="LUA_ALLOWED"/>
-	<haxelib name="hxdiscord_rpc" version="git" url="https://github.com/MAJigsaw77/hxdiscord_rpc"  branch="fb39442" if="DISCORD_ALLOWED"/>
-	<haxelib name="flxanimate"    version="git" url="https://github.com/ShadowMario/flxanimate"    branch="6d11b11"/>
+	<haxelib name="linc_luajit"        version="git" url="https://github.com/superpowers04/linc_luajit" branch="633fcc0" if="LUA_ALLOWED"/>
+	<haxelib name="hxdiscord_rpc"      version="git" url="https://github.com/MAJigsaw77/hxdiscord_rpc"  branch="187c445" if="DISCORD_ALLOWED"/>
+	<haxelib name="flxanimate"         version="git" url="https://github.com/Dot-Stuff/flxanimate"      branch="768740a"/>
+
+	<!-- __________________________ Game Assets & Etc. __________________________ -->
+
+	<assets path="assets"/>
+	<assets path='example_mods' rename='mods' if="MODS_ALLOWED"/>
+	<haxeflag name="--macro" value="macros.CustomManifestFolder.init()" />
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
+
+	<haxedef name="HXVLC_FLIXEL_VOLUME_MULTIPLIER" value="150" if="VIDEOS_ALLOWED"/>
 
 	<!-- Disable Discord IO Thread -->
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />
@@ -109,13 +97,6 @@
 
 	<!--Disable the Flixel core focus lost screen-->
 	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN" />
-
-	<!-- Show debug traces for hxCodec -->
-	<!-- just a little useless
-	<section if="VIDEOS_ALLOWED debug">
-		<haxedef name="HXC_LIBVLC_LOGGING" />
-		<haxedef name="HXC_DEBUG_TRACE" />
-	</section> -->
 
 	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
@@ -131,15 +112,16 @@
 	<!--Disable deprecated warnings-->
 	<haxedef name='no-deprecation-warnings' />
 
+	<!-- Haxe 4.3.0+: Enable pretty syntax errors and stuff. -->
+	<!-- pretty (haxeflixel default), indent, classic (haxe compiler default) -->
+	<haxedef name="message.reporting" value="pretty" />
+
 	<!-- _________________________________ Macros _______________________________ -->
 
 	<haxeflag name="--macro" value="allowPackage('flash')" />
-	<haxeflag name="--macro" value="include('my.pack')" />
-	<haxeflag name="--macro" value="macros.ProjectCustomNodes.init()" />
+	<haxeflag name="--macro" value="include('stages')" />
 
 	<!-- _________________________________ Custom _______________________________ -->
-
-	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
 
 	<assets path='art/iconOG.png' rename='icon.png' if="linux" />
 

@@ -1,12 +1,11 @@
 package backend;
 
 import flixel.FlxState;
-import flixel.addons.ui.FlxUIState;
 import flixel.addons.transition.FlxTransitionableState;
 
 import backend.PsychCamera;
 
-class MusicBeatState extends FlxUIState
+class MusicBeatState extends FlxState
 {
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
@@ -22,15 +21,19 @@ class MusicBeatState extends FlxUIState
 	public var skipNextTransOut(get, set):Bool;
 	public var skipNextTransIn(get, set):Bool;
 
-	/** Shortcut of `prefs` */
+	/** Shortcut of `ClientPrefs.data` */
 	public var prefs(get, never):SaveVariables;
 	@:noCompletion function get_prefs() return ClientPrefs.data;
 
-	/** Shortcut of `prefs.gameplaySettings` / `ClientPrefs.gameplaySettings` */
+	/** Shortcut of `ClientPrefs.data.gameplaySettings` / `ClientPrefs.gameplaySettings` */
 	public var gameplayPrefs(get, never):GameplaySettings;
 	@:noCompletion function get_gameplayPrefs() return ClientPrefs.gameplaySettings;
 
 	var _psychCameraInitialized:Bool = false;
+
+	public var variables:Map<String, Dynamic> = [];
+	public static function getVariables()
+		return getState().variables;
 
 	override function create() {
 		var skip:Bool = skipNextTransOut;
@@ -41,7 +44,7 @@ class MusicBeatState extends FlxUIState
 		super.create();
 
 		if(!skip) {
-			openSubState(new CustomFadeTransition(0.7, true));
+			openSubState(new CustomFadeTransition(CustomFadeTransition.DURATION, true));
 		}
 		skipNextTransOut = false;
 		timePassedOnState = 0;
@@ -81,7 +84,8 @@ class MusicBeatState extends FlxUIState
 			}
 		}
 
-		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
+		if (Main.fullscreenAllowed && FlxG.keys.justPressed.F11)
+			FlxG.fullscreen = !FlxG.fullscreen;
 
 		super.update(elapsed);
 	}
@@ -134,43 +138,31 @@ class MusicBeatState extends FlxUIState
 		curStep = lastChange.stepTime + Math.floor(shit);
 	}
 
-	/** @param dumpCache If `true`, calls `Paths.clearStoredMemory()` on next state pre-create, also increases loading times by a LOT. */
-	public static function switchState(nextState:FlxState = null, ?dumpCache:Bool = false) {
-		if (dumpCache) FlxG.signals.preStateCreate.addOnce(Paths.clearStoredMemory);
-
-		if(nextState == null) nextState = FlxG.state;
-		if(nextState == FlxG.state) {
-			resetState();
+	override function startOutro(onOutroComplete:()->Void):Void
+	{
+		if (!skipNextTransIn)
+		{
+			FlxG.state.openSubState(new CustomFadeTransition(CustomFadeTransition.DURATION, false));
+			CustomFadeTransition.finishCallback = onOutroComplete;
 			return;
 		}
 
+		skipNextTransIn = false;
+
+		onOutroComplete();
+	}
+
+	/** @param dumpCache If `true`, calls `Paths.clearStoredMemory()` on next state pre-create, also increases loading times by a LOT. */
+	public static function switchState(nextState:FlxState, ?dumpCache:Bool = false) {
+		if (dumpCache) FlxG.signals.preStateCreate.addOnce(Paths.clearStoredMemory);
+
 		trace('Switching to ' + Type.getClassName(Type.getClass(nextState)).toCMD(WHITE_BOLD));
 
-		var s = getState();
-		if(s.skipNextTransIn) FlxG.switchState(nextState);
-		else startTransition(nextState);
-		s.skipNextTransIn = false;
+		FlxG.switchState(nextState);
 	}
 
-	public static function resetState() {
-		var s = getState();
-		if(s.skipNextTransIn) FlxG.resetState();
-		else startTransition();
-		s.skipNextTransIn = false;
-	}
-
-	// Custom made Trans in
-	public static function startTransition(nextState:FlxState = null)
-	{
-		if(nextState == null)
-			nextState = FlxG.state;
-
-		FlxG.state.openSubState(new CustomFadeTransition(0.6, false));
-		if(nextState == FlxG.state)
-			CustomFadeTransition.finishCallback = function() FlxG.resetState();
-		else
-			CustomFadeTransition.finishCallback = function() FlxG.switchState(nextState);
-	}
+	public static function resetState()
+		FlxG.resetState();
 
 	public static function getState():MusicBeatState {
 		return cast (FlxG.state, MusicBeatState);
@@ -192,12 +184,8 @@ class MusicBeatState extends FlxUIState
 		//trace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
 	}
 
-	function getBeatsOnSection()
-	{
-		var val:Null<Float> = 4;
-		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
-		return val == null ? 4 : val;
-	}
+	function getBeatsOnSection():Float
+		return Conductor.getSectionBeatsFromSong(curSection);
 
 	@:noCompletion function get_skipNextTransOut():Bool return FlxTransitionableState.skipNextTransOut;
 	@:noCompletion function set_skipNextTransOut(v:Bool):Bool return FlxTransitionableState.skipNextTransOut = v;

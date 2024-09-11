@@ -2,12 +2,7 @@ package backend;
 
 #if ACHIEVEMENTS_ALLOWED
 import haxe.Exception;
-
 import objects.AchievementPopup;
-
-#if LUA_ALLOWED
-import psychlua.FunkinLua;
-#end
 
 typedef Achievement =
 {
@@ -33,6 +28,7 @@ class Achievements {
 		createAchievement('week5_nomiss',			{name: "Missless Christmas", description: "Beat Week 5 on Hard with no Misses."});
 		createAchievement('week6_nomiss',			{name: "Highscore!!", description: "Beat Week 6 on Hard with no Misses."});
 		createAchievement('week7_nomiss',			{name: "God Effing Damn It!", description: "Beat Week 7 on Hard with no Misses."});
+		createAchievement('weekend1_nomiss',		{name: "Just a Friendly Sparring", description: "Beat Weekend 1 on Hard with no Misses."});
 		createAchievement('ur_bad',					{name: "What a Funkin' Disaster!", description: "Complete a Song with a rating lower than 20%."});
 		createAchievement('ur_good',				{name: "Perfectionist", description: "Complete a Song with a rating of 100%."});
 		createAchievement('roadkill_enthusiast',	{name: "Roadkill Enthusiast", description: "Watch the Henchmen die 50 times.", maxScore: 50, maxDecimals: 0});
@@ -41,6 +37,7 @@ class Achievements {
 		createAchievement('two_keys',				{name: "Just the Two of Us", description: "Finish a Song pressing only two keys."});
 		createAchievement('toastie',				{name: "Toaster Gamer", description: "Have you tried to run the game on a toaster?"});
 		createAchievement('debugger',				{name: "Debugger", description: "Beat the \"Test\" Stage from the Chart Editor.", hidden: true});
+		createAchievement('pessy_easter_egg',		{name: "Engine Gal Pal", description: "Teehee, you found me~!", hidden: true});
 		
 		//dont delete this thing below
 		_originalLength = _sortID + 1;
@@ -200,16 +197,24 @@ class Achievements {
 
 		_sortID = _originalLength-1;
 
-		loadAchievementJson(Paths.jsonPath('achievements'));
+		var modLoaded:String = Mods.currentModDirectory;
+		Mods.currentModDirectory = null;
+		loadAchievementJson(Paths.modsPath('data/achievements.json'));
+		for (i => mod in Mods.parseList().enabled)
+		{
+			Mods.currentModDirectory = mod;
+			loadAchievementJson(Paths.modsPath('$mod/data/achievements.json'));
+		}
+		Mods.currentModDirectory = modLoaded;
 	}
 
 	inline static function loadAchievementJson(path:String, addMods:Bool = true)
 	{
 		var retVal:Array<Dynamic> = null;
-		if(Paths.fileExistsAbsolute(path)) {
+		if(Paths.existsAbsolute(path)) {
 			try {
 				var rawJson:String = Paths.text(path).trim();
-				if(rawJson != null && rawJson.length > 0) retVal = Json.parse(rawJson); //Json.parse('{"achievements": $rawJson}').achievements;
+				if(rawJson != null && rawJson.length > 0) retVal = tjson.TJSON.parse(rawJson); //Json.parse('{"achievements": $rawJson}').achievements;
 				
 				if(addMods && retVal != null)
 				{
@@ -258,54 +263,54 @@ class Achievements {
 	#end
 
 	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:State)
+	public static function implementLua(funk:psychlua.FunkinLua)
 	{
-		Lua_helper.add_callback(lua, "getAchievementScore", function(name:String):Float
+		funk.set("getAchievementScore", function(name:String):Float
 		{
 			if(!achievements.exists(name))
 			{
-				FunkinLua.luaTrace('getAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				funk.debugPrint('getAchievementScore: Couldnt find achievement: $name', FlxColor.RED);
 				return -1;
 			}
 			return getScore(name);
 		});
-		Lua_helper.add_callback(lua, "setAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float
+		funk.set("setAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float
 		{
 			if(!achievements.exists(name))
 			{
-				FunkinLua.luaTrace('setAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				funk.debugPrint('setAchievementScore: Couldnt find achievement: $name', FlxColor.RED);
 				return -1;
 			}
 			return setScore(name, value, saveIfNotUnlocked);
 		});
-		Lua_helper.add_callback(lua, "addAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float
+		funk.set("addAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float
 		{
 			if(!achievements.exists(name))
 			{
-				FunkinLua.luaTrace('addAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				funk.debugPrint('addAchievementScore: Couldnt find achievement: $name', FlxColor.RED);
 				return -1;
 			}
 			return addScore(name, value, saveIfNotUnlocked);
 		});
-		Lua_helper.add_callback(lua, "unlockAchievement", function(name:String):Dynamic
+		funk.set("unlockAchievement", function(name:String):Dynamic
 		{
 			if(!achievements.exists(name))
 			{
-				FunkinLua.luaTrace('unlockAchievement: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				funk.debugPrint('unlockAchievement: Couldnt find achievement: $name', FlxColor.RED);
 				return null;
 			}
 			return unlock(name);
 		});
-		Lua_helper.add_callback(lua, "isAchievementUnlocked", function(name:String):Dynamic
+		funk.set("isAchievementUnlocked", function(name:String):Dynamic
 		{
 			if(!achievements.exists(name))
 			{
-				FunkinLua.luaTrace('isAchievementUnlocked: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				funk.debugPrint('isAchievementUnlocked: Couldnt find achievement: $name', FlxColor.RED);
 				return null;
 			}
 			return isUnlocked(name);
 		});
-		Lua_helper.add_callback(lua, "achievementExists", function(name:String) return achievements.exists(name));
+		funk.set("achievementExists", function(name:String) return achievements.exists(name));
 	}
 	#end
 }

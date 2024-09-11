@@ -1,15 +1,23 @@
 package options;
 
 import states.MainMenuState;
-import backend.StageData;
 
 class OptionsState extends MusicBeatState
 {
-	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay'];
+	var options:Array<String> = [
+		'Note Colors',
+		'Controls',
+		'Adjust Delay and Combo',
+		'Graphics',
+		'Visuals',
+		'Gameplay',
+		#if TRANSLATIONS_ALLOWED 'Language', #end
+	];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
+	//public static var reloadAssetsOnQuit:Bool = false;
 
 	function openSelectedSubstate(label:String) {
 		switch(label) {
@@ -19,12 +27,16 @@ class OptionsState extends MusicBeatState
 				openSubState(new options.ControlsSubState());
 			case 'Graphics':
 				openSubState(new options.GraphicsSettingsSubState());
-			case 'Visuals and UI':
-				openSubState(new options.VisualsUISubState());
+			case 'Visuals':
+				openSubState(new options.VisualsSettingsSubState());
 			case 'Gameplay':
 				openSubState(new options.GameplaySettingsSubState());
 			case 'Adjust Delay and Combo':
 				MusicBeatState.switchState(new options.NoteOffsetState());
+			#if TRANSLATIONS_ALLOWED
+			case 'Language':
+				openSubState(new options.LanguageSubState());
+			#end
 		}
 	}
 
@@ -44,11 +56,11 @@ class OptionsState extends MusicBeatState
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
 
-		for (i in 0...options.length)
+		for (num => option in options)
 		{
-			var optionText:Alphabet = new Alphabet(0, 0, options[i], true);
+			var optionText:Alphabet = new Alphabet(0, 0, Language.getPhrase('options_$option', option), true);
 			optionText.screenCenter();
-			optionText.y += (100 * (i - (options.length / 2))) + 50;
+			optionText.y += (92 * (num - (options.length / 2))) + 45;
 			grpOptions.add(optionText);
 		}
 
@@ -66,44 +78,39 @@ class OptionsState extends MusicBeatState
 	override function closeSubState() {
 		super.closeSubState();
 		ClientPrefs.saveSettings();
-		DiscordClient.changePresence("In the Options Menu", null);
+		DiscordClient.changePresence("In the Options Menu");
 	}
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (controls.UI_UP_P) {
-			changeSelection(-1);
-		}
-		if (controls.UI_DOWN_P) {
-			changeSelection(1);
-		}
+		if (controls.UI_UP_P) changeSelection(-1);
+		if (controls.UI_DOWN_P) changeSelection(1);
 
-		if (controls.BACK) {
-			FlxG.sound.play(Paths.sound('cancelMenu'));
-			if(onPlayState)
-			{
-				MusicBeatState.switchState(new PlayState());
-				FlxG.sound.music.volume = 0;
-			}
-			else MusicBeatState.switchState(new MainMenuState());
-		}
+		if (controls.BACK) back();
 		else if (controls.ACCEPT) openSelectedSubstate(options[curSelected]);
 	}
-	
+
+	function back() {
+		FlxG.sound.play(Paths.sound('cancelMenu'));
+
+		var state = onPlayState ? new PlayState() : new MainMenuState();
+		//if (reloadAssetsOnQuit)
+		//	MusicBeatState.switchState(new backend.LoadingScreen(state, onPlayState));
+		//else
+			MusicBeatState.switchState(state);
+
+		if (onPlayState)
+			FlxG.sound.music.volume = 0;
+
+		//reloadAssetsOnQuit = false;
+	}
+
 	function changeSelection(change:Int = 0) {
-		curSelected += change;
-		if (curSelected < 0)
-			curSelected = options.length - 1;
-		if (curSelected >= options.length)
-			curSelected = 0;
+		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);
 
-		var bullShit:Int = 0;
-
-		for (item in grpOptions.members) {
-			item.targetY = bullShit - curSelected;
-			bullShit++;
-
+		for (num => item in grpOptions.members) {
+			item.targetY = num - curSelected;
 			item.alpha = 0.6;
 			if (item.targetY == 0) {
 				item.alpha = 1;

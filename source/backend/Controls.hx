@@ -75,10 +75,21 @@ class Controls
 	public var BACK(get, never):Bool;
 	public var PAUSE(get, never):Bool;
 	public var RESET(get, never):Bool;
-	private function get_ACCEPT() return justPressed('accept');
+	private function get_ACCEPT() {
+		var v:Bool = justPressed('accept');
+		if (!v) return false;
+
+		if (!triggerAcceptOnFullscreenKeys && keyboardBinds.get('accept').contains(ENTER))
+			return FlxG.keys.justPressed.ENTER ? !FlxG.keys.pressed.ALT : v;
+
+		return v;
+	}
 	private function get_BACK() return justPressed('back');
 	private function get_PAUSE() return justPressed('pause');
 	private function get_RESET() return justPressed('reset');
+
+	/** Fullscreen keys are Alt + Enter */
+	public var triggerAcceptOnFullscreenKeys:Bool = false;
 
 	//Gamepad & Keyboard stuff
 	public var keyboardBinds:Map<String, Array<FlxKey>>;

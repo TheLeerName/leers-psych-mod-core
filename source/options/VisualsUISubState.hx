@@ -139,14 +139,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			['None', 'Breakfast', 'Tea Time']);
 		addOption(option);
 		option.onChange = onChangePauseMusic;
-		
-		#if CHECK_FOR_UPDATES
-		var option:Option = new Option('Check for Updates',
-			'On Release builds, turn this on to check for updates when you start the game.',
-			'checkForUpdates',
-			'bool');
-		addOption(option);
-		#end
 
 		#if DISCORD_ALLOWED
 		var option:Option = new Option('Discord Rich Presence',
@@ -175,7 +167,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		for (i in 0...Note.colArray.length)
 		{
 			var note:StrumNote = notes.members[i];
-			if(notesTween[i] != null) notesTween[i].cancel();
+			notesTween[i]?.cancel();
 			if(curSelected == noteOptionID)
 				notesTween[i] = FlxTween.tween(note, {y: noteY}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
 			else
@@ -207,7 +199,7 @@ class VisualsUISubState extends BaseOptionsMenu
 	{
 		var skin:String = Note.defaultNoteSkin;
 		var customSkin:String = skin + Note.getNoteSkinPostfix();
-		if(Paths.fileExistsAbsolute(Paths.imagePath(customSkin))) skin = customSkin;
+		if(Paths.existsAbsolute(Paths.imagePath(customSkin))) skin = customSkin;
 
 		note.texture = skin; //Load texture and anims
 		note.reloadNote();
@@ -216,7 +208,7 @@ class VisualsUISubState extends BaseOptionsMenu
 
 	override function destroy()
 	{
-		if(changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music('freakyMenu'), 1, true);
+		if(changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music(Paths.getMenuMusic('MainMenu'), 1, true);
 		super.destroy();
 	}
 }

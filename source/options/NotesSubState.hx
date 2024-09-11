@@ -1,14 +1,15 @@
 package options;
 
+import lime.system.Clipboard;
+
+import flixel.util.FlxGradient;
+import flixel.input.keyboard.FlxKey;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.display.shapes.FlxShapeCircle;
-import flixel.input.keyboard.FlxKey;
-import flixel.input.gamepad.FlxGamepadInputID;
-import lime.system.Clipboard;
-import flixel.util.FlxGradient;
-import objects.StrumNote;
+
 import objects.Note;
+import objects.StrumNote;
 
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
@@ -50,8 +51,8 @@ class NotesSubState extends MusicBeatSubstate
 	public function new() {
 		super();
 
-		DiscordClient.changePresence("In the Note Colors Menu", null);
-
+		DiscordClient.changePresence("In the Note Colors Menu");
+		
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFFEA71FD;
 		bg.screenCenter();
@@ -143,7 +144,7 @@ class NotesSubState extends MusicBeatSubstate
 
 		var tipX = 20;
 		var tipY = 660;
-		var tip:FlxText = new FlxText(tipX, tipY, 0, "Press RELOAD to Reset the selected Note Part.", 16);
+		var tip:FlxText = new FlxText(tipX, tipY, 0, Language.getPhrase('note_colors_tip', 'Press RESET to Reset the selected Note Part.'), 16);
 		tip.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		tip.borderSize = 2;
 		add(tip);
@@ -167,7 +168,8 @@ class NotesSubState extends MusicBeatSubstate
 
 	function updateTip()
 	{
-		tipTxt.text = 'Hold ' + (!controls.controllerMode ? 'Shift' : 'Left Shoulder Button') + ' + Press RESET key to fully reset the selected Note.';
+		var key:String = !controls.controllerMode ? Language.getPhrase('note_colors_shift', 'Shift') : Language.getPhrase('note_colors_lb', 'Left Shoulder Button');
+		tipTxt.text = Language.getPhrase('note_colors_hold_tip', 'Hold {1} + Press RESET key to fully reset the selected Note.', [key]);
 	}
 
 	var _storedColor:FlxColor;
@@ -451,7 +453,7 @@ class NotesSubState extends MusicBeatSubstate
 				}
 				else if (holdingOnObj == colorWheel)
 				{
-					var center:FlxPoint = new FlxPoint(colorWheel.x + colorWheel.width/2, colorWheel.y + colorWheel.height/2);
+					var center:FlxPoint = FlxPoint.get(colorWheel.x + colorWheel.width/2, colorWheel.y + colorWheel.height/2);
 					var mouse:FlxPoint = pointerFlxPoint();
 					var hue:Float = FlxMath.wrap(FlxMath.wrap(Std.int(mouse.degreesTo(center)), 0, 360) - 90, 0, 360);
 					var sat:Float = FlxMath.bound(mouse.dist(center) / colorWheel.width*2, 0, 1);
@@ -464,7 +466,7 @@ class NotesSubState extends MusicBeatSubstate
 		}
 		else if(controls.RESET && hexTypeNum < 0)
 		{
-			if(FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyJustPressed(LEFT_SHOULDER))
+			if(FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyPressed(LEFT_SHOULDER))
 			{
 				for (i in 0...3)
 				{
@@ -575,17 +577,8 @@ class NotesSubState extends MusicBeatSubstate
 		dataArray = !onPixel ? prefs.arrowRGB : prefs.arrowRGBPixel;
 		if (onPixel) PlayState.stageUI = "pixel";
 
-		// clear groups
-		modeNotes.forEachAlive(function(note:FlxSprite) {
-			note.kill();
-			note.destroy();
-		});
-		myNotes.forEachAlive(function(note:StrumNote) {
-			note.kill();
-			note.destroy();
-		});
-		modeNotes.clear();
-		myNotes.clear();
+		modeNotes.destroyGroup();
+		myNotes.destroyGroup();
 
 		if(skinNote != null)
 		{

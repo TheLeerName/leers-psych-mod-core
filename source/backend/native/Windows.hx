@@ -38,13 +38,13 @@ class Windows {
 	 * Removes minimize and maximize buttons of current window
 	 * @see https://stackoverflow.com/a/46145911
 	 */
-	 @:functionCode('
-	 HWND hwnd = GetActiveWindow();
-	 DWORD style = GetWindowLong(hwnd, GWL_STYLE);
-	 style &= ~WS_MINIMIZEBOX;
-	 style &= ~WS_MAXIMIZEBOX;
-	 SetWindowLong(hwnd, GWL_STYLE, style);
-	 SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_FRAMECHANGED);
+	@:functionCode('
+		HWND hwnd = GetActiveWindow();
+		DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+		style &= ~WS_MINIMIZEBOX;
+		style &= ~WS_MAXIMIZEBOX;
+		SetWindowLong(hwnd, GWL_STYLE, style);
+		SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_FRAMECHANGED);
 	') public static function removeMaximizeMinimizeButtons() {}
 
 	/**
@@ -62,8 +62,11 @@ class Windows {
 
 
 	/** Changes window border color, works on Windows 11 build 22000 or greater. */
-	public static function setBorderColor(color:FlxColor) {
-		untyped __cpp__('COLORREF clr = RGB({0}, {1}, {2})', color.red, color.green, color.blue);
+	public static function setBorderColor(color:FlxColor)
+		setBorderColorFromRGBFloat(color.redFloat, color.greenFloat, color.blueFloat);
+	/** Changes window border color from RGB float, works on Windows 11 build 22000 or greater. */
+	public static function setBorderColorFromRGBFloat(red:Float, green:Float, blue:Float) {
+		untyped __cpp__('COLORREF clr = RGB({0}, {1}, {2})', red * 255, green * 255, blue * 255);
 		untyped __cpp__('DwmSetWindowAttribute(GetActiveWindow(), 34, &clr, sizeof(clr))');
 	}
 	/** Resets window border color, works on Windows 11 build 22000 or greater. */
@@ -79,8 +82,11 @@ class Windows {
 
 
 	/** Changes window border color, works on Windows 11 build 22000 or greater. */
-	public static function setCaptionColor(color:FlxColor) {
-		untyped __cpp__('COLORREF clr = RGB({0}, {1}, {2})', color.red, color.green, color.blue);
+	public static function setCaptionColor(color:FlxColor)
+		setCaptionColorFromRGBFloat(color.redFloat, color.greenFloat, color.blueFloat);
+	/** Changes window border color from RGB float, works on Windows 11 build 22000 or greater. */
+	public static function setCaptionColorFromRGBFloat(red:Float, green:Float, blue:Float) {
+		untyped __cpp__('COLORREF clr = RGB({0}, {1}, {2})', red * 255, green * 255, blue * 255);
 		untyped __cpp__('DwmSetWindowAttribute(GetActiveWindow(), 35, &clr, sizeof(clr))');
 	}
 	/** Resets window border color, works on Windows 11 build 22000 or greater. */
@@ -91,8 +97,11 @@ class Windows {
 
 
 	/** Changes window border color, works on Windows 11 build 22000 or greater. */
-	public static function setTextColor(color:FlxColor) {
-		untyped __cpp__('COLORREF clr = RGB({0}, {1}, {2})', color.red, color.green, color.blue);
+	public static function setTextColor(color:FlxColor)
+		setTextColorFromRGBFloat(color.redFloat, color.greenFloat, color.blueFloat);
+	/** Changes window border color from RGB float, works on Windows 11 build 22000 or greater. */
+	public static function setTextColorFromRGBFloat(red:Float, green:Float, blue:Float) {
+		untyped __cpp__('COLORREF clr = RGB({0}, {1}, {2})', red * 255, green * 255, blue * 255);
 		untyped __cpp__('DwmSetWindowAttribute(GetActiveWindow(), 36, &clr, sizeof(clr))');
 	}
 	/** Resets window border color, works on Windows 11 build 22000 or greater. */

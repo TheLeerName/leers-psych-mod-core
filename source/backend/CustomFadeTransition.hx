@@ -3,21 +3,20 @@ package backend;
 import flixel.util.FlxGradient;
 
 class CustomFadeTransition extends MusicBeatSubstate {
+	inline public static final DURATION:Float = 0.6;
 	public static var finishCallback:Void->Void;
 	var isTransIn:Bool = false;
 	var transBlack:FlxSprite;
 	var transGradient:FlxSprite;
 
 	var duration:Float;
-	public function new(duration:Float, isTransIn:Bool)
-	{
+	public function new(duration:Float, isTransIn:Bool) {
 		this.duration = duration;
 		this.isTransIn = isTransIn;
 		super();
 	}
 
-	override function create()
-	{
+	override function create() {
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
 		var width:Int = Std.int(FlxG.width / Math.max(camera.zoom, 0.001));
 		var height:Int = Std.int(FlxG.height / Math.max(camera.zoom, 0.001));
@@ -59,10 +58,13 @@ class CustomFadeTransition extends MusicBeatSubstate {
 			transBlack.y = transGradient.y - transBlack.height;
 
 		if(transGradient.y >= targetPos)
-		{
 			close();
-			if(finishCallback != null) finishCallback();
-			finishCallback = null;
-		}
+	}
+
+	override function close() {
+		super.close();
+
+		if(finishCallback != null) finishCallback();
+		finishCallback = null;
 	}
 }

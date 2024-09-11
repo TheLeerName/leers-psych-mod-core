@@ -6,8 +6,11 @@ class Defines {
 		var fields = Context.getBuildFields();
 
 		var a = Context.getDefines();
-		for (noleaks in ['ANDROID-NDK-ROOT', 'ANDROID-SDK', 'ANDROID_NDK_ROOT', 'ANDROID_SDK', 'HXCODEC-DIR', 'HXCODEC_DIR', 'JAVA-HOME', 'JAVA_HOME'])
+		for (noleaks in ['ANDROID-NDK-ROOT', 'ANDROID-SDK', 'ANDROID_NDK_ROOT', 'ANDROID_SDK', 'JAVA-HOME', 'JAVA_HOME'])
 			a.remove(noleaks);
+		var s = a.get('SONG');
+		if (s != null)
+			Sys.println('Game will load song '.toCMD(YELLOW) + s.toCMD(YELLOW_BOLD) + ' on start!'.toCMD(YELLOW));
 		var d = macro $v{a};
 		fields.push({
 			pos: Context.currentPos(),

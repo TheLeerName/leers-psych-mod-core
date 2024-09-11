@@ -24,8 +24,8 @@ class Alphabet extends FlxSpriteGroup
 	public var scaleY(default, set):Float = 1;
 	public var rows:Int = 0;
 
-	public var distancePerItem:FlxPoint = new FlxPoint(20, 120);
-	public var startPosition:FlxPoint = new FlxPoint(0, 0); //for the calculations
+	public var distancePerItem:FlxPoint = FlxPoint.get(20, 120);
+	public var startPosition:FlxPoint = FlxPoint.get(0, 0); //for the calculations
 
 	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = true)
 	{
@@ -102,7 +102,7 @@ class Alphabet extends FlxSpriteGroup
 				remove(letter);
 			}
 		}
-		letters = [];
+		letters.clearArray();
 		rows = 0;
 	}
 
@@ -192,9 +192,9 @@ class Alphabet extends FlxSpriteGroup
 		var xPos:Float = 0;
 		var rowData:Array<Float> = [];
 		rows = 0;
-		for (character in newText.split(''))
+		for (i in 0...newText.length)
 		{
-			
+			var character:String = newText.charAt(i);
 			if(character != '\n')
 			{
 				var spaceChar:Bool = (character == " " || (bold && character == "_"));
@@ -216,12 +216,12 @@ class Alphabet extends FlxSpriteGroup
 					consecutiveSpaces = 0;
 
 					var letter:AlphaCharacter = cast recycle(AlphaCharacter, true);
+					letter.parent = this;
 					letter.scale.x = scaleX;
 					letter.scale.y = scaleY;
 					letter.rowWidth = 0;
 
 					letter.setupAlphaCharacter(xPos, rows * Y_PER_ROW * scale.y, character, bold);
-					@:privateAccess letter.parent = this;
 
 					letter.row = rows;
 					var off:Float = 0;
@@ -241,9 +241,7 @@ class Alphabet extends FlxSpriteGroup
 		}
 
 		for (letter in letters)
-		{
-			letter.rowWidth = rowData[letter.row];
-		}
+			letter.rowWidth = rowData[letter.row] / scale.x;
 
 		if(letters.length > 0) rows++;
 	}
@@ -274,68 +272,54 @@ class AlphaCharacter extends FlxSprite
 
 	public var image(default, set):String;
 
-	public static var allLetters:Map<String, Null<Letter>> = [
-		//alphabet
-		'a'  => null, 'b'  => null, 'c'  => null, 'd'  => null, 'e'  => null, 'f'  => null,
-		'g'  => null, 'h'  => null, 'i'  => null, 'j'  => null, 'k'  => null, 'l'  => null,
-		'm'  => null, 'n'  => null, 'o'  => null, 'p'  => null, 'q'  => null, 'r'  => null,
-		's'  => null, 't'  => null, 'u'  => null, 'v'  => null, 'w'  => null, 'x'  => null,
-		'y'  => null, 'z'  => null,
+	public static var allLetters:Map<String, Null<Letter>>;
 
-		//additional alphabet
-		'á'  => null, 'é'  => null, 'í'  => null, 'ó'  => null, 'ú'  => null,
-		'à'  => null, 'è'  => null, 'ì'  => null, 'ò'  => null, 'ù'  => null,
-		'â'  => null, 'ê'  => null, 'î'  => null, 'ô'  => null, 'û'  => null,
-		'ã'  => null, 'ë'  => null, 'ï'  => null, 'õ'  => null, 'ü'  => null,
-		'ä'  => null, 'ö'  => null, 'å'  => null, 'ø'  => null, 'æ'  => null,
-		'ñ'  => null, 'ç'  => {offsetsBold: [0, -11]}, 'š'  => null, 'ž'  => null, 'ý'  => null, 'ÿ'  => null,
-		'ß'  => null,
-		
-		//numbers
-		'0'  => null, '1'  => null, '2'  => null, '3'  => null, '4'  => null,
-		'5'  => null, '6'  => null, '7'  => null, '8'  => null, '9'  => null,
+	public static function loadAlphabetData(request:String = 'alphabet')
+	{
+		var path:String = Paths.path('images/$request.json');
+		if (path == null) path = Paths.path('images/alphabet.json');
 
-		//symbols
-		'&'  => {offsetsBold: [0, 2]},
-		'('  => {offsetsBold: [0, 0]},
-		')'  => {offsetsBold: [0, 0]},
-		'['  => null,
-		']'  => {offsets: [0, -1]},
-		'*'  => {offsets: [0, 28], offsetsBold: [0, 40]},
-		'+'  => {offsets: [0, 7], offsetsBold: [0, 12]},
-		'-'  => {offsets: [0, 16], offsetsBold: [0, 16]},
-		'<'  => {offsetsBold: [0, -2]},
-		'>'  => {offsetsBold: [0, -2]},
-		'\'' => {anim: 'apostrophe', offsets: [0, 32], offsetsBold: [0, 40]},
-		'"'  => {anim: 'quote', offsets: [0, 32], offsetsBold: [0, 40]},
-		'!'  => {anim: 'exclamation'},
-		'?'  => {anim: 'question'}, //also used for "unknown"
-		'.'  => {anim: 'period'},
-		'❝'  => {anim: 'start quote', offsets: [0, 24], offsetsBold: [0, 40]},
-		'❞'  => {anim: 'end quote', offsets: [0, 24], offsetsBold: [0, 40]},
-		'_'  => null,
-		'#'  => null,
-		'$'  => null,
-		'%'  => null,
-		':'  => {offsets: [0, 2], offsetsBold: [0, 8]},
-		';'  => {offsets: [0, -2], offsetsBold: [0, 4]},
-		'@'  => null,
-		'^'  => {offsets: [0, 28], offsetsBold: [0, 38]},
-		','  => {anim: 'comma', offsets: [0, -6], offsetsBold: [0, -4]},
-		'\\' => {anim: 'back slash', offsets: [0, 0]},
-		'/'  => {anim: 'forward slash', offsets: [0, 0]},
-		'|'  => null,
-		'~'  => {offsets: [0, 16], offsetsBold: [0, 20]},
+		allLetters = new Map<String, Null<Letter>>();
+		try
+		{
+			if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
+			var data = Json.parse(Paths.text(path));
+			if (data == null) throw Json.lastError;
 
-		//additional symbols
-		'¡'  => {anim: 'inverted exclamation', offsets: [0, -20], offsetsBold: [0, -20]},
-		'¿'  => {anim: 'inverted question', offsets: [0, -20], offsetsBold: [0, -20]},
-		'{'  => null,
-		'}'  => null,
-		'•'  => {anim: 'bullet', offsets: [0, 18], offsetsBold: [0, 20]}
-	];
+			if(data.allowed != null && data.allowed.length > 0)
+			{
+				for (i in 0...data.allowed.length)
+				{
+					var char:String = data.allowed.charAt(i);
+					if(char == ' ') continue;
 
+					allLetters.set(char.toLowerCase(), null); //Allows character to be used in Alphabet
+				}
+			}
+
+			if(data.characters != null)
+			{
+				for (char in Reflect.fields(data.characters))
+				{
+					var letterData = Reflect.field(data.characters, char);
+					var character:String = char.toLowerCase().substr(0, 1);
+					if((letterData.animation != null || letterData.normal != null || letterData.bold != null) && allLetters.exists(character))
+						allLetters.set(character, {anim: letterData.animation, offsets: letterData.normal, offsetsBold: letterData.bold});
+				}
+			}
+			trace('Letters reloaded successfully'.toCMD(GREEN), '($path)'.toCMD(YELLOW));
+		}
+		catch(e) {
+			trace('Loading alphabet data failed!'.toCMD(RED_BOLD), '($path)'.toCMD(YELLOW), e.toString().toCMD(RED));
+		}
+
+		if(!allLetters.exists('?'))
+			allLetters.set('?', {anim: 'question'});
+	}
+
+	@:allow(objects.Alphabet)
 	var parent:Alphabet;
+
 	public var alignOffset:Float = 0; //Don't change this
 	public var letterOffset:Array<Float> = [0, 0];
 
@@ -347,7 +331,7 @@ class AlphaCharacter extends FlxSprite
 		super(x, y);
 		image = 'alphabet';
 	}
-	
+
 	public var curLetter:Letter = null;
 	public function setupAlphaCharacter(x:Float, y:Float, ?character:String = null, ?bold:Null<Bool> = null)
 	{
@@ -370,30 +354,30 @@ class AlphaCharacter extends FlxSprite
 			if(allLetters.exists(lowercase)) curLetter = allLetters.get(lowercase);
 			else curLetter = allLetters.get('?');
 
-			var suffix:String = '';
+			var postfix:String = '';
 			if(!bold)
 			{
 				if(isTypeAlphabet(lowercase))
 				{
 					if(lowercase != this.character)
-						suffix = ' uppercase';
+						postfix = ' uppercase';
 					else
-						suffix = ' lowercase';
+						postfix = ' lowercase';
 				}
-				else suffix = ' normal';
+				else postfix = ' normal';
 			}
-			else suffix = ' bold';
+			else postfix = ' bold';
 
 			var alphaAnim:String = lowercase;
 			if(curLetter != null && curLetter.anim != null) alphaAnim = curLetter.anim;
 
-			var anim:String = alphaAnim + suffix;
+			var anim:String = alphaAnim + postfix;
 			animation.addByPrefix(anim, anim, 24);
 			animation.play(anim, true);
 			if(animation.curAnim == null)
 			{
-				if(suffix != ' bold') suffix = ' normal';
-				anim = 'question' + suffix;
+				if(postfix != ' bold') postfix = ' normal';
+				anim = 'question' + postfix;
 				animation.addByPrefix(anim, anim, 24);
 				animation.play(anim, true);
 			}

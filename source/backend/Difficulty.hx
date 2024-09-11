@@ -2,33 +2,29 @@ package backend;
 
 class Difficulty
 {
-	public static var defaultList(default, never):Array<String> = [
+	public static final defaultList:Array<String> = [
 		'Easy',
 		'Normal',
 		'Hard'
 	];
+	private static final defaultDifficulty:String = 'Normal'; //The chart that has no postfix and starting difficulty on Freeplay/Story Mode
+
 	public static var list:Array<String> = [];
-	private static var defaultDifficulty(default, never):String = 'Normal'; //The chart that has no suffix and starting difficulty on Freeplay/Story Mode
 
-	inline public static function getFilePath(num:Null<Int> = null)
-	{
-		if(num == null) num = PlayState.storyDifficulty;
+	public static function getFilePath(?num:Int) {
+		num ??= PlayState.storyDifficulty;
 
-		var fileSuffix:String = list[num];
-		if(fileSuffix != defaultDifficulty)
-		{
-			fileSuffix = '-' + fileSuffix;
-		}
+		var filePostfix:String = list[num];
+		if(filePostfix != null && Paths.formatToSongPath(filePostfix) != Paths.formatToSongPath(defaultDifficulty))
+			filePostfix = '-' + filePostfix;
 		else
-		{
-			fileSuffix = '';
-		}
-		return Paths.formatToSongPath(fileSuffix);
+			filePostfix = '';
+
+		return Paths.formatToSongPath(filePostfix);
 	}
 
-	inline public static function loadFromWeek(week:WeekData = null)
-	{
-		if(week == null) week = WeekData.getCurrentWeek();
+	public static function loadFromWeek(?week:WeekData) {
+		week ??= WeekData.getCurrentWeek();
 
 		var diffStr:String = week.difficulties;
 		if(diffStr != null && diffStr.length > 0)
@@ -52,22 +48,16 @@ class Difficulty
 	}
 
 	inline public static function resetList()
-	{
 		list = defaultList.copy();
-	}
 
 	inline public static function copyFrom(diffs:Array<String>)
-	{
 		list = diffs.copy();
-	}
 
-	inline public static function getString(num:Null<Int> = null):String
-	{
-		return list[num == null ? PlayState.storyDifficulty : num];
+	inline public static function getString(?num:Int, ?canTranslate:Bool = true):String {
+		var diffName:String = list[num ?? PlayState.storyDifficulty] ?? defaultDifficulty;
+		return canTranslate ? Language.getPhrase('difficulty_$diffName', diffName) : diffName;
 	}
 
 	inline public static function getDefault():String
-	{
 		return defaultDifficulty;
-	}
 }

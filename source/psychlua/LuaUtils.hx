@@ -1,12 +1,13 @@
 package psychlua;
 
-import backend.WeekData;
-import objects.Character;
-
 import openfl.display.BlendMode;
 import Type.ValueType;
 
 import substates.GameOverSubstate;
+
+#if LUA_ALLOWED
+import llua.Lua;
+#end
 
 typedef LuaTweenOptions = {
 	type:FlxTweenType,
@@ -18,13 +19,23 @@ typedef LuaTweenOptions = {
 	ease:EaseFunction
 }
 
+enum abstract FunctionState(String) from String {
+	var Function_Stop = "##PSYCHLUA_FUNCTIONSTOP";
+	var Function_Continue = "##PSYCHLUA_FUNCTIONCONTINUE";
+	var Function_StopLua = "##PSYCHLUA_FUNCTIONSTOPLUA";
+	var Function_StopHScript = "##PSYCHLUA_FUNCTIONSTOPHSCRIPT";
+	var Function_StopAll = "##PSYCHLUA_FUNCTIONSTOPALL";
+
+	@:from static function fromDynamic(v:Dynamic) return '$v';
+}
+
 class LuaUtils
 {
-	public static final Function_Stop:Dynamic = "##PSYCHLUA_FUNCTIONSTOP";
-	public static final Function_Continue:Dynamic = "##PSYCHLUA_FUNCTIONCONTINUE";
-	public static final Function_StopLua:Dynamic = "##PSYCHLUA_FUNCTIONSTOPLUA";
-	public static final Function_StopHScript:Dynamic = "##PSYCHLUA_FUNCTIONSTOPHSCRIPT";
-	public static final Function_StopAll:Dynamic = "##PSYCHLUA_FUNCTIONSTOPALL";
+	public static var Function_Stop = FunctionState.Function_Stop;
+	public static var Function_Continue = FunctionState.Function_Continue;
+	public static var Function_StopLua = FunctionState.Function_StopLua;
+	public static var Function_StopHScript = FunctionState.Function_StopHScript;
+	public static var Function_StopAll = FunctionState.Function_StopAll;
 
 	public static function getLuaTween(options:Dynamic)
 	{
@@ -41,13 +52,14 @@ class LuaUtils
 
 	public static function setVarInArray(instance:Dynamic, variable:String, value:Dynamic, allowMaps:Bool = false):Any
 	{
+		var variables = MusicBeatState.getVariables();
 		var splitProps:Array<String> = variable.split('[');
 		if(splitProps.length > 1)
 		{
 			var target:Dynamic = null;
-			if(PlayState.instance.variables.exists(splitProps[0]))
+			if(variables.exists(splitProps[0]))
 			{
-				var retVal:Dynamic = PlayState.instance.variables.get(splitProps[0]);
+				var retVal:Dynamic = variables.get(splitProps[0]);
 				if(retVal != null)
 					target = retVal;
 			}
@@ -71,9 +83,9 @@ class LuaUtils
 			return value;
 		}
 
-		if(PlayState.instance.variables.exists(variable))
+		if(variables.exists(variable))
 		{
-			PlayState.instance.variables.set(variable, value);
+			variables.set(variable, value);
 			return value;
 		}
 		Reflect.setProperty(instance, variable, value);
@@ -81,13 +93,14 @@ class LuaUtils
 	}
 	public static function getVarInArray(instance:Dynamic, variable:String, allowMaps:Bool = false):Any
 	{
+		var vars = PlayState.instance.variables;
 		var splitProps:Array<String> = variable.split('[');
 		if(splitProps.length > 1)
 		{
 			var target:Dynamic = null;
-			if(PlayState.instance.variables.exists(splitProps[0]))
+			if(vars.exists(splitProps[0]))
 			{
-				var retVal:Dynamic = PlayState.instance.variables.get(splitProps[0]);
+				var retVal:Dynamic = vars.get(splitProps[0]);
 				if(retVal != null)
 					target = retVal;
 			}
@@ -108,32 +121,35 @@ class LuaUtils
 			return instance.get(variable);
 		}
 
-		if(PlayState.instance.variables.exists(variable))
+		if(vars.exists(variable))
 		{
-			var retVal:Dynamic = PlayState.instance.variables.get(variable);
+			var retVal:Dynamic = vars.get(variable);
 			if(retVal != null)
 				return retVal;
 		}
 		return Reflect.getProperty(instance, variable);
 	}
 
-	public static function getModSetting(saveTag:String, ?modName:String = null)
+	public static function getModSetting(saveTag:String, ?modName:String = null, ?debugPrint:(text:String, ?color:FlxColor)->Void)
 	{
 		#if MODS_ALLOWED
+		debugPrint ??= (text:String, ?color:FlxColor) -> {};
 		if(FlxG.save.data.modSettings == null) FlxG.save.data.modSettings = new Map<String, Dynamic>();
 
 		var settings:Map<String, Dynamic> = FlxG.save.data.modSettings.get(modName);
 		var path:String = Paths.modsPath('$modName/data/settings.json');
-		if(FileSystem.exists(path))
+		if(Paths.existsAbsolute(path))
 		{
 			if(settings == null || !settings.exists(saveTag))
 			{
 				if(settings == null) settings = new Map<String, Dynamic>();
-				var data:String = File.getContent(path);
-				try
-				{
-					//FunkinLua.luaTrace('getModSetting: Trying to find default value for "$saveTag" in Mod: "$modName"');
+				try {
+					//debugPrint('getModSetting: Trying to find default value for "$saveTag" in Mod: "$modName"');
+					var data:String = Paths.text(path);
+					if (data == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
 					var parsedJson:Dynamic = Json.parse(data);
+					if (parsedJson == null) throw Json.lastError;
+
 					for (i in 0...parsedJson.length)
 					{
 						var sub:Dynamic = parsedJson[i];
@@ -143,13 +159,13 @@ class LuaUtils
 							{
 								if(sub.value != null)
 								{
-									//FunkinLua.luaTrace('getModSetting: Found unsaved value "${sub.save}" in Mod: "$modName"');
+									//debugPrint('getModSetting: Found unsaved value "${sub.save}" in Mod: "$modName"');
 									settings.set(sub.save, sub.value);
 								}
 							}
 							else
 							{
-								//FunkinLua.luaTrace('getModSetting: Found unsaved keybind "${sub.save}" in Mod: "$modName"');
+								//debugPrint('getModSetting: Found unsaved keybind "${sub.save}" in Mod: "$modName"');
 								settings.set(sub.save, {keyboard: (sub.keyboard != null ? sub.keyboard : 'NONE'), gamepad: (sub.gamepad != null ? sub.gamepad : 'NONE')});
 							}
 						}
@@ -170,20 +186,12 @@ class LuaUtils
 		else
 		{
 			FlxG.save.data.modSettings.remove(modName);
-			#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-			PlayState.instance.addTextToDebug('getModSetting: $path could not be found!', FlxColor.RED);
-			#else
-			FlxG.log.warn('getModSetting: $path could not be found!');
-			#end
+			debugPrint('getModSetting: $path could not be found!', FlxColor.RED);
 			return null;
 		}
 
 		if(settings.exists(saveTag)) return settings.get(saveTag);
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		PlayState.instance.addTextToDebug('getModSetting: "$saveTag" could not be found inside $modName\'s settings!', FlxColor.RED);
-		#else
-		FlxG.log.warn('getModSetting: "$saveTag" could not be found inside $modName\'s settings!');
-		#end
+		debugPrint('getModSetting: "$saveTag" could not be found inside $modName\'s settings!', FlxColor.RED);
 		#end
 		return null;
 	}
@@ -231,9 +239,9 @@ class LuaUtils
 		return Reflect.getProperty(leArray, variable);
 	}
 
-	public static function getPropertyLoop(split:Array<String>, ?checkForTextsToo:Bool = true, ?getProperty:Bool=true, ?allowMaps:Bool = false):Dynamic
+	public static function getPropertyLoop(split:Array<String>, ?getProperty:Bool=true, ?allowMaps:Bool = false):Dynamic
 	{
-		var obj:Dynamic = getObjectDirectly(split[0], checkForTextsToo);
+		var obj:Dynamic = getObjectDirectly(split[0]);
 		var end = split.length;
 		if(getProperty) end = split.length-1;
 
@@ -241,7 +249,7 @@ class LuaUtils
 		return obj;
 	}
 
-	public static function getObjectDirectly(objectName:String, ?checkForTextsToo:Bool = true, ?allowMaps:Bool = false):Dynamic
+	public static function getObjectDirectly(objectName:String, ?allowMaps:Bool = false):Dynamic
 	{
 		switch(objectName)
 		{
@@ -249,15 +257,10 @@ class LuaUtils
 				return PlayState.instance;
 			
 			default:
-				var obj:Dynamic = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
-				if(obj == null) obj = getVarInArray(getTargetInstance(), objectName, allowMaps);
+				var obj:Dynamic = MusicBeatState.getVariables().get(objectName);
+				if(obj == null) obj = getVarInArray(MusicBeatState.getState(), objectName, allowMaps);
 				return obj;
 		}
-	}
-
-	inline public static function getTextObject(name:String):FlxText
-	{
-		return #if LUA_ALLOWED PlayState.instance.modchartTexts.exists(name) ? PlayState.instance.modchartTexts.get(name) : #end Reflect.getProperty(PlayState.instance, name);
 	}
 	
 	public static function isOfTypes(value:Any, types:Array<Dynamic>)
@@ -269,13 +272,12 @@ class LuaUtils
 		return false;
 	}
 	
-	public static inline function getTargetInstance()
-	{
-		return PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
+	public static function getTargetInstance() {
+		if(PlayState.instance != null) return PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
+		return MusicBeatState.getState();
 	}
 
-	public static inline function getLowestCharacterGroup():FlxSpriteGroup
-	{
+	public static function getLowestCharacterGroup():FlxSpriteGroup {
 		var group:FlxSpriteGroup = PlayState.instance.gfGroup;
 		var pos:Int = PlayState.instance.members.indexOf(group);
 
@@ -297,7 +299,7 @@ class LuaUtils
 	
 	public static function addAnimByIndices(obj:String, name:String, prefix:String, indices:Any = null, framerate:Int = 24, loop:Bool = false)
 	{
-		var obj:Dynamic = LuaUtils.getObjectDirectly(obj, false);
+		var obj:FlxSprite = cast LuaUtils.getObjectDirectly(obj);
 		if(obj != null && obj.animation != null)
 		{
 			if(indices == null)
@@ -315,8 +317,9 @@ class LuaUtils
 			obj.animation.addByIndices(name, prefix, indices, '', framerate, loop);
 			if(obj.animation.curAnim == null)
 			{
-				if(obj.playAnim != null) obj.playAnim(name, true);
-				else obj.animation.play(name, true);
+				var dyn:Dynamic = cast obj;
+				if(dyn.playAnim != null) dyn.playAnim(name, true);
+				else dyn.animation.play(name, true);
 			}
 			return true;
 		}
@@ -333,6 +336,9 @@ class LuaUtils
 			//case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
 				//spr.frames = AtlasFrameMaker.construct(image, null, true);
 
+			case 'aseprite' | 'jsoni8':
+				spr.frames = Paths.getAsepriteAtlas(image);
+
 			case "packer" | "packeratlas" | "pac":
 				spr.frames = Paths.getPackerAtlas(image);
 
@@ -341,61 +347,50 @@ class LuaUtils
 		}
 	}
 
-	public static function resetTextTag(tag:String) {
-		#if LUA_ALLOWED
-		if(!PlayState.instance.modchartTexts.exists(tag)) {
+	public static function destroyObject(tag:String) {
+		var variables = MusicBeatState.getVariables();
+		var obj:FlxSprite = variables.get(tag);
+		if(obj == null || obj.destroy == null)
 			return;
-		}
 
-		var target:FlxText = PlayState.instance.modchartTexts.get(tag);
-		target.kill();
-		PlayState.instance.remove(target, true);
-		target.destroy();
-		PlayState.instance.modchartTexts.remove(tag);
-		#end
-	}
-
-	public static function resetSpriteTag(tag:String) {
-		#if LUA_ALLOWED
-		if(!PlayState.instance.modchartSprites.exists(tag)) {
-			return;
-		}
-
-		var target:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-		target.kill();
-		PlayState.instance.remove(target, true);
-		target.destroy();
-		PlayState.instance.modchartSprites.remove(tag);
-		#end
+		LuaUtils.getTargetInstance().remove(obj, true);
+		obj.destroy();
+		variables.remove(tag);
 	}
 
 	public static function cancelTween(tag:String) {
-		#if LUA_ALLOWED
-		if(PlayState.instance.modchartTweens.exists(tag)) {
-			PlayState.instance.modchartTweens.get(tag).cancel();
-			PlayState.instance.modchartTweens.get(tag).destroy();
-			PlayState.instance.modchartTweens.remove(tag);
+		if(!tag.startsWith('tween_')) tag = 'tween_' + LuaUtils.formatVariable(tag);
+		var variables = MusicBeatState.getVariables();
+		var twn:FlxTween = variables.get(tag);
+		if(twn != null)
+		{
+			twn.cancel();
+			twn.destroy();
+			variables.remove(tag);
 		}
-		#end
 	}
 
+	public static function cancelTimer(tag:String) {
+		if(!tag.startsWith('timer_')) tag = 'timer_' + LuaUtils.formatVariable(tag);
+		var variables = MusicBeatState.getVariables();
+		var tmr:FlxTimer = variables.get(tag);
+		if(tmr != null)
+		{
+			tmr.cancel();
+			tmr.destroy();
+			variables.remove(tag);
+		}
+	}
+
+	public static function formatVariable(tag:String)
+		return tag.trim().replace(' ', '_').replace('.', '');
+
 	public static function tweenPrepare(tag:String, vars:String) {
-		cancelTween(tag);
+		if(tag != null) cancelTween(tag);
 		var variables:Array<String> = vars.split('.');
 		var sexyProp:Dynamic = LuaUtils.getObjectDirectly(variables[0]);
 		if(variables.length > 1) sexyProp = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(variables), variables[variables.length-1]);
 		return sexyProp;
-	}
-
-	public static function cancelTimer(tag:String) {
-		#if LUA_ALLOWED
-		if(PlayState.instance.modchartTimers.exists(tag)) {
-			var theTimer:FlxTimer = PlayState.instance.modchartTimers.get(tag);
-			theTimer.cancel();
-			theTimer.destroy();
-			PlayState.instance.modchartTimers.remove(tag);
-		}
-		#end
 	}
 
 	public static function getBuildTarget():String {
@@ -462,7 +457,7 @@ class LuaUtils
 			case 'sineout': return FlxEase.sineOut;
 			case 'smoothstepin': return FlxEase.smoothStepIn;
 			case 'smoothstepinout': return FlxEase.smoothStepInOut;
-			case 'smoothstepout': return FlxEase.smoothStepInOut;
+			case 'smoothstepout': return FlxEase.smoothStepOut;
 			case 'smootherstepin': return FlxEase.smootherStepIn;
 			case 'smootherstepinout': return FlxEase.smootherStepInOut;
 			case 'smootherstepout': return FlxEase.smootherStepOut;
@@ -506,9 +501,12 @@ class LuaUtils
 
 	public static function cameraFromString(cam:String):FlxCamera {
 		switch(cam.toLowerCase()) {
+			case 'camgame' | 'game': return PlayState.instance.camGame;
 			case 'camhud' | 'hud': return PlayState.instance.camHUD;
 			case 'camother' | 'other': return PlayState.instance.camOther;
 		}
-		return PlayState.instance.camGame;
+		var camera:FlxCamera = MusicBeatState.getVariables().get(cam);
+		if (camera == null || !Std.isOfType(camera, FlxCamera)) camera = PlayState.instance.camGame;
+		return camera;
 	}
 }

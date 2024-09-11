@@ -1,16 +1,16 @@
 package states;
 
 import flixel.FlxObject;
-import flixel.addons.transition.FlxTransitionableState;
 import flixel.effects.FlxFlicker;
-import lime.app.Application;
-import states.editors.MasterEditorMenu;
+
 import options.OptionsState;
+import states.editors.MasterEditorMenu;
 
 @:build(macros.ModVersion.add())
 class MainMenuState extends MusicBeatState
 {
-	public static var psychEngineVersion:String = '0.7.3'; // This is also used for Discord RPC
+	public static var psychEngineVersion:String = '1.0b';
+	public static var psychEngineLastCommit:String = '1f15374';
 	//public static var modVersion:String;
 	public static var curSelected:Int = 0;
 
@@ -37,9 +37,6 @@ class MainMenuState extends MusicBeatState
 		Mods.loadTopMod();
 
 		DiscordClient.changePresence("In the Main Menu");
-
-		transIn = FlxTransitionableState.defaultTransIn;
-		transOut = FlxTransitionableState.defaultTransOut;
 
 		persistentUpdate = persistentDraw = true;
 
@@ -185,13 +182,7 @@ class MainMenuState extends MusicBeatState
 					{
 						if (i == curSelected)
 							continue;
-						FlxTween.tween(menuItems.members[i], {alpha: 0}, 0.4, {
-							ease: FlxEase.quadOut,
-							onComplete: function(twn:FlxTween)
-							{
-								menuItems.members[i].kill();
-							}
-						});
+						FlxTween.tween(menuItems.members[i], {alpha: 0}, 0.4, {ease: FlxEase.quadOut});
 					}
 				}
 			}

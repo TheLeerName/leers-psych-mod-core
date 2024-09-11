@@ -1,10 +1,10 @@
 package objects;
 
 #if ACHIEVEMENTS_ALLOWED
-import openfl.Lib;
-import openfl.geom.Matrix;
 import openfl.events.Event;
-import openfl.display.BitmapData;
+import openfl.geom.Matrix;
+import flash.display.BitmapData;
+import openfl.Lib;
 
 class AchievementPopup extends openfl.display.Sprite {
 	public var onFinish:Void->Void = null;
@@ -31,7 +31,8 @@ class AchievementPopup extends openfl.display.Sprite {
 		if(achievement != null) Mods.currentModDirectory = achievement.mod != null ? achievement.mod : '';
 		#end
 
-		if(Paths.fileExistsAbsolute(Paths.imagePath('$image-pixel'))) {
+		if(Paths.exists('images/$image-pixel.png'))
+		{
 			graphic = Paths.image('$image-pixel');
 			hasAntialias = false;
 		}
@@ -57,15 +58,15 @@ class AchievementPopup extends openfl.display.Sprite {
 		var desc:String = 'Description not found';
 		if(achievement != null)
 		{
-			if(achievement.name != null) name = achievement.name;
-			if(achievement.description != null)  desc = achievement.description;
+			if(achievement.name != null) name = Language.getPhrase('achievement_$achieve', achievement.name);
+			if(achievement.description != null)  desc = Language.getPhrase('description_$achieve', achievement.description);
 		}
 
 		var textX = sizeX + imgX + 15;
 		var textY = imgY + 20;
 
 		var text:FlxText = new FlxText(0, 0, 270, 'TEST!!!', 16);
-		text.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT);
+		text.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT);
 		drawTextAt(text, name, textX, textY);
 		drawTextAt(text, desc, textX, textY + 30);
 		graphics.endFill();

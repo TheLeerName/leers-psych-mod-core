@@ -1,5 +1,8 @@
 package objects;
 
+import openfl.utils.Assets;
+import haxe.Json;
+
 typedef MenuCharacterFile = {
 	var image:String;
 	var scale:Float;
@@ -7,6 +10,7 @@ typedef MenuCharacterFile = {
 	var idle_anim:String;
 	var confirm_anim:String;
 	var flipX:Bool;
+	var antialiasing:Null<Bool>;
 }
 
 class MenuCharacter extends FlxSprite
@@ -32,6 +36,9 @@ class MenuCharacter extends FlxSprite
 		var dontPlayAnim:Bool = false;
 		scale.set(1, 1);
 		updateHitbox();
+		
+		color = FlxColor.WHITE;
+		alpha = 1;
 
 		hasConfirmAnimation = false;
 		switch(character) {
@@ -39,11 +46,14 @@ class MenuCharacter extends FlxSprite
 				visible = false;
 				dontPlayAnim = true;
 			default:
-				var rawJson = Paths.getTextFromFile('images/menucharacters/$character.json');
-				if (rawJson == null)
-					rawJson = Paths.getTextFromFile('images/menucharacters/$DEFAULT_CHARACTER.json');
+				var rawJson:String = Paths.path('images/menucharacters/$character.json');
+				if (rawJson == null) {
+					rawJson = Paths.path('images/characters/$DEFAULT_CHARACTER.json'); //If a character couldn't be found, change him to BF just to prevent a crash
+					color = FlxColor.BLACK;
+					alpha = 0.6;
+				}
 
-				var charFile:MenuCharacterFile = cast Json.parse(rawJson);
+				var charFile:MenuCharacterFile = cast Json.parse(Paths.text(rawJson));
 				frames = Paths.getSparrowAtlas('menucharacters/' + charFile.image);
 				animation.addByPrefix('idle', charFile.idle_anim, 24);
 
@@ -54,15 +64,17 @@ class MenuCharacter extends FlxSprite
 					if (animation.getByName('confirm') != null) //check for invalid animation
 						hasConfirmAnimation = true;
 				}
-
 				flipX = (charFile.flipX == true);
 
-				if(charFile.scale != 1) {
+				if(charFile.scale != 1)
+				{
 					scale.set(charFile.scale, charFile.scale);
 					updateHitbox();
 				}
 				offset.set(charFile.position[0], charFile.position[1]);
 				animation.play('idle');
+
+				antialiasing = (charFile.antialiasing != false && ClientPrefs.data.antialiasing);
 		}
 	}
 }

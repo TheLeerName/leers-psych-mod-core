@@ -10,7 +10,7 @@ class WindowUtil {
 	 */
 	@:access(flixel.FlxCamera)
 	@:access(flixel.FlxGame)
-	public static function resizeAbsolute(width:Int = 1280, height:Int = 720) {
+	static function resizeAbsolute(width:Int = 1280, height:Int = 720) {
 		var initSize = {x: FlxG.width, y: FlxG.height};
 
 		Reflect.setProperty(FlxG, 'width', width); // haha suck ballz
@@ -29,6 +29,7 @@ class WindowUtil {
 	}
 
 	static function forceWindowMode(gameWidth:Int, gameHeight:Int) {
+		if (FlxG.width == gameWidth && FlxG.height == gameHeight) return;
 		wasFullscreen = FlxG.fullscreen;
 		wasBounds = [FlxG.stage.window.width, FlxG.stage.window.height];
 
@@ -48,7 +49,7 @@ class WindowUtil {
 
 		FlxG.stage.window.resizable = false;
 		#if windows backend.native.Windows.removeMaximizeMinimizeButtons(); #end
-		FlxG.stage.addEventListener("keyDown", preventFullscreen);
+		Main.fullscreenAllowed = false;
 	}
 
 	static function disableForceWindowMode() {
@@ -66,14 +67,10 @@ class WindowUtil {
 
 		FlxG.stage.window.resizable = true;
 		#if windows backend.native.Windows.addMaximizeMinimizeButtons(); #end
-		FlxG.stage.removeEventListener("keyDown", preventFullscreen);
+		Main.fullscreenAllowed = true;
 		@:privateAccess FlxG.stage.application.__backend.toggleFullscreen = true; // needs to set it to true to allow next toggle
 	}
 
 	@:noCompletion private static var wasFullscreen:Bool;
 	@:noCompletion private static var wasBounds:Array<Int>;
-
-	private static function preventFullscreen(event:openfl.events.KeyboardEvent)
-		if (event.altKey && event.keyCode == openfl.ui.Keyboard.ENTER)
-			@:privateAccess FlxG.stage.application.__backend.toggleFullscreen = false; // if setted to false, bro doesnt let toggle fullscreen in only NEXT toggle
 }

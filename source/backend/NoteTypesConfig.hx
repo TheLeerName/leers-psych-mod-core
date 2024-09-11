@@ -9,8 +9,8 @@ typedef NoteTypeProperty = {
 
 class NoteTypesConfig
 {
-	private static var noteTypesData:Map<String, Array<NoteTypeProperty>> = new Map<String, Array<NoteTypeProperty>>();
-	public static function clearNoteTypesData()
+	private static var noteTypesData:Map<String, Array<NoteTypeProperty>> = [];
+	inline public static function clearNoteTypesData()
 		noteTypesData.clear();
 
 	public static function loadNoteTypeData(name:String)
@@ -48,7 +48,7 @@ class NoteTypesConfig
 	public static function applyNoteTypeData(note:Note, name:String)
 	{
 		var data:Array<NoteTypeProperty> = loadNoteTypeData(name);
-		if(data == null || data.length < 1) return;
+		if(data.isEmpty()) return;
 		
 		for (line in data) 
 		{

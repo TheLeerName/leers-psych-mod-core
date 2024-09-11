@@ -1,121 +1,85 @@
 package backend;
 
-class CoolUtil
-{
-	inline public static function quantize(f:Float, snap:Float){
-		// changed so this actually works lol
-		var m:Float = Math.fround(f * snap);
-		//trace(snap);
-		return (m / snap);
-	}
+@:publicFields
+class CoolUtil {
+	static function quantize(f:Float, snap:Float):Float
+		return Math.fround(f * snap) / snap;
 
-	inline public static function capitalize(text:String)
+	static function capitalize(text:String):String
 		return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
 
-	inline public static function coolTextFile(path:String):Array<String> {
-		var relPath:String = Paths.path(path);
-		if (Paths.fileExistsAbsolute(relPath)) path = relPath;
-
+	inline static function coolTextFile(path:String):Array<String>
 		return listFromString(Paths.text(path));
+
+	static function colorFromString(colorStr:String):FlxColor {
+		static var colorRegex:EReg = ~/[\t\n\r]/g;
+
+		colorStr = colorRegex.replace(colorStr, '');
+
+		if (colorStr.length == 6 || colorStr.length == 8)
+			colorStr = '#$colorStr';
+
+		return FlxColor.fromString(colorStr) ?? FlxColor.WHITE;
 	}
 
-	inline public static function colorFromString(color:String):FlxColor
-	{
-		var hideChars = ~/[\t\n\r]/;
-		var color:String = hideChars.split(color).join('').trim();
-		if(color.startsWith('0x')) color = color.substring(color.length - 6);
+	static function listFromString(string:String):Array<String>
+		return string == null ? [] : string.trim().split('\n').map((i:String) -> {i.trim();});
 
-		var colorNum:Null<FlxColor> = FlxColor.fromString(color);
-		if(colorNum == null) colorNum = FlxColor.fromString('#$color');
-		return colorNum != null ? colorNum : FlxColor.WHITE;
+	static function floorDecimal(value:Float, decimals:Int):Float {
+		var mult:Float = 10.pow(decimals);
+		return Math.ffloor(value * mult) / mult;
 	}
 
-	inline public static function listFromString(string:String):Array<String>
-	{
-		var daList:Array<String> = [];
-		if (string != null) {
-			daList = string.trim().split('\n');
-
-			for (i in 0...daList.length)
-				daList[i] = daList[i].trim();
-		}
-
-		return daList;
-	}
-
-	public static function floorDecimal(value:Float, decimals:Int):Float
-	{
-		if(decimals < 1)
-			return Math.floor(value);
-
-		var tempMult:Float = 1;
-		for (i in 0...decimals)
-			tempMult *= 10;
-
-		var newValue:Float = Math.floor(value * tempMult);
-		return newValue / tempMult;
-	}
-
-	inline public static function dominantColor(path:String):Int {
-		var pixels = Paths.bitmapData(path);
-
+	static function dominantColor(path:String):Int {
+		var pixels:openfl.display.BitmapData = Paths.bitmapData(path);
 		var countByColor:Map<Int, Int> = [];
-		for(col in 0...pixels.width) {
-			for(row in 0...pixels.height) {
-				var colorOfThisPixel:Int = pixels.getPixel32(col, row);
-				if(colorOfThisPixel != 0) {
-					if(countByColor.exists(colorOfThisPixel))
-						countByColor[colorOfThisPixel] = countByColor[colorOfThisPixel] + 1;
-					else if(countByColor[colorOfThisPixel] != 13520687 - (2*13520687))
-						countByColor[colorOfThisPixel] = 1;
+		for (col in 0...pixels.width) {
+			for (row in 0...pixels.height) {
+				var i:Int = pixels.getPixel32(col, row);
+				if (i != 0) {
+					if (countByColor.exists(i)) {
+						countByColor[i]++;
+					} else if (countByColor[i] != -13520687) {
+						countByColor[i] = 1;
+					}
 				}
 			}
 		}
 		pixels.image.data = null;
 		pixels.dispose();
 		pixels.disposeImage();
-
 		var maxCount = 0;
-		var maxKey:Int = 0; //after the loop this will store the max color
+		var maxKey:Int = 0;
 		countByColor[FlxColor.BLACK] = 0;
-		for(key in countByColor.keys()) {
-			if(countByColor[key] >= maxCount) {
-				maxCount = countByColor[key];
-				maxKey = key;
+		for (key in countByColor.keys()) {
+			if (countByColor[key] >= maxCount) {
+				maxCount = countByColor[maxKey = key];
 			}
 		}
-		countByColor = [];
+		countByColor.clear();
 		return maxKey;
 	}
 
-	inline public static function numberArray(max:Int, ?min = 0):Array<Int>
-	{
-		var dumbArray:Array<Int> = [];
-		for (i in min...max) dumbArray.push(i);
+	inline static function numberArray(max:Int, ?min:Int = 0):Array<Int>
+		return [for (i in min...max) {i;}];
 
-		return dumbArray;
-	}
-
-	inline public static function browserLoad(site:String) {
+	inline static function browserLoad(site:String)
 		#if linux
 		Sys.command('/usr/bin/xdg-open', [site]);
 		#else
 		FlxG.openURL(site);
 		#end
-	}
 
-	inline public static function openFolder(folder:String, absolute:Bool = false) {
+	static function openFolder(folder:String, ?absolute:Bool = false):Void {
 		#if sys
-		if(!absolute) folder =  Sys.getCwd() + '$folder';
-
+		if (!absolute) folder = Sys.getCwd() + folder;
 		folder = folder.replace('/', '\\');
-		if(folder.endsWith('/')) folder.substr(0, folder.length - 1);
-
+		if (folder.endsWith('/')) folder.substr(0, folder.length - 1);
 		var command:String = #if linux '/usr/bin/xdg-open' #else 'explorer.exe' #end;
 		Sys.command(command, [folder]);
 		trace('$command $folder');
 		#else
-		FlxG.error("Platform is not supported for CoolUtil.openFolder");
+		FlxG.error('Platform is not supported for CoolUtil.openFolder');
 		#end
 	}
 
@@ -129,17 +93,11 @@ class CoolUtil
 		@crowplexus
 	**/
 	@:access(flixel.util.FlxSave.validate)
-	inline public static function getSavePath():String {
-		final company:String = FlxG.stage.application.meta.get('company');
-		// #if (flixel < "5.0.0") return company; #else
-		return '${company}/${flixel.util.FlxSave.validate(FlxG.stage.application.meta.get('file'))}';
-		// #end
-	}
+	static function getSavePath():String
+		return '${FlxG.stage.application.meta.get('company')}/${flixel.util.FlxSave.validate(FlxG.stage.application.meta.get('file'))}';
 
-	public static function setTextBorderFromString(text:FlxText, border:String)
-	{
-		switch(border.toLowerCase().trim())
-		{
+	static function setTextBorderFromString(text:FlxText, border:String):Void {
+		switch (border.toLowerCase().trim()) {
 			case 'shadow':
 				text.borderStyle = SHADOW;
 			case 'outline':
@@ -151,11 +109,54 @@ class CoolUtil
 		}
 	}
 
-	public static function getPackagePath(cl:Dynamic):String {
-		if (cl is Class) {} else
-			var cl:Class<Dynamic> = cast Type.getClass(cl);
+	/**
+	 * Works like `FlxTween.color` and `FlxTween.tween`, but it can tween colors in every structure (`FlxTween.color` can work only with `FlxSprite`)
+	 *
+	 * @param	Object		The object containing the properties to tween.
+	 * @param	Values		An object containing key/value pairs of properties and target values.
+	 * @param	Duration	Duration of the tween in seconds.
+	 * @param	Options		A structure with tween options.
+	 * @return	The added `NumTween` object.
+	 */
+	static function tweenColor(Object:Dynamic, Values:Dynamic, ?Duration:Float = 1, ?Options:Null<TweenOptions>):flixel.tweens.misc.NumTween {
+		var initValues = {};
+		var fields = Reflect.fields(Values);
+		for (field in fields)
+			Reflect.setField(initValues, field, Reflect.getProperty(Object, field));
 
+		return FlxTween.num(0, 1, Duration, Options, scale -> {
+			for (field in fields)
+				Reflect.setProperty(Object, field, FlxColor.interpolate(Reflect.field(initValues, field), Reflect.field(Values, field), scale));
+		});
+	}
+
+	static function getClassNameWithoutPath(obj:Dynamic):String {
+		var name = Type.getClassName(Type.getClass(obj));
+		return name.substring(name.lastIndexOf('.') + 1);
+	}
+
+	static function getPackagePath(cl:Dynamic):String {
+		if (!(cl is Class)) cl = cast (Type.getClass(cl), Class<Dynamic>);
 		var typeof:String = cast Type.typeof(cl);
 		return typeof.substring(typeof.indexOf('(') + 1, typeof.indexOf(')'));
+	}
+
+	static function prettierNotFoundException(e:haxe.Exception):String {
+		var str:String = e.toString();
+		return str.startsWith('[lime.utils.Assets]') ? 'Not found' : str;
+	}
+
+	static function changeVarLooped(arr:Array<Dynamic>, varr:String, value:Dynamic) {
+		if (arr.isEmpty()) return;
+		for (o in arr) {
+			if (o == null) continue;
+
+			if(Reflect.getProperty(o, varr) != null)
+				Reflect.setProperty(o, varr, value);
+
+			var meme = Reflect.getProperty(o, 'members');
+			if (meme?.length > 0)
+				changeVarLooped(meme, varr, value);
+		}
 	}
 }

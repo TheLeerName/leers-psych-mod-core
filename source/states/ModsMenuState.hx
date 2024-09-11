@@ -58,7 +58,7 @@ class ModsMenuState extends MusicBeatState
 		persistentUpdate = false;
 
 		modsList = Mods.parseList();
-		Mods.currentModDirectory = modsList.all[0] != null ? modsList.all[0] : null;
+		Mods.currentModDirectory = modsList.all[0];
 
 		DiscordClient.changePresence("In the Mods Menu");
 
@@ -97,16 +97,6 @@ class ModsMenuState extends MusicBeatState
 		add(buttonReload);
 		
 		var myY = buttonReload.y + buttonReload.bg.height + 20;
-		/*buttonModFolder = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, "MODS FOLDER", function() {
-			var modFolder = Paths.mods();
-			if(!FileSystem.exists(modFolder))
-			{
-				trace('created missing folder');
-				FileSystem.createDirectory(modFolder);
-			}
-			CoolUtil.openFolder(modFolder);
-		});
-		add(buttonModFolder);*/
 
 		buttonEnableAll = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, "ENABLE ALL", function() {
 			buttonEnableAll.ignoreCheck = false;
@@ -243,7 +233,7 @@ class ModsMenuState extends MusicBeatState
 		add(settingsButton);
 		buttons.push(settingsButton);
 
-		if(modsGroup.members[curSelectedMod].settings == null || modsGroup.members[curSelectedMod].settings.length < 1)
+		if(modsGroup.members[curSelectedMod].settings.isEmpty())
 			settingsButton.enabled = false;
 
 		var button = new MenuButton(buttonsX + 400, buttonsY, 80, 80, Paths.image('modsMenuButtons'), function() //On/Off
@@ -293,7 +283,7 @@ class ModsMenuState extends MusicBeatState
 	
 	var nextAttempt:Float = 1;
 	var holdingMod:Bool = false;
-	var mouseOffsets:FlxPoint = new FlxPoint();
+	var mouseOffsets:FlxPoint = FlxPoint.get();
 	var holdingElapsed:Float = 0;
 	var gottaClickAgain:Bool = false;
 
@@ -729,7 +719,7 @@ class ModsMenuState extends MusicBeatState
 	var waitingToRestart:Bool = false;
 	function moveModToPosition(?mod:String = null, position:Int = 0)
 	{
-		if(mod == null) mod = modsList.all[curSelectedMod];
+		mod ??= modsList.all[curSelectedMod];
 		if(position >= modsList.all.length) position = 0;
 		else if(position < 0) position = modsList.all.length-1;
 
@@ -791,7 +781,7 @@ class ModsMenuState extends MusicBeatState
 		}
 
 		var path:String = 'modsList.txt';
-		File.saveContent(path, fileStr);
+		Paths.saveFile(path, fileStr);
 	}
 }
 
@@ -820,9 +810,9 @@ class ModItem extends FlxSpriteGroup
 		pack = Mods.getPack(folder);
 
 		var path:String = Paths.modsPath('$folder/data/settings.json');
-		if(FileSystem.exists(path))
+		if(Paths.existsAbsolute(path))
 		{
-			var data:String = File.getContent(path);
+			var data:String = Paths.text(path);
 			try
 			{
 				//trace('trying to load settings: $folder');
@@ -830,7 +820,7 @@ class ModItem extends FlxSpriteGroup
 			}
 			catch(e:Dynamic)
 			{
-				var errorTitle = 'Mod name: ' + Mods.currentModDirectory;
+				var errorTitle = 'Mod name: ' + Mods.currentModDirectory ?? "None";
 				var errorMsg = 'An error occurred: $e';
 				#if windows
 				lime.app.Application.current.window.alert(errorMsg, errorTitle);
@@ -856,12 +846,12 @@ class ModItem extends FlxSpriteGroup
 		var isPixel = false;
 		var bmp = null;
 		for (ext in ['jpg', 'png']) {
-			if (Paths.fileExistsAbsolute(Paths.modsPath('$folder/pack-pixel.$ext'))) {
+			if (Paths.existsAbsolute(Paths.modsPath('$folder/pack-pixel.$ext'))) {
 				bmp = Paths.imageAbsolute(Paths.modsPath('$folder/pack-pixel.$ext'));
 				isPixel = true;
 				break;
 			}
-			else if (Paths.fileExistsAbsolute(Paths.modsPath('$folder/pack.$ext'))) {
+			else if (Paths.existsAbsolute(Paths.modsPath('$folder/pack.$ext'))) {
 				bmp = Paths.imageAbsolute(Paths.modsPath('$folder/pack.$ext'));
 				break;
 			}

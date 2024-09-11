@@ -18,7 +18,7 @@ class FPSCounter extends TextField
 	/**
 		The current frame rate, expressed using frames-per-second
 	**/
-	public var currentFPS(default, null):Int;
+	public var currentFPS(default, null):Float;
 
 	/**
 		The current RAM usage (WARNING: this is NOT your total program memory usage, rather it shows the garbage collector memory)
@@ -35,9 +35,16 @@ class FPSCounter extends TextField
 	public var lowFPSColor:FlxColor = FlxColor.RED;
 	public var normalColor:FlxColor = FlxColor.WHITE;
 
-	@:noCompletion var prefs:SaveVariables = ClientPrefs.data;
+	var prefs:SaveVariables = ClientPrefs.data;
 
-	@:noCompletion private var times:Array<Float> = [];
+	var displayFPS:String = "0.3 fps";
+	var _updateTimer:Float = 0;
+	#if !debug
+	var _frameCount:Int = 0;
+	var _itvTime:Int = FlxG.game.ticks;
+	#end
+
+	var UPDATE_DELAY:Int = 500;
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
 	{
@@ -54,14 +61,16 @@ class FPSCounter extends TextField
 		multiline = true;
 		text = "";
 
-		GPUStats.init();
 		resetTextFormat();
 	}
 
-	var deltaTimeout:Float = 0.0;
-
 	@:noCompletion var pressedF3(default, set):Bool = false;
+	public var wasPressedF3:Bool = false;
 	@:noCompletion inline function set_pressedF3(pressedF3:Bool):Bool {
+		if (pressedF3) {
+			FlxG.save.data.wasPressedF3 = wasPressedF3 = true;
+			FlxG.save.flush();
+		}
 		this.pressedF3 = pressedF3;
 		resetTextFormat();
 		return pressedF3;
@@ -72,14 +81,28 @@ class FPSCounter extends TextField
 	{
 		if (FlxG.keys.justPressed.F3) pressedF3 = !pressedF3;
 
-		var now:Float = haxe.Timer.stamp();
-		times.push(now);
-		while (times[0] < now - 1000)
-			times.shift();
+		#if !debug
+		_frameCount++;
+		#end
+		_updateTimer += deltaTime;
+		if (_updateTimer > UPDATE_DELAY) {
+			#if !debug
+			currentFPS = _frameCount / ((FlxG.game.ticks - _itvTime) / 1000);
+			displayFPS = '$currentFPS';
+			if (displayFPS.contains('.')) displayFPS = displayFPS.substring(0, displayFPS.indexOf('.'));
 
-		currentFPS = currentFPS < FlxG.updateFramerate ? times.length : FlxG.updateFramerate;		
+			_frameCount = 0;
+			_itvTime = FlxG.game.ticks;
+			#else
+			@:privateAccess var txt = FlxG.game.debugger.stats.fpsGraph.curLabel.text;
+			txt = txt.substring(0, txt.length - 4);
+			displayFPS = txt;
+			currentFPS = txt.toFloat();
+			#end
+			_updateTimer -= UPDATE_DELAY;
+		}
+
 		updateText();
-		deltaTimeout += deltaTime;
 	}
 
 	/**
@@ -92,7 +115,7 @@ class FPSCounter extends TextField
 		#if windows
 		if (pressedF3)
 			lines = [
-				'%file% v%modVer% (%modVer%/%psychVer%)',
+				'%file% %modVer% (%modVer%/%psychVer%)',
 				'%fps% fps T: %maxFPS% %quality% %antialiasing%',
 				'RAM: %ram% GPU: %gpuUsgMem% %caching%',
 				'GPU: %gpuUsg%% (%gpuUsgGlobal%%) %shaders%',
@@ -103,7 +126,6 @@ class FPSCounter extends TextField
 				'lime: %lime%',
 				'openfl: %openfl%',
 				'flixel: %flixel%',
-				'flixel-ui: %flixel-ui%',
 				'flixel-addons: %flixel-addons%',
 				#if tjson
 				'tjson: %tjson%',
@@ -114,10 +136,10 @@ class FPSCounter extends TextField
 				'%luajit%',
 				#end
 				#if HSCRIPT_ALLOWED
-				'SScript: %SScript%',
+				'hscript-iris: %hscript-iris%',
 				#end
 				#if VIDEOS_ALLOWED
-				'hxCodec: %hxCodec%',
+				'hxvlc: %hxvlc%',
 				#end
 				#if DISCORD_ALLOWED
 				'hxdiscord_rpc: %hxdiscord_rpc%',
@@ -127,28 +149,16 @@ class FPSCounter extends TextField
 				#end
 			];
 		else {
-			if (prefs.showFPS)
-				lines.push('FPS: %fps%');
+			lines.push(states.MainMenuState.modVersion + (prefs.showFPS ? ' | FPS: %fps%' : ''));
 
-			switch(prefs.memoryCounter) {
-				case 'Show used':
-					lines.push(prefs.cacheOnGPU ? 'GPU: %gpu%' : 'RAM: %gpuUsgMem%');
-				case 'Show both':
-					lines.push('RAM: %ram%');
-					lines.push('GPU: %gpuUsgMem%');
-				case 'Show RAM':
-					lines.push('RAM: %ram%');
-				case 'Show GPU':
-					lines.push('GPU: %gpuUsgMem%');
-			}
-			lines.push('v' + states.MainMenuState.modVersion);
-			lines.push('F3 to expand');
+			if (prefs.memoryCounter)
+				lines.push('Mem: %ram% / %gpuUsgMem%');
+			if (!wasPressedF3)
+				lines.push('F3 to expand (press to close tip)');
 		}
 		#else
-		if (prefs.showFPS) {
-			lines.push('FPS: %fps%');
-			lines.push('Memory: %ram%');
-		}
+			if (prefs.showFPS) lines.push('FPS: %fps%');
+			if (prefs.memoryCounter) lines.push('Memory: %ram%');
 		#end
 
 		textFormat = lines.join('\n');
@@ -156,16 +166,15 @@ class FPSCounter extends TextField
 	}
 
 	public dynamic function updateText():Void { // so people can override it in hscript
-
 		var d = Main.defines;
 		var replaces = [
-			'fps' => currentFPS + '',
+			'fps' => displayFPS,
 			'ram' => FlxStringUtil.formatBytes(memoryMegas),
 			#if windows
 			'gpuUsgMem' => (GPUStats.errorMessage == null ? FlxStringUtil.formatBytes(GPUStats.memoryUsage) : 'Error!'),
 			'file' => FlxG.stage.application.meta.get('file'),
 			'modVer' => MainMenuState.modVersion,
-			'psychVer' => MainMenuState.psychEngineVersion,
+			'psychVer' => '${MainMenuState.psychEngineVersion} (${MainMenuState.psychEngineLastCommit})',
 			'maxFPS' => prefs.framerate + '',
 			'quality' => (prefs.lowQuality ? 'low' : 'high') + 'Quality',
 			'antialiasing' => (prefs.antialiasing ? 'a' : 'noA') + 'ntialiasing',
@@ -179,7 +188,6 @@ class FPSCounter extends TextField
 			'lime' => d.get('lime'),
 			'openfl' => d.get('openfl'),
 			'flixel' => d.get('flixel'),
-			'flixel-ui' => d.get('flixel-ui'),
 			'flixel-addons' => d.get('flixel-addons'),
 			#if tjson
 			'tjson' => d.get('tjson'),
@@ -190,10 +198,10 @@ class FPSCounter extends TextField
 			'luajit' => llua.Lua.versionJIT(),
 			#end
 			#if HSCRIPT_ALLOWED
-			'SScript' => d.get('SScript'),
+			'hscript-iris' => d.get('hscript-iris'),
 			#end
 			#if VIDEOS_ALLOWED
-			'hxCodec' => d.get('hxCodec'),
+			'hxvlc' => d.get('hxvlc'),
 			#end
 			#if DISCORD_ALLOWED
 			'hxdiscord_rpc' => d.get('hxdiscord_rpc'),
@@ -209,11 +217,12 @@ class FPSCounter extends TextField
 		if (pressedF3 && GPUStats.errorMessage != null)
 			text += '\n\nGPU stats tracking failed! ' + GPUStats.errorMessage;
 		#end
+
 		for (f => r in replaces) text = text.replace('%$f%', r);
 
 		textColor = (currentFPS < FlxG.drawFramerate * 0.5 && !pressedF3) ? lowFPSColor : normalColor;
 	}
 
 	inline function get_memoryMegas():Float
-		return cast(System.totalMemory, UInt);
+		return cpp.vm.Gc.memInfo64(cpp.vm.Gc.MEM_INFO_USAGE);
 }

@@ -3,34 +3,37 @@ package backend;
 #if DISCORD_ALLOWED
 import hxdiscord_rpc.Discord;
 import hxdiscord_rpc.Types;
+import sys.thread.Thread;
+import flixel.util.FlxStringUtil;
 #end
 
-class DiscordClient
-{
+class DiscordClient {
 	public static var isInitialized:Bool = false;
-	private static final _defaultID:String = "1191891177520255077";
+	private inline static final _defaultID:String = "1191891177520255077";
 	public static var clientID(default, set):String = _defaultID;
 	#if DISCORD_ALLOWED
-	private static var presence:DiscordRichPresence = DiscordRichPresence.create();
+	private static var presence:DiscordPresence = new DiscordPresence();
 	#end
+	// hides this field from scripts and reflection in general
+	@:unreflective private static var __thread:Thread;
 
 	public static function check()
 	{
 		if(ClientPrefs.data.discordRPC) initialize();
 		else if(isInitialized) shutdown();
 	}
-	
+
 	public static function prepare()
 	{
 		if (!isInitialized && ClientPrefs.data.discordRPC)
 			initialize();
 
-		FlxG.stage.window.onClose.add(function() {
-			if(isInitialized) shutdown();
-		});
+		if (FlxG.stage.window.onClose.has(shutdown))
+			FlxG.stage.window.onClose.add(shutdown);
 	}
 
 	public dynamic static function shutdown() {
+		if (!isInitialized) return;
 		#if DISCORD_ALLOWED
 		Discord.Shutdown();
 		#end
@@ -47,20 +50,23 @@ class DiscordClient
 
 		trace('Connected to User: ' + user.toCMD(WHITE_BOLD));
 
+		// you can use presence.makeButton here!
+
 		changePresence();
 	}
 
 	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void {
-		trace('Error!'.toCMD(RED) + ' ($errorCode: ${cast(message, String)})');
+		trace('Error!'.toCMD(RED_BOLD) + ' ($errorCode: ${cast(message, String)})'.toCMD(RED));
 	}
 
 	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void {
-		trace('Disconnected!'.toCMD(RED) + ' ($errorCode: ${cast(message, String)})');
+		trace('Disconnected!'.toCMD(RED_BOLD) + ' ($errorCode: ${cast(message, String)})'.toCMD(RED));
 	}
 	#end
 
 	public static function initialize()
 	{
+		if (isInitialized) return;
 		#if DISCORD_ALLOWED
 		var discordHandlers:DiscordEventHandlers = DiscordEventHandlers.create();
 		discordHandlers.ready = cpp.Function.fromStaticFunction(onReady);
@@ -68,49 +74,50 @@ class DiscordClient
 		discordHandlers.errored = cpp.Function.fromStaticFunction(onError);
 		Discord.Initialize(clientID, cpp.RawPointer.addressOf(discordHandlers), 1, null);
 
-		if(!isInitialized) trace("Discord Client initialized".toCMD(GREEN));
+		trace("Discord Client initialized".toCMD(GREEN));
 
-		sys.thread.Thread.create(() ->
-		{
-			var localID:String = clientID;
-			while (localID == clientID)
-			{
-				#if DISCORD_DISABLE_IO_THREAD
-				Discord.UpdateConnection();
-				#end
-				Discord.RunCallbacks();
+		if (__thread == null)
+			__thread = Thread.create(() -> {
+				while (true) {
+					if (isInitialized) {
+						#if DISCORD_DISABLE_IO_THREAD
+						Discord.UpdateConnection();
+						#end
+						Discord.RunCallbacks();
+					}
 
-				Sys.sleep(2);
-			}
-		});
+					// Wait 1 second until the next loop...
+					Sys.sleep(1.0);
+				}
+			});
 		isInitialized = true;
 		#end
 	}
 
-	public static function changePresence(?details:String = 'In the Menus', ?state:Null<String>, ?smallImageKey : String, ?hasStartTimestamp : Bool, ?endTimestamp: Float)
+	public static function changePresence(?details:String = 'In the Menus', ?state:Null<String>, ?smallImageKey : String, ?hasStartTimestamp : Bool, ?endTimestamp: Float, largeImageKey:String = 'story_mode')
 	{
 		#if DISCORD_ALLOWED
 		var startTimestamp:Float = 0;
 		if (hasStartTimestamp) startTimestamp = Date.now().getTime();
 		if (endTimestamp > 0) endTimestamp = startTimestamp + endTimestamp;
 
-		presence.details = details;
 		presence.state = state;
-		presence.largeImageKey = 'icon';
-		presence.largeImageText = "Mod Version: " + states.MainMenuState.modVersion;
+		presence.details = details;
 		presence.smallImageKey = smallImageKey;
+		presence.largeImageKey = largeImageKey;
+		presence.largeImageText = "Mod Version: " + states.MainMenuState.modVersion;
 		// Obtained times are in milliseconds so they are divided so Discord can use it
 		presence.startTimestamp = Std.int(startTimestamp / 1000);
 		presence.endTimestamp = Std.int(endTimestamp / 1000);
 		updatePresence();
 
-		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
+		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp, $largeImageKey');
 		#end
 	}
 
 	public static function updatePresence()
-		#if DISCORD_ALLOWED Discord.UpdatePresence(cpp.RawConstPointer.addressOf(presence)); #else return; #end
-	
+		#if DISCORD_ALLOWED Discord.UpdatePresence(cpp.RawConstPointer.addressOf(presence.__presence)); #else return; #end
+
 	public static function resetClientID()
 		clientID = _defaultID;
 
@@ -132,7 +139,7 @@ class DiscordClient
 	{
 		#if MODS_ALLOWED
 		var pack:Dynamic = Mods.getPack();
-		if(pack != null && pack.discordRPC != null && pack.discordRPC != clientID)
+		if(pack?.discordRPC != null && pack.discordRPC != clientID)
 		{
 			clientID = pack.discordRPC;
 			//trace('Changing clientID! $clientID, $_defaultID');
@@ -141,15 +148,71 @@ class DiscordClient
 	}
 
 	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:State) {
-		Lua_helper.add_callback(lua, "changeDiscordPresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
-			changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
-		});
-
-		Lua_helper.add_callback(lua, "changeDiscordClientID", function(?newID:String = null) {
-			if(newID == null) newID = _defaultID;
-			clientID = newID;
+	public static function implementLua(lua:psychlua.FunkinLua) {
+		lua.set("changeDiscordPresence", changePresence);
+		lua.set("changeDiscordClientID", function(?newID:String) {
+			clientID = newID ?? _defaultID;
 		});
 	}
 	#end
 }
+
+#if DISCORD_ALLOWED
+@:allow(backend.DiscordClient)
+private final class DiscordPresence
+{
+	public var state(get, set):String;
+	public var details(get, set):String;
+	public var smallImageKey(get, set):String;
+	public var largeImageKey(get, set):String;
+	public var largeImageText(get, set):String;
+	public var startTimestamp(get, set):Int;
+	public var endTimestamp(get, set):Int;
+
+	@:noCompletion private var __presence:DiscordRichPresence;
+
+	/** @param id 0 or 1 */
+	public function makeButton(id:Int, label:String, url:String):DiscordButton {
+		final button = DiscordButton.create();
+		button.label = label; button.url = url;
+		return __presence.buttons[id == 0 ? 0 : 1] = button;
+	}
+
+	function new()
+		__presence = DiscordRichPresence.create();
+
+	@:to public function toString():String
+	{
+		return FlxStringUtil.getDebugString([
+			LabelValuePair.weak("state", state),
+			LabelValuePair.weak("details", details),
+			LabelValuePair.weak("smallImageKey", smallImageKey),
+			LabelValuePair.weak("largeImageKey", largeImageKey),
+			LabelValuePair.weak("largeImageText", largeImageText),
+			LabelValuePair.weak("startTimestamp", startTimestamp),
+			LabelValuePair.weak("endTimestamp", endTimestamp)
+		]);
+	}
+
+	@:noCompletion inline function get_state():String return __presence.state;
+	@:noCompletion inline function set_state(value:String):String return __presence.state = value;
+
+	@:noCompletion inline function get_details():String return __presence.details;
+	@:noCompletion inline function set_details(value:String):String return __presence.details = value;
+
+	@:noCompletion inline function get_smallImageKey():String return __presence.smallImageKey;
+	@:noCompletion inline function set_smallImageKey(value:String):String return __presence.smallImageKey = value;
+
+	@:noCompletion inline function get_largeImageKey():String return __presence.largeImageKey;
+	@:noCompletion inline function set_largeImageKey(value:String):String return __presence.largeImageKey = value;
+
+	@:noCompletion inline function get_largeImageText():String return __presence.largeImageText;
+	@:noCompletion inline function set_largeImageText(value:String):String return __presence.largeImageText = value;
+
+	@:noCompletion inline function get_startTimestamp():Int return __presence.startTimestamp;
+	@:noCompletion inline function set_startTimestamp(value:Int):Int return __presence.startTimestamp = value;
+
+	@:noCompletion inline function get_endTimestamp():Int return __presence.endTimestamp;
+	@:noCompletion inline function set_endTimestamp(value:Int):Int return __presence.endTimestamp = value;
+}
+#end

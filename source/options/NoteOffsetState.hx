@@ -1,6 +1,5 @@
 package options;
 
-import backend.StageData;
 import objects.Character;
 import objects.Bar;
 import flixel.addons.display.shapes.FlxShapeCircle;
@@ -9,7 +8,8 @@ import stages.StageWeek1 as BackgroundStage;
 
 class NoteOffsetState extends MusicBeatState
 {
-	var stageDirectory:String = 'week1';
+	var stageDirectory:String = 'week_assets/week1';
+	var prevStageDirectory:String;
 	var boyfriend:Character;
 	var gf:Character;
 
@@ -35,9 +35,14 @@ class NoteOffsetState extends MusicBeatState
 	var controllerPointer:FlxSprite;
 	var _lastControllerMode:Bool = false;
 
+	override function destroy() {
+		super.destroy();
+		Paths.setCurrentLevel(prevStageDirectory);
+	}
+
 	override public function create()
 	{
-		DiscordClient.changePresence("In the Delay/Combo Menu", null);
+		DiscordClient.changePresence("In the Adjust Delay/Combo Menu");
 
 		// Cameras
 		camGame = initPsychCamera();
@@ -56,6 +61,7 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.sound.pause();
 
 		// Stage
+		prevStageDirectory = Paths.currentLevel;
 		Paths.setCurrentLevel(stageDirectory);
 		BackgroundStage.makeStage(this);
 
@@ -111,7 +117,7 @@ class NoteOffsetState extends MusicBeatState
 		repositionCombo();
 
 		// Note delay stuff
-		beatText = new Alphabet(0, 0, 'Beat Hit!', true);
+		beatText = new Alphabet(0, 0, Language.getPhrase('delay_beat_hit', 'Beat Hit!'), true);
 		beatText.setScale(0.6, 0.6);
 		beatText.x += 260;
 		beatText.alpha = 0;
@@ -173,8 +179,8 @@ class NoteOffsetState extends MusicBeatState
 	var onComboMenu:Bool = true;
 	var holdingObjectType:Null<Bool> = null;
 
-	var startMousePos:FlxPoint = new FlxPoint();
-	var startComboOffset:FlxPoint = new FlxPoint();
+	var startMousePos:FlxPoint = FlxPoint.get();
+	var startComboOffset:FlxPoint = FlxPoint.get();
 
 	override public function update(elapsed:Float)
 	{
@@ -409,7 +415,7 @@ class NoteOffsetState extends MusicBeatState
 				else
 					FlxG.sound.music.volume = 0;
 			}
-			else FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			else FlxG.sound.playMusic(Paths.music(Paths.getMenuMusic('MainMenu')));
 			FlxG.mouse.visible = false;
 		}
 
@@ -495,9 +501,9 @@ class NoteOffsetState extends MusicBeatState
 		{
 			switch(i)
 			{
-				case 0: dumbTexts.members[i].text = 'Rating Offset:';
+				case 0: dumbTexts.members[i].text = Language.getPhrase('combo_rating_offset', 'Rating Offset:');
 				case 1: dumbTexts.members[i].text = '[' + prefs.comboOffset[0] + ', ' + prefs.comboOffset[1] + ']';
-				case 2: dumbTexts.members[i].text = 'Numbers Offset:';
+				case 2: dumbTexts.members[i].text = Language.getPhrase('combo_numbers_offset', 'Numbers Offset:');
 				case 3: dumbTexts.members[i].text = '[' + prefs.comboOffset[2] + ', ' + prefs.comboOffset[3] + ']';
 			}
 		}
@@ -506,7 +512,7 @@ class NoteOffsetState extends MusicBeatState
 	function updateNoteDelay()
 	{
 		prefs.noteOffset = Math.round(barPercent);
-		timeTxt.text = 'Current offset: ' + Math.floor(barPercent) + ' ms';
+		timeTxt.text = Language.getPhrase('delay_current_offset', 'Current offset: {1} ms', [Math.floor(barPercent)]);
 	}
 
 	function updateMode()
@@ -530,14 +536,14 @@ class NoteOffsetState extends MusicBeatState
 		var str:String;
 		var str2:String;
 		if(onComboMenu)
-			str = 'Combo Offset';
+			str = Language.getPhrase('combo_offset', 'Combo Offset');
 		else
-			str = 'Note/Beat Delay';
+			str = Language.getPhrase('note_delay', 'Note/Beat Delay');
 
 		if(!controls.controllerMode)
-			str2 = '(Press Accept to Switch)';
+			str2 = Language.getPhrase('switch_on_accept', '(Press Accept to Switch)');
 		else
-			str2 = '(Press Start to Switch)';
+			str2 = Language.getPhrase('switch_on_start', '(Press Start to Switch)');
 
 		changeModeText.text = '< ${str.toUpperCase()} ${str2.toUpperCase()} >';
 	}

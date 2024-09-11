@@ -1,6 +1,9 @@
 package debug;
 
+#if windows
 import lime.app.Future;
+import sys.io.Process;
+#end
 
 /**
  * To start tracking GPU stats, call `init()` function.
@@ -13,16 +16,18 @@ import lime.app.Future;
 #end
 @:publicFields
 class GPUStats {
-	/** Current dedicated GPU memory usage of this application. */
-	static var memoryUsage(default, null):Int;
+	/** Total dedicated GPU memory in bytes. */
+	static var totalMemory(default, null):Float = -1;
 
-	// goes unused for now
-	//static var globalMemoryUsage(get, never):Int;
+	/** Current dedicated GPU memory usage in bytes of this application. */
+	static var memoryUsage(default, null):Float = -1;
+	/** Current dedicated GPU memory usage in bytes of all applications on PC. */
+	static var globalMemoryUsage(default, null):Float = -1;
 
 	/** Current GPU utilization percentage of this application. */
-	static var usage(default, null):Float;
+	static var usage(default, null):Float = -1;
 	/** Current GPU utilization percentage of all applications on PC. */
-	static var globalUsage(default, null):Float;
+	static var globalUsage(default, null):Float = -1;
 
 	/** Will be called on update of variables. Usually called each second. */
 	static var onUpdate:Void->Void = () -> {};
@@ -32,28 +37,38 @@ class GPUStats {
 
 	static var errorMessage:String;
 
-	/**
-	 * Starts tracking GPU stats, can be gotten with static variables in this class.
-	 * 
-	 * @return `1` if successfully initialized.
-	 */
-	static function init():Int {
+	/** Starts tracking GPU stats, can be gotten with static variables in this class. */
+	static function init() {
 		#if windows
+		if (wasStarted) return;
 		wasStarted = true;
 
 		var first = true;
 		// very cool thing!!!
 		// https://stackoverflow.com/a/73496338
 		var pid = Std.string(untyped __cpp__('GetCurrentProcessId()'));
-		new FlxTimer().start(FlxG.elapsed, tmr -> {
+		new FlxTimer().start(0.1, tmr -> {
 			new Future(() -> {
-				var tr = new Process('powershell', ['((Get-Counter -Counter @("\\GPU Process Memory(pid_$pid*)\\Dedicated Usage", "\\GPU Engine(pid_$pid*engtype_3d)\\Utilization Percentage", "\\GPU Engine(*engtype_3D)\\Utilization Percentage")).CounterSamples | where CookedValue).CookedValue']);
+				if (first) {
+					var a = new Process('powershell', ['(Get-WmiObject Win32_VideoController).AdapterRAM']);
+					var err = a.stderr.readAll().toString();
+					if (err.length > 0) {
+						trace('Getting values from tracking failed! '.toCMD(RED_BOLD) + err.toCMD(RED));
+						errorMessage = 'Unknown';
+						wasStarted = false;
+						return;
+					}
 
-				var err:String = tr.stderr.readAll().toString();
+					totalMemory = Std.parseFloat(a.stdout.readAll().toString().trim());
+					a.close();
+				}
+
+				var tr = new Process('powershell', ['((Get-Counter -Counter @("\\GPU Process Memory(pid_${pid}_*)\\Dedicated Usage", "\\GPU Engine(pid_${pid}_*)\\Utilization Percentage", "\\GPU Engine(*)\\Utilization Percentage", "\\GPU Process Memory(*)\\Dedicated Usage")).CounterSamples | where CookedValue).CookedValue']);
+				var err = tr.stderr.readAll().toString();
 				if (err.length > 0) {
 					err = err.substring(err.indexOf('CategoryInfo          : ') + 24);
 					err = err.substring(0, err.indexOf('\r\n'));
-					trace('Can\'t get values from tracking! '.toCMD(RED_BOLD) + err.toCMD(RED));
+					trace('Getting values from tracking failed! '.toCMD(RED_BOLD) + err.toCMD(RED));
 					errorMessage = err;
 					wasStarted = false;
 					return;
@@ -61,32 +76,32 @@ class GPUStats {
 					trace('Tracking started'.toCMD(GREEN));
 				first = false;
 
-				var num:Array<String> = tr.stdout.readAll().toString().replace(',', '.').split('\r\n');
-				var sum:Float = 0;
+				var percent:Array<Float> = [];
+				var mem:Array<Float> = [];
 
-				for (i in 1...num.length - 1)
-					sum += Std.parseFloat(num[i]);
+				var arr:Array<String> = tr.stdout.readAll().toString().trim().replace(',', '.').split('\r\n');
+				for (i in 1...arr.length)
+					(arr[i].contains('.') ? percent : mem).push(Std.parseFloat(arr[i]));
 
-				memoryUsage = Std.parseInt(num[0]);
-				usage = Std.parseInt(num[1]);
-				globalUsage = sum;
+				memoryUsage = Std.parseFloat(arr[0]);
+				globalMemoryUsage = memoryUsage;
+				for (m in mem) globalMemoryUsage += m;
+
+				usage = Std.parseFloat(arr[1]);
+				globalUsage = 0;
+				for (p in percent) globalUsage += p;
 
 				onUpdate();
 
 				if (wasStarted) tmr.reset();
 			}, true);
 		});
-
-		return 1;
 		#else
-		trace('Can\'t start tracking! '.toCMD(YELLOW_BOLD) + 'Not supported by target'.toCMD(YELLOW));
+		trace('Start of tracking failed!'.toCMD(YELLOW_BOLD), 'Not supported by target'.toCMD(YELLOW));
 		#end
-		return 0;
 	}
 
-	/**
-	 * Terminates tracking GPU stats.
-	 */
+	/** Terminates tracking GPU stats. */
 	static function close() {
 		if (!wasStarted) return;
 		trace('Tracking stopped'.toCMD(RED));

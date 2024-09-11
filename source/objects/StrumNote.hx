@@ -15,8 +15,8 @@ class StrumNote extends FlxSprite
 	public var sustainReduce:Bool = true;
 	private var player:Int;
 
-	@:noCompletion var prefs:SaveVariables = ClientPrefs.data;
-	
+	var prefs:SaveVariables = ClientPrefs.data;
+
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
 		if(texture != value) {
@@ -32,7 +32,7 @@ class StrumNote extends FlxSprite
 
 		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
 		rgbShader.enabled = false;
-		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) useRGBShader = false;
+		if(PlayState.SONG?.disableNoteRGB) useRGBShader = false;
 		
 		var arr:Array<FlxColor> = prefs.arrowRGB[leData];
 		if(PlayState.isPixelStage) arr = prefs.arrowRGBPixel[leData];
@@ -53,12 +53,11 @@ class StrumNote extends FlxSprite
 		super(x, y);
 
 		var skin:String = null;
-		if(PlayState.SONG != null && PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
+		if(!PlayState.SONG?.arrowSkin.isEmpty()) skin = PlayState.SONG.arrowSkin;
 		else skin = Note.defaultNoteSkin;
 
 		var customSkin:String = skin + Note.getNoteSkinPostfix();
-		if (Paths.fileExistsAbsolute(Paths.imagePath('noteSkins/noteTypes/$customSkin'))) skin = 'noteSkins/noteTypes/$customSkin';
-		else if (Paths.fileExistsAbsolute(Paths.imagePath(customSkin))) skin = customSkin;
+		if (Paths.existsAbsolute(Paths.imagePath(customSkin))) skin = customSkin;
 
 		texture = skin; //Load texture and anims
 		scrollFactor.set();
@@ -70,7 +69,6 @@ class StrumNote extends FlxSprite
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
 
 		var skin:String = texture;
-		if (Paths.fileExistsAbsolute(Paths.imagePath('noteSkins/noteTypes/$skin'))) skin = 'noteSkins/noteTypes/$skin';
 
 		if(PlayState.isPixelStage)
 		{
@@ -170,6 +168,6 @@ class StrumNote extends FlxSprite
 			centerOffsets();
 			centerOrigin();
 		}
-		if(useRGBShader) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
+		if(useRGBShader) rgbShader.enabled = (animation.curAnim?.name != 'static');
 	}
 }
