@@ -1,6 +1,7 @@
 # Leer's Psych Mod Core
-Currently uses [Psych Engine 1.0b](https://github.com/ShadowMario/FNF-PsychEngine/tree/1f15374)
+- I DIDNT TESTED IT YET wait some time
 
+## Built on [Psych Engine 1.0b](https://github.com/ShadowMario/FNF-PsychEngine/tree/1f15374)
 ### [CHANGES](setup/changes.md)
 ### [BUILDING](setup/building.md)
 - tl;dr - upgrade haxe to 4.3 or higher and do `haxe setup.hxml`
