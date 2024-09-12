@@ -74,7 +74,7 @@
 	<haxelib name="flixel-addons"      version="3.2.3"/>
 	<haxelib name="tjson"              version="1.4.0"/>
 
-	<haxelib name="hscript-iris"       version="1.0.2" if="HSCRIPT_ALLOWED"/>
+	<haxelib name="hscript-iris"       version="1.0.2"  if="HSCRIPT_ALLOWED"/>
 	<haxelib name="hxvlc"              version="1.7.1"  if="VIDEOS_ALLOWED"/>
 
 	<haxelib name="linc_luajit"        version="git" url="https://github.com/superpowers04/linc_luajit" branch="633fcc0" if="LUA_ALLOWED"/>
