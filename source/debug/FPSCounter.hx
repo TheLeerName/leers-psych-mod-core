@@ -26,9 +26,9 @@ class FPSCounter extends TextField
 	public var memoryMegas(get, never):Float;
 
 	/**
-	 * `%fps%` replaces as `currentFPS`, `%ram%` replaces as `memoryMegas`, `%gpu%` replaces as `GPUMemory.usage`.
+	 * Format of fps counter text
 	 * 
-	 * WARNING: Resets to default on calling `resetTextFormat()`.
+	 * WARNING: Resets to default on calling `resetTextFormat()`
 	 */
 	public var textFormat:String;
 
@@ -105,6 +105,41 @@ class FPSCounter extends TextField
 		updateText();
 	}
 
+	var pressedF3Lines:Array<String> = [
+		'%file% %modVer% (%modVer%/%psychVer%)',
+		'%fps% fps T: %maxFPS% %quality% %antialiasing%',
+		'RAM: %ram% GPU: %gpuUsgMem% %caching%',
+		'GPU: %gpuUsg%% (%gpuUsgGlobal%%) %shaders%',
+		'',
+		'XY: %mouseX% / %mouseY%',
+		'',
+		'haxe: %haxe%',
+		'lime: %lime%',
+		'openfl: %openfl%',
+		'flixel: %flixel%',
+		'flixel-addons: %flixel-addons%',
+		#if tjson
+		'tjson: %tjson%',
+		#end
+		#if LUA_ALLOWED
+		'linc_luajit: %linc_luajit%',
+		'%lua%',
+		'%luajit%',
+		#end
+		#if HSCRIPT_ALLOWED
+		'hscript-iris: %hscript-iris%',
+		#end
+		#if VIDEOS_ALLOWED
+		'hxvlc: %hxvlc%',
+		#end
+		#if DISCORD_ALLOWED
+		'hxdiscord_rpc: %hxdiscord_rpc%',
+		#end
+		#if flxanimate
+		'flxanimate: %flxanimate%'
+		#end
+	];
+
 	/**
 	 * Resets `textFormat` variable to default.
 	 * 
@@ -114,40 +149,7 @@ class FPSCounter extends TextField
 		var lines:Array<String> = [];
 		#if windows
 		if (pressedF3)
-			lines = [
-				'%file% %modVer% (%modVer%/%psychVer%)',
-				'%fps% fps T: %maxFPS% %quality% %antialiasing%',
-				'RAM: %ram% GPU: %gpuUsgMem% %caching%',
-				'GPU: %gpuUsg%% (%gpuUsgGlobal%%) %shaders%',
-				'',
-				'XY: %mouseX% / %mouseY%',
-				'',
-				'haxe: %haxe%',
-				'lime: %lime%',
-				'openfl: %openfl%',
-				'flixel: %flixel%',
-				'flixel-addons: %flixel-addons%',
-				#if tjson
-				'tjson: %tjson%',
-				#end
-				#if LUA_ALLOWED
-				'linc_luajit: %linc_luajit%',
-				'%lua%',
-				'%luajit%',
-				#end
-				#if HSCRIPT_ALLOWED
-				'hscript-iris: %hscript-iris%',
-				#end
-				#if VIDEOS_ALLOWED
-				'hxvlc: %hxvlc%',
-				#end
-				#if DISCORD_ALLOWED
-				'hxdiscord_rpc: %hxdiscord_rpc%',
-				#end
-				#if flxanimate
-				'flxanimate: %flxanimate%'
-				#end
-			];
+			lines.concat(pressedF3Lines);
 		else {
 			lines.push(states.MainMenuState.modVersion + (prefs.showFPS ? ' | FPS: %fps%' : ''));
 
@@ -165,7 +167,7 @@ class FPSCounter extends TextField
 		updateText();
 	}
 
-	public dynamic function updateText():Void { // so people can override it in hscript
+	public function replaceVars(text:String) {
 		var d = Main.defines;
 		var replaces = [
 			'fps' => displayFPS,
@@ -212,15 +214,17 @@ class FPSCounter extends TextField
 			#end
 		];
 
-		text = textFormat;
-		#if windows
-		if (pressedF3 && GPUStats.errorMessage != null)
-			text += '\n\nGPU stats tracking failed! ' + GPUStats.errorMessage;
-		#end
+		var _text:String = text;
+		for (f => r in replaces) _text = _text.replace('%$f%', r);
+		return _text;
+	}
 
-		for (f => r in replaces) text = text.replace('%$f%', r);
+	public function getTextColor():FlxColor
+		return (currentFPS < FlxG.drawFramerate * 0.5 && !pressedF3) ? lowFPSColor : normalColor;
 
-		textColor = (currentFPS < FlxG.drawFramerate * 0.5 && !pressedF3) ? lowFPSColor : normalColor;
+	public dynamic function updateText():Void { // so people can override it in hscript
+		text = replaceVars(textFormat);
+		textColor = getTextColor();
 	}
 
 	inline function get_memoryMegas():Float

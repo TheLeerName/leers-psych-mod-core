@@ -17,18 +17,19 @@ typedef PlayingSound = {
  */
 @:access(flixel.sound.FlxSound)
 class AudioUtil {
+	public static var currentAudioDevice:String;
 	public static function checkForDisconnect() {
 		// default audio device switch fix!!
 		// or the "AL lib: (EE) ALCwasapiPlayback_mixerProc: Failed to get padding: 0x88890004" fix
 		// dont ask how i found this i just got it by random 💀 - TheLeerName
 
 		static var prevDevice:String = null;
-		var newDevice = ALC.getString(null, 0x1013);
-		if (prevDevice != null && prevDevice != newDevice) {
+		currentAudioDevice = ALC.getString(null, 0x1013);
+		if (prevDevice != null && prevDevice != currentAudioDevice) {
 			reconnect();
-			trace('Audio was reconnected: '.toCMD(GREEN_BOLD) + newDevice.substring(newDevice.indexOf('(') + 1, newDevice.lastIndexOf(')')).toCMD(GREEN));
+			trace('Audio was reconnected: '.toCMD(GREEN_BOLD) + currentAudioDevice.substring(currentAudioDevice.indexOf('(') + 1, currentAudioDevice.lastIndexOf(')')).toCMD(GREEN));
 		}
-		prevDevice = newDevice;
+		prevDevice = currentAudioDevice;
 	}
 
 	public static function reconnect() {

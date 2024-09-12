@@ -1,5 +1,6 @@
 package debug;
 
+import flixel.util.FlxSignal;
 #if windows
 import lime.app.Future;
 import sys.io.Process;
@@ -15,6 +16,7 @@ import sys.io.Process;
 @:cppInclude('windows.h')
 #end
 @:publicFields
+@:access(debug.FPSCounter)
 class GPUStats {
 	/** Total dedicated GPU memory in bytes. */
 	static var totalMemory(default, null):Float = -1;
@@ -29,8 +31,10 @@ class GPUStats {
 	/** Current GPU utilization percentage of all applications on PC. */
 	static var globalUsage(default, null):Float = -1;
 
-	/** Will be called on update of variables. Usually called each second. */
-	static var onUpdate:Void->Void = () -> {};
+	/** Will be dispatched on update of variables. Usually dispatched each second. */
+	static var onUpdate:FlxSignal;
+	/** Will be dispatched on error. */
+	static var onError:FlxSignal;
 
 	/** `true` if GPU stats tracking is running. */
 	static var wasStarted:Bool = false;
@@ -42,6 +46,10 @@ class GPUStats {
 		#if windows
 		if (wasStarted) return;
 		wasStarted = true;
+
+		onUpdate = new FlxSignal();
+		onError = new FlxSignal();
+		onError.addOnce(() -> Main.fpsVar.pressedF3Lines.push('\nGPU stats tracking failed! $errorMessage'));
 
 		var first = true;
 		// very cool thing!!!
@@ -55,6 +63,7 @@ class GPUStats {
 					if (err.length > 0) {
 						trace('Getting values from tracking failed! '.toCMD(RED_BOLD) + err.toCMD(RED));
 						errorMessage = 'Unknown';
+						onError.dispatch();
 						wasStarted = false;
 						return;
 					}
@@ -70,6 +79,7 @@ class GPUStats {
 					err = err.substring(0, err.indexOf('\r\n'));
 					trace('Getting values from tracking failed! '.toCMD(RED_BOLD) + err.toCMD(RED));
 					errorMessage = err;
+					onError.dispatch();
 					wasStarted = false;
 					return;
 				} else if (first)
@@ -91,7 +101,7 @@ class GPUStats {
 				globalUsage = 0;
 				for (p in percent) globalUsage += p;
 
-				onUpdate();
+				onUpdate.dispatch();
 
 				if (wasStarted) tmr.reset();
 			}, true);

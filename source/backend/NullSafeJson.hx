@@ -6,7 +6,7 @@ import #if tjson tjson.TJSON #else haxe.Json #end;
 
 @:publicFields
 class NullSafeJson {
-	/** Contains `haxe.Exception` object which has last error occurred in `parse` or `encode` methods. Changes only if error was happened. */
+	/** Contains `haxe.Exception` object which has last error occurred in methods. Changes only if error was happened. */
 	static var lastError(default, null):Exception;
 
 	#if tjson
@@ -54,7 +54,7 @@ class NullSafeJson {
 	 * @return `String` / `null` (if `value` = `null`, or error occurred)
 	 */
 	#end
-	static function stringify(value:Dynamic, ?replacer:(key:Dynamic, value:Dynamic) -> Dynamic, ?space:String) {
+	static function stringify(value:Dynamic, ?replacer:(key:Dynamic, value:Dynamic) -> Dynamic, ?space:String):Null<String> {
 		var val:String = "";
 
 		try {

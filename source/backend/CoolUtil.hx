@@ -135,17 +135,13 @@ class CoolUtil {
 		return name.substring(name.lastIndexOf('.') + 1);
 	}
 
-	static function getPackagePath(cl:Dynamic):String {
-		if (!(cl is Class)) cl = cast (Type.getClass(cl), Class<Dynamic>);
-		var typeof:String = cast Type.typeof(cl);
-		return typeof.substring(typeof.indexOf('(') + 1, typeof.indexOf(')'));
-	}
-
+	/** returns haxe exception as string, but if error will be about file not existing it will return just `"Not found"` */
 	static function prettierNotFoundException(e:haxe.Exception):String {
 		var str:String = e.toString();
 		return str.startsWith('[lime.utils.Assets]') ? 'Not found' : str;
 	}
 
+	/** changes variable with name `varr` to `value` value from `arr` array recursively (if member of `arr` array has `members` variable it will change from them too) */
 	static function changeVarLooped(arr:Array<Dynamic>, varr:String, value:Dynamic) {
 		if (arr.isEmpty()) return;
 		for (o in arr) {

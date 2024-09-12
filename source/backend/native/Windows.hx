@@ -18,9 +18,10 @@ class Windows {
 	public static function changeWallpaper(path:String):Bool
 		return false;
 
-	/** Allows drawing window frame in dark mode, works on Windows 10 build 17763 or greater.
+	/** 
+	 * Allows drawing window frame in dark mode, works on Windows 10 build 17763 or greater.
 	 * @return Is dark mode allowed?
-	*/
+	 */
 	@:functionCode('
 		DWORD val;
 		DWORD valSize = sizeof(val);

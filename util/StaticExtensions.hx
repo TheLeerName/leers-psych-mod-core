@@ -85,7 +85,7 @@ class StaticExtensions {
 	}
 	#end
 
-	/** Shortcut of `FlxMath.roundDecimal` */
+	/** Shortcut of `Math.pow` */
 	public static function pow(n:Float, ?exp:Float = 2):Float return Math.pow(n, exp);
 	/** Shortcut of `Std.parseInt()` (if `n` is `String`) or `Std.int` (if `n` is `Float`) or `bool ? 1 : 0` (if `n` is `Bool`) */
 	public static function toInt(n:flixel.util.typeLimit.OneOfThree<String, Float, Bool>):Int { return n is Float ? Std.int(n) : (n is Bool ? (n ? 1 : 0) : Std.parseInt(n)); }
@@ -95,5 +95,5 @@ class StaticExtensions {
 	public static function isEmpty(str:flixel.util.typeLimit.OneOfTwo<String, Array<Dynamic>>, ?length:Int = 1):Bool return str != null ? Reflect.getProperty(str is String ? Reflect.callMethod(str, Reflect.getProperty(str, 'trim'), []) : str, 'length') < length : true;
 
 	/** Formats this `str` as `format` in Windows cmd, on other platforms will return just `str` */
-	public static function toCMD(str:String, format:CMDFormat) return WindowsCMDUtil.toCMD(str, format);
+	public static function toCMD(str:String, format:CMDFormat):String return WindowsCMDUtil.toCMD(str, format);
 }

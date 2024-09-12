@@ -40,10 +40,14 @@ import lime.graphics.Image;
 #end
 
 enum TitleWindowColorMode {
+	/** lerps from red to default colors */
 	RED_GLOW;
+
 	RAINBOW;
+
 	DEFAULT;
-	/** if you wanna set title window color by yourself */
+
+	/** with this title window will not be changed by game so u can change it by yourself in hscript or lua */
 	DISABLED;
 }
 
@@ -62,10 +66,14 @@ class Main extends Sprite
 
 	public static var fpsVar:FPSCounter;
 
+	/** If dark mode is allowed on this system, works on Windows target only */
 	public static var isDarkMode(default, null):Bool = false;
+	/** Color mode of title window, works on Windows target only */
 	public static var titleWindowColorMode:TitleWindowColorMode = DEFAULT;
 
+	/** if `false`, you cant change fullscreen by `Alt+Enter` or `F11` */
 	public static var fullscreenAllowed:Bool = true;
+	/** dispatches on each fullscreen change */
 	public static var onFullscreenChange:FlxSignal = new FlxSignal();
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
@@ -76,6 +84,8 @@ class Main extends Sprite
 	}
 
 	/**
+	 * Plays video which will be got from relative `key`
+	 * 
 	 * `onFinish` returns:
 	 * - `2` -> video handler not supported by target / `ClientPrefs.data.showVideos` = `false`;
 	 * - `1` -> video not found;
@@ -112,6 +122,7 @@ class Main extends Sprite
 		#end
 	}
 
+	/** Sets framerate of game and updates fps graph of flixel debugger */
 	public static function setFramerate(value:Int) {
 		if(value > FlxG.drawFramerate)
 			FlxG.updateFramerate = FlxG.drawFramerate = value;
