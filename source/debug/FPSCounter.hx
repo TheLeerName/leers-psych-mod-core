@@ -64,6 +64,18 @@ class FPSCounter extends TextField
 		resetTextFormat();
 	}
 
+	/** Usually used before `MusicBeatState.switchState` or in start of `create()` */
+	public function tweenToColor(color:FlxColor, ?withDelay:Bool) {
+		if (normalColor == color) return;
+		var dur:Float = CustomFadeTransition.DURATION;
+
+		function lol(?tmr)
+			CoolUtil.tweenColor(this, {normalColor: color}, dur);
+
+		if (withDelay) new FlxTimer().start(dur, lol);
+		else lol();
+	}
+
 	@:noCompletion var pressedF3(default, set):Bool = false;
 	public var wasPressedF3:Bool = false;
 	@:noCompletion inline function set_pressedF3(pressedF3:Bool):Bool {

@@ -42,6 +42,8 @@ class MainMenuState extends MusicBeatState
 
 	override function create()
 	{
+		Main.fpsVar.tweenToColor(0x000000, false);
+
 		#if MODS_ALLOWED
 		Mods.pushGlobalMods();
 		#end
@@ -284,6 +286,7 @@ class MainMenuState extends MusicBeatState
 
 					FlxFlicker.flicker(item, 1, 0.06, false, false, function(flick:FlxFlicker)
 					{
+						Main.fpsVar.tweenToColor(0xffffff, true);
 						switch (option)
 						{
 							case 'story_mode':

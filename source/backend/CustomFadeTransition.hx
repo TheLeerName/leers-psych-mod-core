@@ -3,7 +3,7 @@ package backend;
 import flixel.util.FlxGradient;
 
 class CustomFadeTransition extends MusicBeatSubstate {
-	inline public static final DURATION:Float = 0.6;
+	public static final DURATION:Float = 0.6;
 	public static var finishCallback:Void->Void;
 	var isTransIn:Bool = false;
 	var transBlack:FlxSprite;
