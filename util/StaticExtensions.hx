@@ -99,10 +99,10 @@ class StaticExtensions {
 	/** Shortcut of `Std.parseFloat()` */
 	public static function toFloat(n:String):Float return Std.parseFloat(n);
 
-	/** Returns `true` if `arr` is empty array or `null` */
-	public static function arrIsEmpty(arr:Array<Dynamic>, ?length:Int = 1):Bool return arr != null ? arr.length < length : true;
-	/** Returns `true` if `str` is empty string or `null` */
-	public static function strIsEmpty(str:String, ?length:Int = 1):Bool return str != null ? str.trim().length < length : true;
+	/** Returns `false` if `arr` is empty array or `null` */
+	public static function arrNotEmpty(arr:Array<Dynamic>, ?length:Int = 1):Bool return arr != null ? arr.length >= length : false;
+	/** Returns `false` if `str` is empty string or `null` */
+	public static function strNotEmpty(str:String, ?length:Int = 1):Bool return str != null ? str.trim().length >= length : false;
 
 	/** Formats this `str` as `format` in Windows cmd, on other platforms will return just `str` */
 	public static function toCMD(str:String, format:CMDFormat):String return WindowsCMDUtil.toCMD(str, format);

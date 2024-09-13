@@ -617,7 +617,7 @@ class PsychUIInputText extends FlxSpriteGroup
 		v = filter(v);
 
 		textObj.text = '';
-		if(!v.strIsEmpty())
+		if(v.strNotEmpty())
 		{
 			if(v.length > 1)
 			{

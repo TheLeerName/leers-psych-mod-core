@@ -9,10 +9,10 @@ class School extends BaseStage {
 	var bgGirls:BackgroundGirls;
 	override function onCreate() {
 		var _song = PlayState.SONG;
-		if(_song.gameOverSound.strIsEmpty()) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pixel';
-		if(_song.gameOverLoop.strIsEmpty()) GameOverSubstate.loopSoundName = 'gameOver-pixel';
-		if(_song.gameOverEnd.strIsEmpty()) GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
-		if(_song.gameOverChar.strIsEmpty()) GameOverSubstate.characterName = 'bf-pixel-dead';
+		if(!_song.gameOverSound.strNotEmpty()) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pixel';
+		if(!_song.gameOverLoop.strNotEmpty()) GameOverSubstate.loopSoundName = 'gameOver-pixel';
+		if(!_song.gameOverEnd.strNotEmpty()) GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
+		if(!_song.gameOverChar.strNotEmpty()) GameOverSubstate.characterName = 'bf-pixel-dead';
 
 		var bgSky:BGSprite = new BGSprite('weeb/weebSky', 0, 0, 0.1, 0.1);
 		add(bgSky);

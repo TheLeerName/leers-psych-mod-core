@@ -143,7 +143,7 @@ class CoolUtil {
 
 	/** changes variable with name `varr` to `value` value from `arr` array recursively (if member of `arr` array has `members` variable it will change from them too) */
 	static function changeVarLooped(arr:Array<Dynamic>, varr:String, value:Dynamic) {
-		if (arr.arrIsEmpty()) return;
+		if (!arr.arrNotEmpty()) return;
 		for (o in arr) {
 			if (o == null) continue;
 

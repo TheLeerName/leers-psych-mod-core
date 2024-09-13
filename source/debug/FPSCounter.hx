@@ -69,10 +69,10 @@ class FPSCounter extends TextField
 		if (normalColor == color) return;
 		var dur:Float = CustomFadeTransition.DURATION;
 
-		function lol(?tmr)
+		function lol(?idk)
 			CoolUtil.tweenColor(this, {normalColor: color}, dur);
 
-		if (withDelay) new FlxTimer().start(dur, lol);
+		if (withDelay) FlxG.signals.preStateCreate.addOnce(lol);
 		else lol();
 	}
 

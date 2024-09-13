@@ -233,7 +233,7 @@ class ModsMenuState extends MusicBeatState
 		add(settingsButton);
 		buttons.push(settingsButton);
 
-		if(modsGroup.members[curSelectedMod].settings.arrIsEmpty())
+		if(!modsGroup.members[curSelectedMod].settings.arrNotEmpty())
 			settingsButton.enabled = false;
 
 		var button = new MenuButton(buttonsX + 400, buttonsY, 80, 80, Paths.image('modsMenuButtons'), function() //On/Off

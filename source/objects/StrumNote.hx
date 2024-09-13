@@ -53,8 +53,7 @@ class StrumNote extends FlxSprite
 		super(x, y);
 
 		var skin:String = null;
-		if(!PlayState.SONG?.arrowSkin.strIsEmpty()) skin = PlayState.SONG.arrowSkin;
-		else skin = Note.defaultNoteSkin;
+		var skin:String = PlayState.SONG?.arrowSkin.strNotEmpty() ? PlayState.SONG.arrowSkin : Note.defaultNoteSkin;
 
 		var customSkin:String = skin + Note.getNoteSkinPostfix();
 		if (Paths.existsAbsolute(Paths.imagePath(customSkin))) skin = customSkin;

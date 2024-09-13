@@ -286,7 +286,7 @@ class MainMenuState extends MusicBeatState
 
 					FlxFlicker.flicker(item, 1, 0.06, false, false, function(flick:FlxFlicker)
 					{
-						Main.fpsVar.tweenToColor(0xffffff, true);
+						Main.fpsVar.tweenToColor(0xffffff);
 						switch (option)
 						{
 							case 'story_mode':
