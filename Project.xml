@@ -70,16 +70,17 @@
 	<haxelib name="lime"               version="8.1.2" />
 	<haxelib name="openfl"             version="9.3.3" />
 
+	<haxelib name="hscript"            version="git" url="https://github.com/TheLeerName/hscript-iris-flixel-debugger" branch="638b984" if="HSCRIPT_ALLOWED"/>
+
 	<haxelib name="flixel"             version="5.6.2"/>
 	<haxelib name="flixel-addons"      version="3.2.3"/>
 	<haxelib name="tjson"              version="1.4.0"/>
 
-	<haxelib name="hscript-iris"       version="1.0.2"  if="HSCRIPT_ALLOWED"/>
-	<haxelib name="hxvlc"              version="1.7.1"  if="VIDEOS_ALLOWED"/>
+	<haxelib name="hxvlc"              version="1.7.1" if="VIDEOS_ALLOWED"/>
 
 	<haxelib name="linc_luajit"        version="git" url="https://github.com/superpowers04/linc_luajit" branch="633fcc0" if="LUA_ALLOWED"/>
 	<haxelib name="hxdiscord_rpc"      version="git" url="https://github.com/MAJigsaw77/hxdiscord_rpc"  branch="187c445" if="DISCORD_ALLOWED"/>
-	<haxelib name="flxanimate"         version="git" url="https://github.com/Dot-Stuff/flxanimate"      branch="768740a"/>
+	<haxelib name="flxanimate"         version="git" url="https://github.com/Dot-Stuff/flxanimate"      branch="768740a" />
 
 	<!-- __________________________ Game Assets & Etc. __________________________ -->
 
@@ -90,6 +91,9 @@
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
 	<haxedef name="HXVLC_FLIXEL_VOLUME_MULTIPLIER" value="150" if="VIDEOS_ALLOWED"/>
+
+	<!-- i guess thats need for hscript iris ??? -->
+	<haxedef name="hscriptPos" />
 
 	<!-- Disable Discord IO Thread -->
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />
