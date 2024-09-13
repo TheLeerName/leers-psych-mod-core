@@ -85,10 +85,10 @@ class MainMenuState extends MusicBeatState
 		}
 
 		if (leftOption != null)
-			leftItem = createMenuItem(leftOption, 60, 490);
+			leftItem = createMenuItem(leftOption, 60, 470);
 		if (rightOption != null)
 		{
-			rightItem = createMenuItem(rightOption, FlxG.width - 60, 490);
+			rightItem = createMenuItem(rightOption, FlxG.width - 60, 470);
 			rightItem.x -= rightItem.width;
 		}
 
