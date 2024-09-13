@@ -137,13 +137,16 @@ class EditorPlayState extends MusicBeatSubstate
 		tipText.scrollFactor.set();
 		add(tipText);
 		FlxG.mouse.visible = false;
-		
+
+		notes = new FlxTypedGroup<Note>();
+		add(notes);
+
 		generateSong();
 		_noteList = null;
 
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
-		
+
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
 		DiscordClient.changePresence('Playtesting on Chart Editor', PlayState.SONG.song, null, true, songLength);
@@ -304,9 +307,6 @@ class EditorPlayState extends MusicBeatSubstate
 		Conductor.bpm = songData.bpm;
 
 		FlxG.sound.music.volume = vocals.volume = opponentVocals.volume = 0;
-
-		notes = new FlxTypedGroup<Note>();
-		add(notes);
 
 		var oldNote:Note = null;
 		for (note in _noteList)

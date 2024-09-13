@@ -87,6 +87,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	public static var GRID_COLUMNS_PER_PLAYER = 4;
 	public static var GRID_PLAYERS = 2;
 	public static var GRID_SIZE = 40;
+	final DEFAULT_SONG = 'blank';
 	final BACKUP_EXT = '.bkp';
 
 	public var quantizations:Array<Int> = [
@@ -189,6 +190,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var selectionStart:FlxPoint = FlxPoint.get();
 	var selectionBox:FlxSprite;
 
+	var instLoaded:Bool;
 	var _shouldReset:Bool = true;
 	public function new(?shouldReset:Bool = true)
 	{
@@ -563,7 +565,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 	}
 
-	var openedNewChart:Bool = false;
 	function openNewChart()
 	{
 		var song:SwagSong = {
@@ -578,12 +579,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			player1: 'bf',
 			player2: 'bf',
 			gfVersion: 'gf',
-			stage: 'stage',
+			stage: '',
 			format: 'psych_v1'
 		};
-		Song.setSongName(song, 'Blank', 'Blank');
+		Song.setSongName(song, DEFAULT_SONG, DEFAULT_SONG);
 		Song.chartPath = null;
-		openedNewChart = true;
 		loadChart(song);
 	}
 
@@ -937,8 +937,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			var canContinue:Bool = true;
 			if(FlxG.keys.justPressed.ENTER)
 			{
-				goToPlayState();
-				return;
+				return goToPlayState();
 			}
 			else if(FlxG.keys.pressed.CONTROL && !isMovingNotes && (FlxG.keys.justPressed.Z || FlxG.keys.justPressed.Y || FlxG.keys.justPressed.X ||
 				FlxG.keys.justPressed.C || FlxG.keys.justPressed.V || FlxG.keys.justPressed.A || FlxG.keys.justPressed.S))
@@ -1752,7 +1751,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				Paths.dumpAsset(key);
 		}
 
-		var loaded = Paths.loadSong(songPath, vocals, opponentVocals, characterData.vocalsP1, characterData.vocalsP2, !openedNewChart);
+		var newChart:Bool = songPath == DEFAULT_SONG;
+		var loaded = Paths.loadSong(songPath, vocals, opponentVocals, characterData.vocalsP1, characterData.vocalsP2, !newChart);
 		if (loaded.inst) {
 			FlxG.sound.music.volume = 0;
 			FlxG.sound.music.pause();
@@ -1771,8 +1771,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			opponentVocals.pause();
 			opponentVocals.time = time;
 		}
+		instLoaded = loaded.inst;
 
-		DiscordClient.changePresence('Chart Editor', openedNewChart ? 'Song not choosed' : 'Song: ' + PlayState.SONG.songDisplay);
+		DiscordClient.changePresence('Chart Editor', (!instLoaded && newChart) ? 'Song not choosed' : 'Song: ' + PlayState.SONG.songDisplay);
 		updateAudioVolume();
 		setPitch();
 		_cacheSections();
@@ -4515,6 +4516,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function openEditorPlayState()
 	{
+		if (!instLoaded)
+			return showOutput('Song inst not loaded!', true);
+
 		setSongPlaying(false);
 		chartEditorSave.flush(); //just in case a random crash happens before loading
 
@@ -4525,6 +4529,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function goToPlayState()
 	{
+		if (!instLoaded)
+			return showOutput('Song inst not loaded!', true);
+
 		persistentUpdate = false;
 		FlxG.mouse.visible = false;
 		chartEditorSave.flush();

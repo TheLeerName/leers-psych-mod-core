@@ -36,7 +36,7 @@ class Paths {
 			loaded.inst = true;
 		}
 		catch(e) {
-			callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Inst.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
+			if (printErrors) callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Inst.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
 			FlxG.sound.playMusic(Paths.openflSoundEmpty());
 		}
 
@@ -51,14 +51,14 @@ class Paths {
 				loaded.player = true;
 			}
 			catch (e) {
-				callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals-$postfix.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
+				if (printErrors) callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals-$postfix.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
 				try {
 					var path = Paths.voicesPath(songPath);
 					if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
 					vocalsP1.loadEmbedded(Paths.soundAbsolute(path));
 					loaded.player = true;
 				} catch (e)
-					callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
+					if (printErrors) callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
 			}
 
 			postfix = vocalsP2Postfix.strNotEmpty() ? vocalsP2Postfix : 'Opponent';
@@ -68,7 +68,7 @@ class Paths {
 				vocalsP2.loadEmbedded(Paths.soundAbsolute(path));
 				loaded.opponent = true;
 			} catch (e)
-				callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals-$postfix.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
+				if (printErrors) callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals-$postfix.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
 		}
 
 		return loaded;
