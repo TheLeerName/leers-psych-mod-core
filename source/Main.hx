@@ -229,7 +229,7 @@ class Main extends Sprite
 				case RAINBOW:
 					Windows.setTextColor(FlxColor.fromHSB(time * 250, 0.75, 0.75));
 				case DEFAULT:
-					Windows.setTextColor(isDarkMode.toInt() * 0xffffff);
+					Windows.setTextColor(isDarkMode.boolToInt() * 0xffffff);
 				// you can add your custom glows here!
 				default:
 			}

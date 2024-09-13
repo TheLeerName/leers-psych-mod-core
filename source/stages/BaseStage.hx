@@ -119,7 +119,7 @@ class BaseStageWithoutDefaultStageObjects {
 	//Fix for the Chart Editor on Base Game stages
 	function setDefaultGF(name:String) {
 		var gfVersion:String = PlayState.SONG.gfVersion;
-		if(gfVersion.isEmpty()) {
+		if(gfVersion.strIsEmpty()) {
 			gfVersion = name;
 			PlayState.SONG.gfVersion = gfVersion;
 		}

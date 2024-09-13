@@ -13,6 +13,7 @@ import backend.CoolUtil;
 #end
 
 import util.WindowsCMDUtil;
+using StringTools;
 
 /** 
  * To use:
@@ -87,12 +88,21 @@ class StaticExtensions {
 
 	/** Shortcut of `Math.pow` */
 	public static function pow(n:Float, ?exp:Float = 2):Float return Math.pow(n, exp);
-	/** Shortcut of `Std.parseInt()` (if `n` is `String`) or `Std.int` (if `n` is `Float`) or `bool ? 1 : 0` (if `n` is `Bool`) */
-	public static function toInt(n:flixel.util.typeLimit.OneOfThree<String, Float, Bool>):Int { return n is Float ? Std.int(n) : (n is Bool ? (n ? 1 : 0) : Std.parseInt(n)); }
+
+	/** Shortcut of `Std.parseInt()` */
+	public static function strToInt(str:String):Int return Std.parseInt(str);
+	/** Shortcut of `Std.int` */
+	public static function floatToInt(n:Float):Int return Std.int(n);
+	/** Shortcut of `bool ? 1 : 0` */
+	public static function boolToInt(b:Bool):Int return b ? 1 : 0;
+
 	/** Shortcut of `Std.parseFloat()` */
 	public static function toFloat(n:String):Float return Std.parseFloat(n);
+
+	/** Returns `true` if `arr` is empty array or `null` */
+	public static function arrIsEmpty(arr:Array<Dynamic>, ?length:Int = 1):Bool return arr != null ? arr.length < length : true;
 	/** Returns `true` if `str` is empty string or `null` */
-	public static function isEmpty(str:flixel.util.typeLimit.OneOfTwo<String, Array<Dynamic>>, ?length:Int = 1):Bool return str != null ? Reflect.getProperty(str is String ? Reflect.callMethod(str, Reflect.getProperty(str, 'trim'), []) : str, 'length') < length : true;
+	public static function strIsEmpty(str:String, ?length:Int = 1):Bool return str != null ? str.trim().length < length : true;
 
 	/** Formats this `str` as `format` in Windows cmd, on other platforms will return just `str` */
 	public static function toCMD(str:String, format:CMDFormat):String return WindowsCMDUtil.toCMD(str, format);

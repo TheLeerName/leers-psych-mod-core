@@ -132,7 +132,7 @@ class VSlice
 
 		var focusCameraEvents:Array<Dynamic> = [];
 		var allEvents:Array<Dynamic> = chart.events;
-		if(!allEvents.isEmpty())
+		if(!allEvents.arrIsEmpty())
 		{
 			var time:Float = 0;
 			allEvents.sort(sortByTime);
@@ -240,7 +240,7 @@ class VSlice
 					noteSec++;
 
 				var psychNote:Array<Dynamic> = [note.t, note.d, note.l ?? 0];
-				if(!note.k.isEmpty() && note.k != 'normal') psychNote.push(note.k);
+				if(!note.k.strIsEmpty() && note.k != 'normal') psychNote.push(note.k);
 
 				sectionData[noteSec]?.sectionNotes.push(psychNote);
 			}
@@ -289,7 +289,7 @@ class VSlice
 							fields.push(event.v);
 						case TClass(Array):
 							var arr:Array<Dynamic> = cast event.v;
-							if(!arr.isEmpty())
+							if(!arr.arrIsEmpty())
 							{
 								for (value in arr)
 								{
@@ -316,12 +316,12 @@ class VSlice
 	public static function export(songData:SwagSong, ?difficultyName:String = null):VSlicePackage
 	{
 		var events:Array<VSliceEvent> = [];
-		if(!songData.events.isEmpty()) //Add events
+		if(!songData.events.arrIsEmpty()) //Add events
 		{
 			for (event in songData.events)
 			{
 				var subEvents:Array<Array<Dynamic>> = cast event[1];
-				if(!subEvents.isEmpty())
+				if(!subEvents.arrIsEmpty())
 					for (lilEvent in subEvents)
 						events.push({t: event[0], e: lilEvent[0], v: {value1: lilEvent[1], value2: lilEvent[2]}});
 			}
@@ -340,14 +340,14 @@ class VSlice
 			for (section in songData.notes)
 			{
 				// Add notes
-				if(!section.sectionNotes.isEmpty())
+				if(!section.sectionNotes.arrIsEmpty())
 				{
 					for (note in section.sectionNotes)
 					{
 						var vsliceNote:VSliceNote = {t: note[0], d: note[1]};
 						if(note[2] > 0)
 							vsliceNote.l = note[2];
-						if(!note[3].isEmpty())
+						if(!note[3].strIsEmpty())
 							vsliceNote.k = note[3];
 						
 						notes.push(vsliceNote);

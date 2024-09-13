@@ -48,7 +48,7 @@ class NoteTypesConfig
 	public static function applyNoteTypeData(note:Note, name:String)
 	{
 		var data:Array<NoteTypeProperty> = loadNoteTypeData(name);
-		if(data.isEmpty()) return;
+		if(data.arrIsEmpty()) return;
 		
 		for (line in data) 
 		{

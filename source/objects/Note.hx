@@ -193,7 +193,7 @@ class Note extends FlxSprite
 				case 'GF Sing':
 					gfNote = true;
 			}
-			if (!value.isEmpty()) NoteTypesConfig.applyNoteTypeData(this, value);
+			if (!value.strIsEmpty()) NoteTypesConfig.applyNoteTypeData(this, value);
 			if (hitsound != 'hitsound' && hitsoundVolume > 0) Paths.sound(hitsound); //precache new sound for being idiot-proof
 			noteType = value;
 		}
@@ -323,7 +323,7 @@ class Note extends FlxSprite
 		var skin:String = texture + postfix;
 		if(texture.length < 1) {
 			skin = PlayState.SONG?.arrowSkin;
-			if(skin.isEmpty())
+			if(skin.strIsEmpty())
 				skin = defaultNoteSkin + postfix;
 		}
 		else rgbShader.enabled = false;

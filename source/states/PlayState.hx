@@ -347,7 +347,7 @@ class PlayState extends MusicBeatState
 
 		if (!stageData.hide_girlfriend)
 		{
-			if(SONG.gfVersion.isEmpty()) SONG.gfVersion = 'gf'; //Fix for the Chart Editor
+			if(SONG.gfVersion.strIsEmpty()) SONG.gfVersion = 'gf'; //Fix for the Chart Editor
 			gf = new Character(0, 0, SONG.gfVersion);
 			startCharacterPos(gf);
 			gfGroup.scrollFactor.set(0.95, 0.95);

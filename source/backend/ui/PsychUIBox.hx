@@ -250,7 +250,7 @@ class PsychUIBox extends FlxSpriteGroup
 
 	private function set_selectedName(v:String)
 	{
-		if(v.isEmpty()) selectedTab = null;
+		if(v.strIsEmpty()) selectedTab = null;
 
 		for (tab in tabs)
 		{
