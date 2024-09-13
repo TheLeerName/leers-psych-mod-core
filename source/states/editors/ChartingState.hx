@@ -563,6 +563,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 	}
 
+	var openedNewChart:Bool = false;
 	function openNewChart()
 	{
 		var song:SwagSong = {
@@ -575,13 +576,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			offset: 0,
 
 			player1: 'bf',
-			player2: 'dad',
+			player2: 'bf',
 			gfVersion: 'gf',
 			stage: 'stage',
 			format: 'psych_v1'
 		};
-		Song.setSongName(song, 'Too Slow', 'Too Slow');
+		Song.setSongName(song, 'Blank', 'Blank');
 		Song.chartPath = null;
+		openedNewChart = true;
 		loadChart(song);
 	}
 
@@ -904,7 +906,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				}
 			}
 
-			if(!songFinished) Conductor.songPosition = FlxMath.bound(FlxG.sound.music.time + Conductor.offset, 0, FlxG.sound.music.length - 1);
+			if(!songFinished) Conductor.songPosition = FlxMath.bound(FlxG.sound.music.time + Conductor.offset, 0, Math.max(FlxG.sound.music.length - 1, 0));
 			updateScrollY();
 		}
 
@@ -1750,65 +1752,27 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				Paths.dumpAsset(key);
 		}
 
-		try
-		{
-			var path:String = Paths.instPath(songPath);
-			if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
-			FlxG.sound.playMusic(Paths.soundAbsolute(path), 0);
+		var loaded = Paths.loadSong(songPath, vocals, opponentVocals, characterData.vocalsP1, characterData.vocalsP2, !openedNewChart);
+		if (loaded.inst) {
+			FlxG.sound.music.volume = 0;
 			FlxG.sound.music.pause();
 			FlxG.sound.music.time = time;
 			FlxG.sound.music.onComplete = (function() songFinished = true);
 		}
-		catch(e)
-			return trace('Loading inst file of "$songPath" failed!'.toCMD(RED_BOLD), e.toString().toCMD(RED));
-
-		@:privateAccess vocals.cleanup(true);
-		@:privateAccess opponentVocals.cleanup(true);
-		if (PlayState.SONG.needsVoices) {
-			var loaded = {player: false, opponent: false};
-			try {
-				var path = Paths.voicesPath(songPath, (characterData.vocalsP1 == null || characterData.vocalsP1.length < 1) ? 'Player' : characterData.vocalsP1);
-				if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
-				vocals.loadEmbedded(Paths.soundAbsolute(path));
-				loaded.player = true;
-			}
-			catch (e) {
-				trace('Loading player vocals file of "$songPath" failed!'.toCMD(RED_BOLD), e.toString().toCMD(RED));
-				trace('Trying to load legacy vocals file...'.toCMD(YELLOW));
-				try {
-					var path = Paths.voicesPath(songPath);
-					if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
-					vocals.loadEmbedded(Paths.soundAbsolute(path));
-					loaded.player = true;
-				} catch (e)
-					trace('Failed!'.toCMD(RED_BOLD), e.toString().toCMD(RED));
-			}
-
-			try {
-				var path = Paths.voicesPath(songPath, (characterData.vocalsP2 == null || characterData.vocalsP2.length < 1) ? 'Opponent' : characterData.vocalsP2);
-				if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
-				opponentVocals.loadEmbedded(Paths.soundAbsolute(path));
-				loaded.opponent = true;
-			} catch (e)
-				trace('Loading opponent vocals file of "$songPath" failed!'.toCMD(RED_BOLD), e.toString().toCMD(RED));
-
-			if (loaded.player) {
-				vocals.volume = 0;
-				vocals.play();
-				vocals.pause();
-				vocals.time = time;
-			}
-
-			if (loaded.opponent) {
-				opponentVocals.volume = 0;
-				opponentVocals.play();
-				opponentVocals.pause();
-				opponentVocals.time = time;
-			}
+		if (loaded.player) {
+			vocals.volume = 0;
+			vocals.play();
+			vocals.pause();
+			vocals.time = time;
+		}
+		if (loaded.opponent) {
+			opponentVocals.volume = 0;
+			opponentVocals.play();
+			opponentVocals.pause();
+			opponentVocals.time = time;
 		}
 
-		DiscordClient.changePresence('Chart Editor', 'Song: ' + PlayState.SONG.songDisplay);
-
+		DiscordClient.changePresence('Chart Editor', openedNewChart ? 'Song not choosed' : 'Song: ' + PlayState.SONG.songDisplay);
 		updateAudioVolume();
 		setPitch();
 		_cacheSections();
@@ -1818,7 +1782,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	{
 		trace('song completed');
 		setSongPlaying(false);
-		Conductor.songPosition = FlxG.sound.music.time = vocals.time = opponentVocals.time = FlxG.sound.music.length - 1;
+		Conductor.songPosition = FlxG.sound.music.time = vocals.time = opponentVocals.time = Math.max(FlxG.sound.music.length - 1, 0);
 		curSec = PlayState.SONG.notes.length - 1;
 		forceDataUpdate = true;
 	}

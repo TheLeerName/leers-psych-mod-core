@@ -1090,18 +1090,11 @@ class PlayState extends MusicBeatState
 		var songData = SONG;
 		Conductor.bpm = songData.bpm;
 
+		inst = new FlxSound();
 		vocals = new FlxSound();
 		opponentVocals = new FlxSound();
-		try {
-			if (songData.needsVoices) {
-				var voicesPlayer = Paths.voicesPath(songData.path, (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
-				vocals.loadEmbedded(Paths.soundAbsolute(voicesPlayer ?? Paths.voicesPath(songData.path)));
-				var voicesOpponent = Paths.voicesPath(songData.path, (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
-				if (voicesOpponent != null)
-					opponentVocals.loadEmbedded(Paths.soundAbsolute(voicesOpponent));
-			}
-		}
-		catch(e) {}
+
+		Paths.loadSong(songData.path, vocals, opponentVocals, boyfriend.vocalsFile, dad.vocalsFile);
 
 		#if FLX_PITCH
 		vocals.pitch = playbackRate;
@@ -1109,12 +1102,6 @@ class PlayState extends MusicBeatState
 		#end
 		FlxG.sound.list.add(vocals);
 		FlxG.sound.list.add(opponentVocals);
-
-		inst = new FlxSound();
-		try {
-			inst.loadEmbedded(Paths.inst(songData.path));
-		}
-		catch(e:Dynamic) {}
 		FlxG.sound.list.add(inst);
 
 		notes = new FlxTypedGroup<Note>();

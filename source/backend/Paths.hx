@@ -25,6 +25,55 @@ class Paths {
 	/** Contains `haxe.Exception` object which has last error occurred in some of methods in this class. Changes only if error was happened. */
 	public static var lastError(default, null):Exception;
 
+	public static function loadSong(songPath:String, vocalsP1:FlxSound, vocalsP2:FlxSound, vocalsP1Postfix:String, vocalsP2Postfix:String, ?printErrors:Bool = true, ?stackItem:StackItem):{inst:Bool, player:Bool, opponent:Bool} {
+		stackItem = getStackItem(stackItem);
+		var loaded = {inst: false, player: false, opponent: false};
+
+		try {
+			var path:String = instPath(songPath);
+			if (path == null) throw CoolUtil.prettierNotFoundException(lastError);
+			FlxG.sound.playMusic(soundAbsolute(path));
+			loaded.inst = true;
+		}
+		catch(e) {
+			callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Inst.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
+			FlxG.sound.playMusic(Paths.openflSoundEmpty());
+		}
+
+		@:privateAccess vocalsP1.cleanup(true);
+		@:privateAccess vocalsP2.cleanup(true);
+		if (PlayState.SONG.needsVoices) {
+			var postfix:String = vocalsP1Postfix.strNotEmpty() ? vocalsP1Postfix : 'Player';
+			try {
+				var path = Paths.voicesPath(songPath, postfix);
+				if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
+				vocalsP1.loadEmbedded(Paths.soundAbsolute(path));
+				loaded.player = true;
+			}
+			catch (e) {
+				callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals-$postfix.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
+				try {
+					var path = Paths.voicesPath(songPath);
+					if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
+					vocalsP1.loadEmbedded(Paths.soundAbsolute(path));
+					loaded.player = true;
+				} catch (e)
+					callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
+			}
+
+			postfix = vocalsP2Postfix.strNotEmpty() ? vocalsP2Postfix : 'Opponent';
+			try {
+				var path = Paths.voicesPath(songPath, postfix);
+				if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
+				vocalsP2.loadEmbedded(Paths.soundAbsolute(path));
+				loaded.opponent = true;
+			} catch (e)
+				callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals-$postfix.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
+		}
+
+		return loaded;
+	}
+
 	/**
 	 * Loads json file and parses it in haxe structure
 	 * @param path **Absolute** file path
@@ -396,7 +445,7 @@ class Paths {
 		}
 
 		ohNoAssetReturningNull(stackItem, 'sound', path);
-		return openflSound('$ASSETS_DIRECTORY/sounds/error.' + SOUND_EXT);
+		return openflSoundEmpty();
 	}
 
 	public static function getStackItem(?stackItem:StackItem):StackItem
@@ -467,6 +516,9 @@ class Paths {
 
 		return null;
 	}
+
+	public static function openflSoundEmpty():Sound
+		return new Sound();
 
 	public static function openflSound(key:String):Sound {
 		try {
