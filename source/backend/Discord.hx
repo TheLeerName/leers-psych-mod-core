@@ -94,7 +94,7 @@ class DiscordClient {
 		#end
 	}
 
-	public static function changePresence(?details:String = 'In the Menus', ?state:Null<String>, ?smallImageKey : String, ?hasStartTimestamp : Bool, ?endTimestamp: Float, largeImageKey:String = 'story_mode')
+	public static function changePresence(?details:String = 'In the Menus', ?state:Null<String>, ?smallImageKey : String, ?hasStartTimestamp : Bool, ?endTimestamp: Float, largeImageKey:String = 'icon')
 	{
 		#if DISCORD_ALLOWED
 		var startTimestamp:Float = 0;
