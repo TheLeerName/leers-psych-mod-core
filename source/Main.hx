@@ -284,7 +284,6 @@ class Main extends Sprite
 
 		#if !mobile
 		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
-		fpsVar.visible = false;
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;

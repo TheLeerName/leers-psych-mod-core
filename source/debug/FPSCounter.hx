@@ -149,7 +149,7 @@ class FPSCounter extends TextField
 		var lines:Array<String> = [];
 		#if windows
 		if (pressedF3)
-			lines.concat(pressedF3Lines);
+			lines = lines.concat(pressedF3Lines);
 		else {
 			lines.push(states.MainMenuState.modVersion + (prefs.showFPS ? ' | FPS: %fps%' : ''));
 
@@ -200,7 +200,7 @@ class FPSCounter extends TextField
 			'luajit' => llua.Lua.versionJIT(),
 			#end
 			#if HSCRIPT_ALLOWED
-			'hscript-iris' => d.get('hscript-iris'),
+			'hscript-iris' => d.get('hscript'),
 			#end
 			#if VIDEOS_ALLOWED
 			'hxvlc' => d.get('hxvlc'),

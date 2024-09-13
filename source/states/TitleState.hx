@@ -65,9 +65,6 @@ class TitleState extends MusicBeatState
 		Language.reloadPhrases();
 		GPUStats.init();
 
-		if (Main.fpsVar != null)
-			Main.fpsVar.visible = true;
-
 		initialized = true;
 	}
 
