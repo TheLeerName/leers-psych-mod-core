@@ -2217,7 +2217,7 @@ class PlayState extends MusicBeatState
 					#if MODS_ALLOWED
 					Mods.loadTopMod();
 					#end
-					FlxG.sound.playMusic(Paths.getMenuMusic('StoryMenu'));
+					FlxG.sound.playMusic(Paths.music(Paths.getMenuMusic('StoryMenu')));
 					DiscordClient.resetClientID();
 
 					canResync = false;
@@ -2261,7 +2261,7 @@ class PlayState extends MusicBeatState
 
 				canResync = false;
 				MusicBeatState.switchState(new FreeplayState(), true);
-				FlxG.sound.playMusic(Paths.getMenuMusic('FreeplayMenu'));
+				FlxG.sound.playMusic(Paths.music(Paths.getMenuMusic('FreeplayMenu')));
 				changedDifficulty = false;
 			}
 			transitioning = true;

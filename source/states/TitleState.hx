@@ -112,7 +112,7 @@ class TitleState extends MusicBeatState
 	function startIntro()
 	{
 		if(!FlxG.sound.music?.playing)
-			FlxG.sound.playMusic(Paths.getMenuMusic('MainMenu'), 0);
+			FlxG.sound.playMusic(Paths.music(Paths.getMenuMusic('MainMenu')), 0);
 
 		Conductor.bpm = titleJSON.bpm;
 		persistentUpdate = true;
