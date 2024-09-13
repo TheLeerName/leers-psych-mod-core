@@ -448,7 +448,7 @@ class Paths {
 		return openflSoundEmpty();
 	}
 
-	public static function getStackItem(?stackItem:StackItem):StackItem
+	inline public static function getStackItem(?stackItem:StackItem):StackItem
 		return stackItem ?? CallStack.callStack()[1];
 	static function callStackTrace(stackItem:StackItem, str:String):Null<Any> {
 		stackItem = getStackItem(stackItem);
