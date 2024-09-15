@@ -98,7 +98,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		ghost.alpha = ghostAlpha;
 		add(ghost);
 
-		animsTxt = new FlxText(10, 32, 400, '');
+		animsTxt = new FlxText(10, 42, 400, '');
 		animsTxt.setFormat(null, 16, FlxColor.WHITE, LEFT, OUTLINE_FAST, FlxColor.BLACK);
 		animsTxt.scrollFactor.set();
 		animsTxt.borderSize = 1;

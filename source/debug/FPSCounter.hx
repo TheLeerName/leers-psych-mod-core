@@ -61,6 +61,11 @@ class FPSCounter extends TextField
 		multiline = true;
 		text = "";
 
+		#if debug
+		var debruh = FlxG.debugger;
+		debruh.visibilityChanged.add(() -> this.y = debruh.visible ? 20 : y);
+		#end
+
 		resetTextFormat();
 	}
 
@@ -123,7 +128,7 @@ class FPSCounter extends TextField
 		'RAM: %ram% GPU: %gpuUsgMem% %caching%',
 		'GPU: %gpuUsg%% (%gpuUsgGlobal%%) %shaders%',
 		'',
-		'XY: %mouseX% / %mouseY%',
+		'mouseXY: %mouseX% / %mouseY%',
 		'',
 		'haxe: %haxe%',
 		'lime: %lime%',
