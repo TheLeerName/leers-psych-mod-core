@@ -70,10 +70,14 @@
 3. normalColor:[FlxColor](https://api.haxeflixel.com/flixel/util/FlxColor.html)
 - if fps higher or equals `FlxG.drawFramerate / 2` then fps counter will turn to this color
 
-4. pressedF3:[Bool](https://api.haxe.org/Bool.html)
+4. tweenToColor(color:[FlxColor](https://api.haxeflixel.com/flixel/util/FlxColor.html), ?withDelay:[Bool](https://api.haxe.org/Bool.html)):[Void](https://api.haxe.org/Void.html)
+- tweens color of fps counter to `color` color
+- usually used before `MusicBeatState.switchState` or in start of `create()`
+
+5. pressedF3:[Bool](https://api.haxe.org/Bool.html)
 - if `true`, then fps counter will show more info, can be switched by pressing F3 everywhere in game
 
-5. pressedF3Lines:[Array](https://api.haxe.org/Array.html)<[String](https://api.haxe.org/String.html)>
+6. pressedF3Lines:[Array](https://api.haxe.org/Array.html)<[String](https://api.haxe.org/String.html)>
 - contains which lines will be displayed on fps counter if `pressedF3` is `true`
 
 
@@ -159,16 +163,25 @@
 - works like [Math.pow](https://api.haxe.org/Math.html#pow)
 - for example: `(10).pow(2)` will return `100`
 
-13. toInt(n:[OneOfThree](https://api.haxeflixel.com/flixel/util/typeLimit/OneOfThree.html)<[String](https://api.haxe.org/String.html), [Float](https://api.haxe.org/Float.html), [Bool](https://api.haxe.org/Bool.html)>):[Int](https://api.haxe.org/Int.html)
-- for example: `"22".toInt()` will return `22`, `(22.32).toInt()` will return `22`, `(true).toInt()` will return `1`
+13. strToInt(n:[String](https://api.haxe.org/String.html)):[Int](https://api.haxe.org/Int.html)
+- for example: `"22".toInt()` will return `22`
 
-14. toFloat(n:[String](https://api.haxe.org/String.html)):[Float](https://api.haxe.org/Float.html)
+14. floatToInt(n:[Float](https://api.haxe.org/Float.html)):[Int](https://api.haxe.org/Int.html)
+- for example: `(22.32).toInt()` will return `22`
+
+15. boolToInt(n:[Bool](https://api.haxe.org/Bool.html)):[Int](https://api.haxe.org/Int.html)
+- for example: `(true).toInt()` will return `1`
+
+16. toFloat(n:[String](https://api.haxe.org/String.html)):[Float](https://api.haxe.org/Float.html)
 - for example: `"22.32".toFloat()` will return `22.32`
 
-15. isEmpty(str:[OneOfTwo](https://api.haxeflixel.com/flixel/util/typeLimit/OneOfTwo.html)<[String](https://api.haxe.org/String.html), [Array](https://api.haxe.org/Array.html)<[Dynamic](https://api.haxe.org/Dynamic.html)>>, ?length:[Int](https://api.haxe.org/Int.html) = 1):[Bool](https://api.haxe.org/Bool.html)
-- for example: `[].isEmpty()` returns `true`, `['123123'].isEmpty()` returns `false`, `"".isEmpty()` returns `true`, `"34".isEmpty()` returns `false`
+17. arrIsEmpty(str:[Array](https://api.haxe.org/Array.html)<[Dynamic](https://api.haxe.org/Dynamic.html)>, ?length:[Int](https://api.haxe.org/Int.html) = 1):[Bool](https://api.haxe.org/Bool.html)
+- for example: `[].isEmpty()` returns `true`, `['123123'].isEmpty()` returns `false`
 
-16. toCMD(str:[String](https://api.haxe.org/String.html), format:[CMDFormat](util/WindowsCMDUtil.hx)):[String](https://api.haxe.org/String.html)
+18. strIsEmpty(str:[String](https://api.haxe.org/String.html), ?length:[Int](https://api.haxe.org/Int.html) = 1):[Bool](https://api.haxe.org/Bool.html)
+- for example: `"".isEmpty()` returns `true`, `"34".isEmpty()` returns `false`
+
+19. toCMD(str:[String](https://api.haxe.org/String.html), format:[CMDFormat](util/WindowsCMDUtil.hx)):[String](https://api.haxe.org/String.html)
 - formats `str` for using it in trace
 
 
