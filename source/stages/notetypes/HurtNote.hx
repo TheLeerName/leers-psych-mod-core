@@ -3,7 +3,7 @@ package stages.notetypes;
 class HurtNote extends BaseNoteType {
 	override function getPrecacheList():Array<String> return [
 		'./images/noteSplashes/noteSplashes-electric.png',
-		'./shared/sounds/cancelMenu.ogg'
+		'./sounds/cancelMenu.ogg'
 	];
 
 	override function onCreate() {

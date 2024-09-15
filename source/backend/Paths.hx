@@ -210,7 +210,7 @@ class Paths {
 	 * - `"mods/<Mods.currentModDirectory>/flixel.txt"` (if `MODS_ALLOWED`)
 	 * - `"mods/flixel.txt"` (if `MODS_ALLOWED`)
 	 * - `"assets/<currentLevel>/flixel.txt"`
-	 * - `"assets/shared/flixel.txt"` (if `SHARED_DIRECTORY`)
+	 * - `"assets/shared/flixel.txt"` (if not `DISABLE_SHARED_DIRECTORY`)
 	 * - `"assets/flixel.txt"`
 	 * 
 	 * Also adds language prefix! For example: if language is pt-BR, `key` will be `translations/pt-BR/<key>`, if language is `en-US` then `key` will be not changed (if `TRANSLATIONS_ALLOWED`)
@@ -218,13 +218,15 @@ class Paths {
 	public static function path(key:String, ?ignoreMods:Bool = false):Null<String> {
 		var path:String = "";
 
-		inline function checkPath(?folder:String):Null<String> {
+		function checkPath(?folder:String):Null<String> {
 			folder ??= '';
 
 			#if TRANSLATIONS_ALLOWED
-			path = folder + '/translations/' + Language.language + '/' + key;
-			if (existsAbsolute(path))
-				return path;
+			if (Language.language != ClientPrefs.defaultData.language) {
+				path = folder + '/translations/' + Language.language + '/' + key;
+				if (existsAbsolute(path))
+					return path;
+			}
 			#end
 			path = folder + '/' + key;
 			if (existsAbsolute(path))
@@ -246,11 +248,21 @@ class Paths {
 		#end
 
 		if (currentLevel != null) {
+			#if BASE_GAME_FILES
+			path = checkPath(BASE_GAME_DIRECTORY + '/$currentLevel');
+			if (path != null) return path;
+			#end
+
 			path = checkPath(preloadPath(currentLevel));
 			if (path != null) return path;
 		}
 
-		#if SHARED_DIRECTORY
+		#if BASE_GAME_FILES
+		path = checkPath(BASE_GAME_DIRECTORY);
+		if (path != null) return path;
+		#end
+
+		#if !DISABLE_SHARED_DIRECTORY
 		path = checkPath(preloadPath(SHARED_DIRECTORY));
 		if (path != null) return path;
 		#end
@@ -411,18 +423,21 @@ class Paths {
 	#end
 
 	inline static var ASSETS_DIRECTORY:String = "assets";
-	#if SHARED_DIRECTORY
+	#if !DISABLE_SHARED_DIRECTORY
 	inline static var SHARED_DIRECTORY:String = "shared";
 	#end
 	#if MODS_ALLOWED
 	inline static var MODS_DIRECTORY:String = "mods";
+	#end
+	#if BASE_GAME_FILES
+	inline static var BASE_GAME_DIRECTORY:String = '$ASSETS_DIRECTORY/base_game';
 	#end
 
 	public static var currentLevel:String;
 
 	public static function setCurrentLevel(lvl:String) {
 		currentLevel = null;
-		if (lvl != null && lvl.length > 0 #if SHARED_DIRECTORY && lvl != SHARED_DIRECTORY #end) {
+		if (lvl != null && lvl.length > 0 #if !DISABLE_SHARED_DIRECTORY && lvl != SHARED_DIRECTORY #end) {
 			currentLevel = lvl;
 			trace('Current asset folder:', currentLevel.toCMD(WHITE_BOLD));
 		}
@@ -550,7 +565,7 @@ class Paths {
 			#if MODS_ALLOWED
 			Paths.modsPath(add),
 			#end
-			#if SHARED_DIRECTORY
+			#if !DISABLE_SHARED_DIRECTORY
 			Paths.preloadPath(SHARED_DIRECTORY + '/' + add),
 			#end
 			Paths.preloadPath(add),
