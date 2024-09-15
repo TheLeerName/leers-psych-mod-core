@@ -70,17 +70,9 @@ class WeekData {
 		weeksList.clearArray();
 		weeksLoaded.clear();
 
-		var directories:Array<String> = Paths.getAllFolders();
-		for (i in 0...directories.length) {
-			var dir:String = directories[i] + 'weeks';
-			if(Paths.existsAbsolute(dir)) {
-				for (file in Paths.readDirectory(dir)) {
-					var path = '$dir/$file';
-					if (file.endsWith('.json'))
-						addWeek(file.substr(0, file.length - 5), path, directories[i]);
-				}
-			}
-		}
+		for (i => dir in Paths.directoriesWithFile('weeks'))
+			for (file in Paths.readDirectory(dir)) if (file.hasExtension("json"))
+				addWeek(file.removeExtension(), '$dir/$file', dir);
 	}
 
 	private static function addWeek(weekToCheck:String, path:String, directory:String)
@@ -123,9 +115,6 @@ class WeekData {
 	public static function setDirectoryFromWeek(?data:WeekData)
 		setDirectory(data?.folder);
 
-	public static function setDirectory(?folder:String) {
-		#if MODS_ALLOWED
-		Mods.currentModDirectory = folder?.length > 0 ? folder : null;
-		#end
-	}
+	public static function setDirectory(?folder:String)
+		#if MODS_ALLOWED Mods.setModDirectory(folder); #else return; #end
 }

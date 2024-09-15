@@ -198,14 +198,14 @@ class Achievements {
 		_sortID = _originalLength-1;
 
 		var modLoaded:String = Mods.currentModDirectory;
-		Mods.currentModDirectory = null;
+		Mods.setModDirectory(null);
 		loadAchievementJson(Paths.modsPath('data/achievements.json'));
 		for (i => mod in Mods.parseList().enabled)
 		{
-			Mods.currentModDirectory = mod;
+			Mods.setModDirectory(mod);
 			loadAchievementJson(Paths.modsPath('$mod/data/achievements.json'));
 		}
-		Mods.currentModDirectory = modLoaded;
+		Mods.setModDirectory(modLoaded);
 	}
 
 	inline static function loadAchievementJson(path:String, addMods:Bool = true)
@@ -223,7 +223,7 @@ class Achievements {
 						var achieve:Dynamic = retVal[i];
 						if(achieve == null)
 						{
-							var errorTitle = 'Mod name: ' + Mods.currentModDirectory != null ? Mods.currentModDirectory : "None";
+							var errorTitle = 'Mod name: ' + Mods.currentModDirectory ?? "None";
 							var errorMsg = 'Achievement #${i+1} is invalid.';
 							#if windows
 							lime.app.Application.current.window.alert(errorMsg, errorTitle);
@@ -250,7 +250,7 @@ class Achievements {
 					}
 				}
 			} catch(e:Dynamic) {
-				var errorTitle = 'Mod name: ' + Mods.currentModDirectory != null ? Mods.currentModDirectory : "None";
+				var errorTitle = 'Mod name: ' + Mods.currentModDirectory ?? "None";
 				var errorMsg = 'Error loading achievements.json: $e';
 				#if windows
 				lime.app.Application.current.window.alert(errorMsg, errorTitle);

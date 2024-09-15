@@ -1067,10 +1067,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	final assetFolder = 'week_assets/week1';  //load from assets/base_game/week_assets/week1/
 	function loadBG()
 	{
-		if (Paths.path(assetFolder) == null) return;
+		var thePath:String = Paths.path(assetFolder);
+		if (thePath == null) return;
 
-		var lastLoaded = Paths.currentLevel;
-		Paths.currentLevel = assetFolder;
+		Paths.directories.unshift(thePath);
 
 		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
 		add(bg);
@@ -1080,7 +1080,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		stageFront.updateHitbox();
 		add(stageFront);
 
-		Paths.currentLevel = lastLoaded;
+		Paths.resetDirectories();
 	}
 
 
@@ -1197,13 +1197,11 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	var characterList:Array<String> = [];
 	function reloadCharacterDropDown() {
 		characterList.clearArray();
-		for (dir in Paths.getAllFolders('characters')) {
-			if(!Paths.existsAbsolute(dir)) continue;
-
+		for (dir in Paths.directoriesWithFile('characters')) {
 			for (file in Paths.readDirectory(dir)) {
 				var path = haxe.io.Path.join([dir, file]);
 				if (file.endsWith('.json')) {
-					var toCheck:String = file.substr(0, file.length - 5);
+					var toCheck:String = file.removeExtension();
 					if(toCheck.trim().length > 0 && !characterList.contains(toCheck))
 						characterList.push(toCheck);
 				}

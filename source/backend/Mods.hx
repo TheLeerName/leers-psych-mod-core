@@ -45,6 +45,11 @@ class Mods
 		return globalMods;
 	}
 
+	public static function setModDirectory(?folder:String) {
+		Mods.currentModDirectory = folder.strNotEmpty() ? folder : null;
+		Paths.resetDirectories();
+	}
+
 	public static function getModDirectories():Array<String> {
 		var list:Array<String> = [];
 		if(Paths.existsAbsolute(Paths.MODS_DIRECTORY)) {
@@ -133,11 +138,12 @@ class Mods
 
 	public static function loadTopMod()
 	{
-		Mods.currentModDirectory = null;
-		
+		var dir:Null<String> = null;
 		var list:Array<String> = Mods.parseList().enabled;
 		if(list != null && list[0] != null)
-			Mods.currentModDirectory = list[0];
+			dir = list[0];
+
+		setModDirectory(dir);
 	}
 }
 #end

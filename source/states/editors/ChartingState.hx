@@ -4574,7 +4574,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function loadFileList(mainFolder:String, ?optionalList:String = null, ?fileTypes:Array<String> = null)
 	{
-		if(fileTypes == null) fileTypes = ['.json'];
+		fileTypes ??= ['.json'];
 
 		var fileList:Array<String> = [];
 		if(optionalList != null)
@@ -4588,29 +4588,23 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 
 		#if MODS_ALLOWED
-		for (directory in Paths.getAllFolders(mainFolder))
-		{
-			for (file in Paths.readDirectory(directory))
-			{
-				var path = haxe.io.Path.join([directory, file.trim()]);
-				if (!Paths.isDirectory(path) && !file.startsWith('readme.'))
-				{
-					for (fileType in fileTypes)
-					{
+		for (directory in Paths.directoriesWithFile(mainFolder))
+			for (file in Paths.readDirectory(directory)) {
+				var path = directory + file;
+				if (!Paths.isDirectory(path) && !file.startsWith('readme.')) {
+					for (fileType in fileTypes) {
 						var fileToCheck:String = file.substr(0, file.length - fileType.length);
-						if(fileToCheck.length > 0 && path.endsWith(fileType) && !fileList.contains(fileToCheck))
-						{
+						if(fileToCheck.length > 0 && path.endsWith(fileType) && !fileList.contains(fileToCheck)) {
 							fileList.push(fileToCheck);
 							break;
 						}
 					}
 				}
 			}
-		}
 		#end
 		return fileList;
 	}
-	
+
 	function loadCharacterFile(char:String):CharacterFile {
 		if(char != null) {
 			try {

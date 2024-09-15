@@ -58,7 +58,7 @@ class ModsMenuState extends MusicBeatState
 		persistentUpdate = false;
 
 		modsList = Mods.parseList();
-		Mods.currentModDirectory = modsList.all[0];
+		Mods.setModDirectory(modsList.all[0]);
 
 		DiscordClient.changePresence("In the Mods Menu");
 

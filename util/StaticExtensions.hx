@@ -9,6 +9,7 @@ import flixel.math.FlxMath;
 import flixel.util.FlxDestroyUtil;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
+import backend.Paths;
 import backend.CoolUtil;
 #end
 
@@ -24,18 +25,22 @@ using StringTools;
 class StaticExtensions {
 	#if !macro
 	/** Shortcut of `FlxMath.roundDecimal` */
-	public static function roundDecimal(n:Float, decimals:Int):Float return FlxMath.roundDecimal(n, decimals);
+	inline public static function roundDecimal(n:Float, decimals:Int):Float return FlxMath.roundDecimal(n, decimals);
 	/** Shortcut of `CoolUtil.floorDecimal` */
-	public static function floorDecimal(n:Float, decimals:Int):Float return CoolUtil.floorDecimal(n, decimals);
+	inline public static function floorDecimal(n:Float, decimals:Int):Float return CoolUtil.floorDecimal(n, decimals);
 	/** `0.2423` to `0.24` / `0.2453` => `0.25` */
-	public static function toDouble(n:Float):Float return roundDecimal(n, 2);
+	inline public static function toDouble(n:Float):Float return roundDecimal(n, 2);
+	/** `"meow.json".hasExtension("json")` returns `true`, `"meow".hasExtension("json")` returns `false` */
+	inline public static function hasExtension(path:String, ext:String):Bool return Paths.hasExtension(path, ext);
+	/** `"meow.json".removeExtension()` returns `"meow"` */
+	inline public static function removeExtension(path:String):String return Paths.removeExtension(path);
 
 	/**
 	 * Changes size of game absolutely, i.e. without initial ratio
 	 * 
 	 * WARNING: Changes only game size, use `FlxG.resizeWindow` for resizing window BEFORE
 	 */
-	public static function resizeAbsolute(game:flixel.FlxGame, width:Int = 1280, height:Int = 720)
+	inline public static function resizeAbsolute(game:flixel.FlxGame, width:Int = 1280, height:Int = 720)
 		backend.WindowUtil.resizeAbsolute(width, height);
 
 	/** Clears array and returns `null` */
@@ -90,14 +95,14 @@ class StaticExtensions {
 	public static function pow(n:Float, ?exp:Float = 2):Float return Math.pow(n, exp);
 
 	/** Shortcut of `Std.parseInt()` */
-	public static function strToInt(str:String):Int return Std.parseInt(str);
+	inline public static function strToInt(str:String):Int return Std.parseInt(str);
 	/** Shortcut of `Std.int` */
-	public static function floatToInt(n:Float):Int return Std.int(n);
+	inline public static function floatToInt(n:Float):Int return Std.int(n);
 	/** Shortcut of `bool ? 1 : 0` */
-	public static function boolToInt(b:Bool):Int return b ? 1 : 0;
+	inline public static function boolToInt(b:Bool):Int return b ? 1 : 0;
 
 	/** Shortcut of `Std.parseFloat()` */
-	public static function toFloat(n:String):Float return Std.parseFloat(n);
+	inline public static function toFloat(n:String):Float return Std.parseFloat(n);
 
 	/** Returns `false` if `arr` is empty array or `null` */
 	public static function arrNotEmpty(arr:Array<Dynamic>, ?length:Int = 1):Bool return arr != null ? arr.length >= length : false;
@@ -105,5 +110,5 @@ class StaticExtensions {
 	public static function strNotEmpty(str:String, ?length:Int = 1):Bool return str != null ? str.trim().length >= length : false;
 
 	/** Formats this `str` as `format` in Windows cmd, on other platforms will return just `str` */
-	public static function toCMD(str:String, format:CMDFormat):String return WindowsCMDUtil.toCMD(str, format);
+	inline public static function toCMD(str:String, format:CMDFormat):String return WindowsCMDUtil.toCMD(str, format);
 }

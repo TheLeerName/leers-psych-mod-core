@@ -608,9 +608,9 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		tab_group.add(new FlxText(objX, objY - 18, 150, 'Compiled Assets:'));
 
 		var folderList:Array<String> = [''];
-		for (folder in ['images', 'music', 'songs'])
-			if(Paths.isDirectory('assets/$folder'))
-				folderList.push(folder);
+		for (folder in Paths.directoriesWithFile('week_assets'))
+			if(Paths.isDirectory(folder))
+				folderList.push(folder.substring(folder.lastIndexOf('/'), folder.length));
 
 		var saveButton:PsychUIButton = new PsychUIButton(UI_box.width - 90, UI_box.height - 50, 'Save', function() {
 			saveData();
@@ -985,15 +985,12 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		var tab_group = UI_box.getTab('Meta').menu;
 
 		var characterList = Paths.mergeAllTextsNamed('data/characterList.txt');
-		var foldersToCheck:Array<String> = Paths.getAllFolders('characters');
-		for (folder in foldersToCheck)
-			for (file in Paths.readDirectory(folder))
-				if(file.toLowerCase().endsWith('.json'))
-				{
-					var charToCheck:String = file.substr(0, file.length - 5);
-					if(!characterList.contains(charToCheck))
-						characterList.push(charToCheck);
-				}
+		for (directory in Paths.directoriesWithFile('characters'))
+			for (file in Paths.readDirectory(directory)) if(file.hasExtension('json')) {
+				var charToCheck:String = file.removeExtension();
+				if(!characterList.contains(charToCheck))
+					characterList.push(charToCheck);
+			}
 
 		if(characterList.length < 1) characterList.push(''); //Prevents crash
 		
@@ -1267,19 +1264,16 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		gfDropdown.selectedLabel = gf.curCharacter;
 		plDropdown.selectedLabel = boyfriend.curCharacter;
 	}
-	
+
 	function reloadStageDropDown()
 	{
 		var stageList:Array<String> = [];
-		var foldersToCheck:Array<String> = Paths.getAllFolders('stages');
-		for (folder in foldersToCheck)
-			for (file in Paths.readDirectory(folder))
-				if(file.toLowerCase().endsWith('.json'))
-				{
-					var stageToCheck:String = file.substr(0, file.length - '.json'.length);
-					if(!stageList.contains(stageToCheck))
-						stageList.push(stageToCheck);
-				}
+		for (directory in Paths.directoriesWithFile('stages'))
+			for (file in Paths.readDirectory(directory)) if(file.hasExtension('json')) {
+				var stageToCheck:String = file.removeExtension();
+				if(!stageList.contains(stageToCheck))
+					stageList.push(stageToCheck);
+			}
 
 		if(stageList.length < 1) stageList.push('');
 		stageDropDown.list = stageList;

@@ -55,7 +55,7 @@ class AchievementsMenuState extends MusicBeatState
 			var graphic = null;
 			if(option.unlocked)
 			{
-				#if MODS_ALLOWED Mods.currentModDirectory = option.mod; #end
+				#if MODS_ALLOWED Mods.setModDirectory(option.mod); #end
 				var image:String = 'achievements/' + option.name;
 				if(Paths.existsAbsolute(Paths.imagePath('$image-pixel')))
 				{

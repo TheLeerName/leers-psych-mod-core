@@ -368,15 +368,15 @@ class PlayState extends MusicBeatState
 
 		// "GLOBAL" SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		for (folder in Paths.getAllFolders('scripts'))
-			for (file in Paths.readDirectory(folder)) {
+		for (directory in Paths.directoriesWithFile('scripts'))
+			for (file in Paths.readDirectory(directory)) {
 				#if LUA_ALLOWED
-				if(file.toLowerCase().endsWith('.lua'))
-					new FunkinLua('$folder/$file');
+				if(file.hasExtension('lua'))
+					new FunkinLua('$directory/$file');
 				#end
 				#if HSCRIPT_ALLOWED
-				if(file.toLowerCase().endsWith('.hx'))
-					initHScript('$folder/$file');
+				if(file.hasExtension('hx'))
+					initHScript('$directory/$file');
 				#end
 			}
 		#end
@@ -527,15 +527,15 @@ class PlayState extends MusicBeatState
 
 		// SONG SPECIFIC SCRIPTS
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		for (folder in Paths.getAllFolders('data/$songName'))
-			for (file in Paths.readDirectory(folder)) {
+		for (directory in Paths.directoriesWithFile('data/$songName'))
+			for (file in Paths.readDirectory(directory)) {
 				#if LUA_ALLOWED
-				if(file.toLowerCase().endsWith('.lua'))
-					new FunkinLua('$folder/$file');
+				if(file.hasExtension('lua'))
+					new FunkinLua('$directory/$file');
 				#end
 				#if HSCRIPT_ALLOWED
-				if(file.toLowerCase().endsWith('.hx'))
-					initHScript('$folder/$file');
+				if(file.hasExtension('hx'))
+					initHScript('$directory/$file');
 				#end
 			}
 		#end
@@ -3310,10 +3310,10 @@ class PlayState extends MusicBeatState
 			return true;
 		}
 
-		for (folder in Paths.getAllFolders('shaders'))
+		for (directory in Paths.directoriesWithFile('shaders'))
 		{
-			var frag:String = Paths.text('$folder/$name.frag');
-			var vert:String = Paths.text('$folder/$name.vert');
+			var frag:String = Paths.text('$directory/$name.frag');
+			var vert:String = Paths.text('$directory/$name.vert');
 
 			if(frag != null || vert != null) {
 				runtimeShaders.set(name, [frag, vert]);

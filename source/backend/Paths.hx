@@ -37,7 +37,7 @@ class Paths {
 		}
 		catch(e) {
 			if (printErrors) callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Inst.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
-			FlxG.sound.playMusic(Paths.openflSoundEmpty());
+			FlxG.sound.playMusic(openflSoundEmpty());
 		}
 
 		@:privateAccess vocalsP1.cleanup(true);
@@ -45,17 +45,17 @@ class Paths {
 		if (PlayState.SONG.needsVoices) {
 			var postfix:String = vocalsP1Postfix.strNotEmpty() ? vocalsP1Postfix : 'Player';
 			try {
-				var path = Paths.voicesPath(songPath, postfix);
-				if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
-				vocalsP1.loadEmbedded(Paths.soundAbsolute(path));
+				var path = voicesPath(songPath, postfix);
+				if (path == null) throw CoolUtil.prettierNotFoundException(lastError);
+				vocalsP1.loadEmbedded(soundAbsolute(path));
 				loaded.player = true;
 			}
 			catch (e) {
 				if (printErrors) callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals-$postfix.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
 				try {
-					var path = Paths.voicesPath(songPath);
-					if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
-					vocalsP1.loadEmbedded(Paths.soundAbsolute(path));
+					var path = voicesPath(songPath);
+					if (path == null) throw CoolUtil.prettierNotFoundException(lastError);
+					vocalsP1.loadEmbedded(soundAbsolute(path));
 					loaded.player = true;
 				} catch (e)
 					if (printErrors) callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
@@ -63,9 +63,9 @@ class Paths {
 
 			postfix = vocalsP2Postfix.strNotEmpty() ? vocalsP2Postfix : 'Opponent';
 			try {
-				var path = Paths.voicesPath(songPath, postfix);
-				if (path == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
-				vocalsP2.loadEmbedded(Paths.soundAbsolute(path));
+				var path = voicesPath(songPath, postfix);
+				if (path == null) throw CoolUtil.prettierNotFoundException(lastError);
+				vocalsP2.loadEmbedded(soundAbsolute(path));
 				loaded.opponent = true;
 			} catch (e)
 				if (printErrors) callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Vocals-$postfix.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
@@ -87,8 +87,8 @@ class Paths {
 		var json = null;
 		try {
 			if (path == null) throw 'Not found';
-			var rawJson = Paths.text(path);
-			if (rawJson == null) throw CoolUtil.prettierNotFoundException(Paths.lastError);
+			var rawJson = text(path);
+			if (rawJson == null) throw CoolUtil.prettierNotFoundException(lastError);
 			json = Json.parse(rawJson);
 			if (json == null) throw Json.lastError;
 		} catch(e)
@@ -145,7 +145,7 @@ class Paths {
 		return existsAbsolute(path(key, ignoreMods));
 
 	public static function getAtlas(key:String):FlxAtlasFrames
-		return Paths.exists('images/$key.xml') ? getSparrowAtlas(key) : (Paths.exists('images/$key.json') ? getAsepriteAtlas(key) : getPackerAtlas(key));
+		return exists('images/$key.xml') ? getSparrowAtlas(key) : (exists('images/$key.json') ? getAsepriteAtlas(key) : getPackerAtlas(key));
 	public static function getSparrowAtlas(key:String, ?stackItem:StackItem):FlxAtlasFrames {
 		stackItem = getStackItem(stackItem);
 		return FlxAtlasFrames.fromSparrow(image(key, stackItem), getTextFromFile('images/$key.xml'));
@@ -165,7 +165,7 @@ class Paths {
 	 * Can return image path with extension `.jpg`! If `.jpg` not found, then will try to get `.png`
 	 */
 	inline public static function imagePath(key:String):String
-		return Paths.exists('images/$key.jpg') ? path('images/$key.jpg') : path('images/$key.png');
+		return exists('images/$key.jpg') ? path('images/$key.jpg') : path('images/$key.png');
 
 	inline static public function txtPath(key:String):String
 		return path('data/$key.txt');
@@ -194,7 +194,12 @@ class Paths {
 		return path('videos/$key.$VIDEO_EXT');
 	#end
 
-	inline static public function formatToSongPath(path:String):String {
+	public static function hasExtension(path:String, ext:String = 'txt'):Bool
+		return path.toLowerCase().endsWith('.' + ext.toLowerCase());
+	public static function removeExtension(path:String):String
+		return path.substring(0, path.lastIndexOf('.'));
+
+	public static function formatToSongPath(path:String):String {
 		final invalidChars = ~/[~&;:<>#\s]/g;
 		final hideChars = ~/[.,'"%?!]/g;
 
@@ -205,69 +210,14 @@ class Paths {
 	 * Converts relative `key` path to absolute
 	 * 
 	 * WARNING: can return `null` if file not found
-	 * 
-	 * For example key = `"flixel.txt"`, then it will return in exists-order:
-	 * - `"mods/<Mods.currentModDirectory>/flixel.txt"` (if `MODS_ALLOWED`)
-	 * - `"mods/flixel.txt"` (if `MODS_ALLOWED`)
-	 * - `"assets/<currentLevel>/flixel.txt"`
-	 * - `"assets/shared/flixel.txt"` (if not `DISABLE_SHARED_DIRECTORY`)
-	 * - `"assets/flixel.txt"`
-	 * 
-	 * Also adds language prefix! For example: if language is pt-BR, `key` will be `translations/pt-BR/<key>`, if language is `en-US` then `key` will be not changed (if `TRANSLATIONS_ALLOWED`)
+	 * @see `resetDirectories()`
 	 */
 	public static function path(key:String, ?ignoreMods:Bool = false):Null<String> {
-		var path:String = "";
-
-		function checkPath(?folder:String):Null<String> {
-			folder ??= '';
-
-			#if TRANSLATIONS_ALLOWED
-			if (Language.language != ClientPrefs.defaultData.language) {
-				path = folder + '/translations/' + Language.language + '/' + key;
-				if (existsAbsolute(path))
-					return path;
-			}
-			#end
-			path = folder + '/' + key;
-			if (existsAbsolute(path))
-				return path;
-
-			return null;
+		for (folder in directories) {
+			if (existsAbsolute(folder + key))
+				return folder + key;
 		}
-
-		#if MODS_ALLOWED
-		if (!ignoreMods) {
-			if (Mods.currentModDirectory != null) {
-				path = checkPath(modsPath(Mods.currentModDirectory));
-				if (path != null) return path;
-			}
-
-			path = checkPath(MODS_DIRECTORY);
-			if (path != null) return path;
-		}
-		#end
-
-		if (currentLevel != null) {
-			#if BASE_GAME_FILES
-			path = checkPath(BASE_GAME_DIRECTORY + '/$currentLevel');
-			if (path != null) return path;
-			#end
-
-			path = checkPath(preloadPath(currentLevel));
-			if (path != null) return path;
-		}
-
-		#if BASE_GAME_FILES
-		path = checkPath(BASE_GAME_DIRECTORY);
-		if (path != null) return path;
-		#end
-
-		#if !DISABLE_SHARED_DIRECTORY
-		path = checkPath(preloadPath(SHARED_DIRECTORY));
-		if (path != null) return path;
-		#end
-
-		return checkPath(ASSETS_DIRECTORY);
+		return null;
 	}
 
 	@:deprecated('Use dumpAsset instead')
@@ -341,13 +291,13 @@ class Paths {
 		if(spriteJson != null)
 		{
 			changedAtlasJson = true;
-			spriteJson = Paths.text(spriteJson);
+			spriteJson = text(spriteJson);
 		}
 
 		if(animationJson != null) 
 		{
 			changedAnimJson = true;
-			animationJson = Paths.text(animationJson);
+			animationJson = text(animationJson);
 		}
 
 		// is folder or image path
@@ -367,7 +317,7 @@ class Paths {
 						//trace('found Sprite Json');
 						changedImage = true;
 						changedAtlasJson = true;
-						folderOrImg = Paths.image('$originalPath/spritemap$st', stackItem);
+						folderOrImg = image('$originalPath/spritemap$st', stackItem);
 						break;
 					}
 				}
@@ -375,7 +325,7 @@ class Paths {
 				{
 					//trace('found Sprite PNG');
 					changedImage = true;
-					folderOrImg = Paths.image('$originalPath/spritemap$st', stackItem);
+					folderOrImg = image('$originalPath/spritemap$st', stackItem);
 					break;
 				}
 			}
@@ -384,7 +334,7 @@ class Paths {
 			{
 				//trace('Changing folderOrImg to FlxGraphic');
 				changedImage = true;
-				folderOrImg = Paths.image(originalPath, stackItem);
+				folderOrImg = image(originalPath, stackItem);
 			}
 
 			if(!changedAnimJson)
@@ -404,7 +354,7 @@ class Paths {
 	/*private static function getContentFromFile(path:String):String
 	{
 		var onAssets:Bool = false;
-		var path:String = Paths.getPath(path, TEXT, true);
+		var path:String = getPath(path, TEXT, true);
 		if(#if sys FileSystem.exists(path) || #end (onAssets = true && Assets.exists(path, TEXT)))
 		{
 			//trace('Found text: $path');
@@ -433,6 +383,13 @@ class Paths {
 	inline static var BASE_GAME_DIRECTORY:String = '$ASSETS_DIRECTORY/base_game';
 	#end
 
+	/**
+	 * All directories where game can load any assets, also each entry ends with slash
+	 * 
+	 * WARNING: resets on calling `resetDirectories()`
+	 */
+	public static var directories:Array<String> = [];
+
 	public static var currentLevel:String;
 
 	public static function setCurrentLevel(lvl:String) {
@@ -441,6 +398,7 @@ class Paths {
 			currentLevel = lvl;
 			trace('Current asset folder:', currentLevel.toCMD(WHITE_BOLD));
 		}
+		resetDirectories();
 	}
 
 	public static var currentTrackedImages:Array<String> = [];
@@ -560,41 +518,41 @@ class Paths {
 	public static function isDirectory(path:String):Bool
 		return #if sys FileSystem.isDirectory(path) #else false #end;
 
-	public static function getAllFolders(?add:String = ''):Array<String> {
-		var dirs:Array<String> = [
-			#if MODS_ALLOWED
-			Paths.modsPath(add),
-			#end
-			#if !DISABLE_SHARED_DIRECTORY
-			Paths.preloadPath(SHARED_DIRECTORY + '/' + add),
-			#end
-			Paths.preloadPath(add),
-		];
+	public static function resetDirectories() {
+		directories.clearArray();
 
-		// adding specific folders
+		directories.unshift(preloadPath());
+		#if !DISABLE_SHARED_DIRECTORY
+		directories.unshift(preloadPath(SHARED_DIRECTORY + '/'));
+		#end
+		#if MODS_ALLOWED
+		directories.unshift(modsPath());
+		#end
+
+		// adding specific directories
 		if (currentLevel != null)
-			dirs.push(Paths.preloadPath(currentLevel + '/' + add));
+			directories.unshift(preloadPath(currentLevel + '/'));
 		#if MODS_ALLOWED
 		if (Mods.currentModDirectory != null)
-			dirs.push(Paths.modsPath(Mods.currentModDirectory + '/' + add));
+			directories.unshift(modsPath(Mods.currentModDirectory + '/'));
 		#end
 
-		// adding global mods
 		#if MODS_ALLOWED
+		// adding global mods
 		for (mod in Mods.parseList().enabled)
-			dirs.push(Paths.modsPath(mod) + add);
+			directories.unshift(modsPath(mod));
 		#end
+	}
 
-		// removing nonexistent folders
-		for (dir in dirs) if (!existsAbsolute(dir.endsWith('/') ? dir.substring(0, dir.length - 1) : dir))
-			dirs.remove(dir);
-
+	public static function directoriesWithFile(file:String) {
+		var dirs:Array<String> = directories.copy();
+		for (dir in dirs) dir += file;
 		return dirs;
 	}
 
 	public static function mergeAllTextsNamed(path:String, allowDuplicates:Bool = false):Array<String> {
 		var mergedList = [];
-		for (file in Paths.getAllFolders()) for (value in CoolUtil.coolTextFile('$file/$path'))
+		for (file in directories) for (value in CoolUtil.coolTextFile(file + path))
 			if((allowDuplicates || !mergedList.contains(value)) && value.length > 0)
 				mergedList.push(value);
 		return mergedList;

@@ -117,7 +117,9 @@ class FreeplayState extends MusicBeatState
 			songText.scaleX = Math.min(1, 980 / songText.width);
 			songText.snapToPosition();
 
-			Mods.currentModDirectory = songs[i].folder;
+			#if MODS_ALLOWED
+			Mods.setModDirectory(songs[i].folder);
+			#end
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
 			icon.sprTracker = songText;
 
@@ -332,7 +334,9 @@ class FreeplayState extends MusicBeatState
 				destroyFreeplayVocals();
 				FlxG.sound.music.volume = 0;
 
-				Mods.currentModDirectory = songs[curSelected].folder;
+				#if MODS_ALLOWED
+				Mods.setModDirectory(songs[curSelected].folder);
+				#end
 				var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
 				Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
 				if (PlayState.SONG.needsVoices)
@@ -509,11 +513,13 @@ class FreeplayState extends MusicBeatState
 				icon.alpha = 1;
 			}
 		}
-		
-		Mods.currentModDirectory = songs[curSelected].folder;
+
+		#if MODS_ALLOWED
+		Mods.setModDirectory(songs[curSelected].folder);
+		#end
 		PlayState.storyWeek = songs[curSelected].week;
 		Difficulty.loadFromWeek();
-		
+
 		var savedDiff:String = songs[curSelected].lastDifficulty;
 		var lastDiff:Int = Difficulty.list.indexOf(lastDifficultyName);
 		if(savedDiff != null && !Difficulty.list.contains(savedDiff) && Difficulty.list.contains(savedDiff))

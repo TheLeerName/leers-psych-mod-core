@@ -22,7 +22,7 @@ class LanguageSubState extends MusicBeatSubstate
 
 		languages.push(ClientPrefs.defaultData.language); //English (US)
 		displayLanguages.set(ClientPrefs.defaultData.language, Language.defaultLangName);
-		for (directory in Paths.getAllFolders('translations')) {
+		for (directory in Paths.directoriesWithFile('translations'))
 			for (language in Paths.readDirectory(directory)) {
 				var txt:String = Paths.text('$directory/$language/$language.lang');
 				if (txt == null) continue;
@@ -41,7 +41,6 @@ class LanguageSubState extends MusicBeatSubstate
 					else if(txt.trim().length > 0 && !txt.contains(':')) displayLanguages.set(language, txt.trim());
 				}
 			}
-		}
 
 		languages.sort(function(a:String, b:String)
 		{

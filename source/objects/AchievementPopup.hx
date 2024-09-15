@@ -1,5 +1,6 @@
 package objects;
 
+import backend.WeekData;
 #if ACHIEVEMENTS_ALLOWED
 import openfl.events.Event;
 import openfl.geom.Matrix;
@@ -28,7 +29,7 @@ class AchievementPopup extends openfl.display.Sprite {
 
 		#if MODS_ALLOWED
 		var lastMod = Mods.currentModDirectory;
-		if(achievement != null) Mods.currentModDirectory = achievement.mod != null ? achievement.mod : '';
+		if(achievement != null) Mods.setModDirectory(achievement.mod ?? '');
 		#end
 
 		if(Paths.exists('images/$image-pixel.png'))
@@ -39,7 +40,7 @@ class AchievementPopup extends openfl.display.Sprite {
 		else graphic = Paths.image(image);
 
 		#if MODS_ALLOWED
-		Mods.currentModDirectory = lastMod;
+		Mods.setModDirectory(lastMod);
 		#end
 
 		if(graphic == null) graphic = Paths.image('unknownMod');
