@@ -75,6 +75,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		loadBG();
 
+		dadPosition.set(100, 100);
+		bfPosition.set(770, 100);
+
 		silhouettes = new FlxSpriteGroup();
 		add(silhouettes);
 
@@ -1061,15 +1064,14 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		}
 	}
 
-	final assetFolder = 'week_assets/week1';  //load from assets/week_assets/week1/
-	inline function loadBG()
+	final assetFolder = 'week_assets/week1';  //load from assets/base_game/week_assets/week1/
+	function loadBG()
 	{
+		if (Paths.path(assetFolder) == null) return;
+
 		var lastLoaded = Paths.currentLevel;
 		Paths.currentLevel = assetFolder;
 
-		/////////////
-		// bg data //
-		/////////////
 		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
 		add(bg);
 
@@ -1077,10 +1079,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
 		stageFront.updateHitbox();
 		add(stageFront);
-
-		dadPosition.set(100, 100);
-		bfPosition.set(770, 100);
-		/////////////
 
 		Paths.currentLevel = lastLoaded;
 	}
