@@ -253,6 +253,7 @@ class MainMenuState extends MusicBeatState
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
+				Main.fpsVar.tweenToColor(0xffffff);
 				MusicBeatState.switchState(new TitleState());
 			}
 
@@ -333,6 +334,7 @@ class MainMenuState extends MusicBeatState
 			{
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
+				Main.fpsVar.tweenToColor(0xffffff);
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
 			#end
