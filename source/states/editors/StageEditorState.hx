@@ -122,10 +122,12 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 	var showSelectionQuad:Bool = true;
 	function addHelpScreen()
 	{
-		#if FLX_DEBUG
-		var btn = 'F3';
-		#else
-		var btn = 'F2';
+		#if debug
+		// removing F2 from opening flixel debugger
+		var debruh = FlxG.debugger;
+		debruh.toggleKeys.remove(F2);
+		// and adding it back on next create() of state
+		FlxG.signals.preStateCreate.addOnce(_ -> debruh.toggleKeys.unshift(F2));
 		#end
 
 		var str:Array<String> = ["E/Q - Camera Zoom In/Out",
@@ -133,7 +135,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			"R - Reset Camera Zoom",
 			"Arrow Keys/Mouse & Right Click - Move Object",
 			"",
-			'$btn - Toggle HUD',
+			'F2 - Toggle HUD',
 			"F12 - Toggle Selection Rectangle",
 			"Hold Shift - Move Objects and Camera 4x faster",
 			"Hold Control - Move Objects pixel-by-pixel and Camera 4x slower"
@@ -1364,11 +1366,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			helpTexts.visible = helpBg.visible;
 		}
 
-		#if FLX_DEBUG
-		if(FlxG.keys.justPressed.F3)
-		#else
 		if(FlxG.keys.justPressed.F2)
-		#end
 		{
 			UI_box.visible = !UI_box.visible;
 			UI_box.active = !UI_box.active;
