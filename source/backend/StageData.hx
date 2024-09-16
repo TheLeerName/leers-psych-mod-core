@@ -59,7 +59,7 @@ class StageData {
 	}
 
 	public static function loadStage(stage:String) {
-		stage = stage?.length > 0 ? stage : vanillaSongStage(PlayState.SONG.path);
+		stage = stage.strNotEmpty() ? stage : vanillaSongStage(PlayState.SONG.path);
 		PlayState.curStage = stage;
 
 		PlayState.initStage();
