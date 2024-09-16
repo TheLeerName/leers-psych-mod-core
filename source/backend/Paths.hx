@@ -209,10 +209,15 @@ class Paths {
 	/**
 	 * Converts relative `key` path to absolute
 	 * 
-	 * WARNING: can return `null` if file not found
+	 * WARNING: can return `null` if file not found!
 	 * @see `resetDirectories()`
 	 */
 	public static function path(key:String, ?ignoreMods:Bool = false):Null<String> {
+		#if TRANSLATIONS_ALLOWED
+		var ext:String = key.substring(key.lastIndexOf('.'), key.length);
+		var keyNoExt:String = key.removeExtension();
+		key = Language.getPhrase(keyNoExt, keyNoExt) + ext;
+		#end
 		for (folder in directories) {
 			if (existsAbsolute(folder + key))
 				return folder + key;

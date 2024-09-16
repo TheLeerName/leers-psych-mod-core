@@ -22,9 +22,11 @@ class LanguageSubState extends MusicBeatSubstate
 
 		languages.push(ClientPrefs.defaultData.language); //English (US)
 		displayLanguages.set(ClientPrefs.defaultData.language, Language.defaultLangName);
-		for (directory in Paths.directoriesWithFile('translations'))
-			for (language in Paths.readDirectory(directory)) {
-				var txt:String = Paths.text('$directory/$language/$language.lang');
+		for (directory in Paths.directoriesWithFile('data'))
+			for (file in Paths.readDirectory(directory)) {
+				if (!file.hasExtension('lang')) continue;
+				var language:String = file.removeExtension();
+				var txt:String = Paths.text('$directory/$file');
 				if (txt == null) continue;
 
 				if(!languages.contains(language))

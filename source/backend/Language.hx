@@ -9,7 +9,7 @@ class Language
 	public static function reloadPhrases() {
 		#if TRANSLATIONS_ALLOWED
 		var langFile:String = ClientPrefs.data.language;
-		var loadedText:Array<String> = Paths.mergeAllTextsNamed('translations/$langFile/$langFile.lang');
+		var loadedText:Array<String> = Paths.mergeAllTextsNamed('data/$langFile.lang');
 		//trace(loadedText);
 
 		phrases.clear();
@@ -51,8 +51,7 @@ class Language
 	}
 
 	public static function getPhrase(key:String, ?defaultPhrase:String, values:Array<Dynamic> = null):String {
-		var str:String = #if TRANSLATIONS_ALLOWED phrases.get(formatKey(key)) ?? #end defaultPhrase;
-		str ??= key;
+		var str:String = #if TRANSLATIONS_ALLOWED phrases.get(formatKey(key)) ?? #end defaultPhrase ?? key;
 
 		if(values != null)
 			for (num => value in values)
@@ -67,7 +66,7 @@ class Language
 
 	#if TRANSLATIONS_ALLOWED
 	static function formatKey(key:String) {
-		final hideChars = ~/[~&\\\/;:<>#.,'"%?!]/g;
+		final hideChars = ~/[~&;:<>#.,'"%?!]/g;
 		return hideChars.replace(key.replace(' ', '_'), '').toLowerCase().trim();
 	}
 	#end

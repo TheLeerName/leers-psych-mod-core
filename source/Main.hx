@@ -254,6 +254,7 @@ class Main extends Sprite
 			Difficulty,
 			backend.Highscore,
 			backend.Song,
+			backend.Language,
 			Mods,
 			MusicBeatState,
 			MusicBeatSubstate,
