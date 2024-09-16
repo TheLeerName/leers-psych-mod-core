@@ -1,7 +1,6 @@
 package backend;
 
 import openfl.media.Sound;
-import openfl.utils.Assets as OpenFlAssets;
 import lime.media.openal.ALC;
 import lime.media.AudioManager;
 

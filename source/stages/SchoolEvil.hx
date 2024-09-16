@@ -3,7 +3,6 @@ package stages;
 import flixel.addons.effects.FlxTrail;
 import substates.GameOverSubstate;
 import cutscenes.DialogueBox;
-import openfl.utils.Assets as OpenFlAssets;
 
 class SchoolEvil extends BaseStage {
 	override function onCreate() {

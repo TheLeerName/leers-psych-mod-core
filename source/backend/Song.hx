@@ -1,7 +1,5 @@
 package backend;
 
-import lime.utils.Assets;
-
 import objects.Note;
 
 typedef SwagSong = {

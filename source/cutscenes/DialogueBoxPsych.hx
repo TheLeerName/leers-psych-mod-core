@@ -1,7 +1,5 @@
 package cutscenes;
 
-import openfl.utils.Assets;
-
 import objects.TypedAlphabet;
 import cutscenes.DialogueCharacter;
 

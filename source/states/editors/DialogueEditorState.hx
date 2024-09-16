@@ -3,8 +3,7 @@ package states.editors;
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
-import flash.net.FileFilter;
-import haxe.Json;
+import openfl.net.FileFilter;
 
 import objects.TypedAlphabet;
 

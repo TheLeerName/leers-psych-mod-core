@@ -1,8 +1,5 @@
 package objects;
 
-import openfl.utils.Assets;
-import haxe.Json;
-
 typedef MenuCharacterFile = {
 	var image:String;
 	var scale:Float;

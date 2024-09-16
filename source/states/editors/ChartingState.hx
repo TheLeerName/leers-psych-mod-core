@@ -8,7 +8,6 @@ import flixel.util.FlxStringUtil;
 import flixel.util.FlxDestroyUtil;
 import flixel.input.keyboard.FlxKey;
 
-import lime.utils.Assets;
 import lime.media.AudioBuffer;
 
 import openfl.media.Sound;

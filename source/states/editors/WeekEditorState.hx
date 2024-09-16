@@ -2,13 +2,11 @@ package states.editors;
 
 import backend.WeekData;
 
-import openfl.utils.Assets;
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
-import flash.net.FileFilter;
+import openfl.net.FileFilter;
 import lime.system.Clipboard;
-import haxe.Json;
 
 import objects.HealthIcon;
 import objects.MenuCharacter;
