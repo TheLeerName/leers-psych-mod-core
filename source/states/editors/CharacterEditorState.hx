@@ -1070,7 +1070,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		var thePath:String = Paths.path(assetFolder);
 		if (thePath == null) return;
 
-		Paths.directories.unshift(thePath);
+		Paths.directories.unshift('$thePath/');
 
 		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
 		add(bg);
