@@ -96,6 +96,9 @@ class BaseStageWithoutDefaultStageObjects {
 	var defaultCamZoom(get, set):Float;
 	var camFollow(get, never):FlxObject;
 
+	var skipNextTransIn(get, set):Bool;
+	var skipNextTransOut(get, set):Bool;
+
 	function addBGSprite(image:String, x:Float = 0, y:Float = 0, ?scrollX:Float = 1, ?scrollY:Float = 1, ?scaleX:Float = 1, ?scaleY:Float = 1, ?anim:String = null, ?loop:Bool = true):BGSprite {
 		var spr = new BGSprite(image, x, y, scrollX, scrollY, anim == null ? null : [anim], loop);
 		spr.scale.set(scaleX, scaleY);
@@ -105,11 +108,13 @@ class BaseStageWithoutDefaultStageObjects {
 
 	function triggerEvent(name:String, value1:OneOfTwo<String, Float>, value2:OneOfTwo<String, Float>)
 		game.triggerEvent(name, cast value1, cast value2);
-	function startCountdown() return game.startCountdown();
-	function endSong() return game.endSong();
+	inline function startCountdown() return game.startCountdown();
+	inline function endSong() return game.endSong();
+	inline function moveCamera(isDad:Bool) return game.moveCamera(isDad);
+	inline function moveCameraSection(?sec:Null<Int>) return game.moveCameraSection(sec);
 
 	inline function add(object:FlxBasic) return game.add(object);
-	inline function remove(object:FlxBasic) return game.remove(object);
+	inline function remove(object:FlxBasic, splice:Bool = false) return game.remove(object, splice);
 	inline function insert(position:Int, object:FlxBasic) return game.insert(position, object);
 
 	inline function addBehindGF(obj:FlxBasic) return game.addBehindGF(obj);
@@ -245,4 +250,9 @@ class BaseStageWithoutDefaultStageObjects {
 	@:noCompletion inline function get_defaultCamZoom() return game.defaultCamZoom;
 	@:noCompletion inline function set_defaultCamZoom(value:Float) return game.defaultCamZoom = value;
 	@:noCompletion inline function get_camFollow() return game.camFollow;
+
+	@:noCompletion inline function get_skipNextTransIn() return game.skipNextTransIn;
+	@:noCompletion inline function set_skipNextTransIn(value:Bool) return game.skipNextTransIn = value;
+	@:noCompletion inline function get_skipNextTransOut() return game.skipNextTransOut;
+	@:noCompletion inline function set_skipNextTransOut(value:Bool) return game.skipNextTransOut = value;
 }

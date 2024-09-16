@@ -242,6 +242,8 @@ class PlayState extends MusicBeatState
 			'school' => stages.School,
 			'schoolEvil' => stages.SchoolEvil,
 			'tank' => stages.Tank,
+			'phillyStreets' => stages.PhillyStreets,
+			'phillyBlazin' => stages.PhillyBlazin,
 		];
 
 		stageObjects.clear();
@@ -700,11 +702,47 @@ class PlayState extends MusicBeatState
 		char.y += char.positionArray[1];
 	}
 
-	public function startVideo(name:String) {
-		#if VIDEOS_ALLOWED inCutscene = true; #end
-		return Main.playVideo(name, _ -> {
-			startAndEnd();
-		});
+	public var videoCutscene:VideoSprite = null;
+	public function startVideo(name:String, forMidSong:Bool = false, canSkip:Bool = true, loop:Bool = false, playOnLoad:Bool = true):VideoSprite {
+		#if VIDEOS_ALLOWED
+		inCutscene = true;
+		canPause = false;
+
+		var path = Paths.video(name);
+		if (path != null)
+		{
+			videoCutscene = new VideoSprite(path, forMidSong, canSkip, loop);
+
+			// Finish callback
+			if (!forMidSong)
+			{
+				function onVideoEnd()
+				{
+					if (generatedMusic && PlayState.SONG.notes[Std.int(curStep / 16)] != null && !endingSong && !isCameraOnForcedPos)
+					{
+						moveCameraSection();
+						FlxG.camera.snapToTarget();
+					}
+					videoCutscene = null;
+					canPause = false;
+					inCutscene = false;
+					startAndEnd();
+				}
+				videoCutscene.finishCallback = onVideoEnd;
+				videoCutscene.onSkip = onVideoEnd;
+			}
+			add(videoCutscene);
+
+			if (playOnLoad)
+				videoCutscene.videoSprite.play();
+			return videoCutscene;
+		}
+		else addTextToDebug('Video not found: $name', FlxColor.RED);
+		#else
+		FlxG.log.warn('Platform not supported!');
+		startAndEnd();
+		#end
+		return null;
 	}
 
 	function startAndEnd()

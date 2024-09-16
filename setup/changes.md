@@ -35,12 +35,6 @@
 - added `Clear cache on song start` option, if checked then game will clear cache on switching to / reloading song
 
 
-## [objects.FunkinVideo](source/objects/FunkinVideo.hx) (New)
-- Videos with this class could be skipped by pressing ACCEPT!
-- works like [FlxVideoSprite](https://github.com/MAJigsaw77/hxvlc/blob/main/source/hxvlc/flixel/FlxVideoSprite.hx)
-- can be initialized by `Main.playVideo` method
-
-
 ## [psychlua](source/psychlua)
 - funk.set instead of Lua_helper.add_callback
 
@@ -209,13 +203,10 @@
 5. **static** onFullscreenChange:[FlxSignal](https://api.haxeflixel.com/flixel/util/FlxSignal.html)
 - dispatches on each fullscreen change
 
-6. **static** playVideo(key:[String](https://api.haxe.org/String.html), onFinish:(finishCode:[Int](https://api.haxe.org/Int.html))->[Void](https://api.haxe.org/Void.html)):[Null](https://api.haxe.org/Null.html)<[objects.FunkinVideo](source/objects/FunkinVideo.hx)>
-- plays video which will be got from relative `key`
-
-7. **static** setFramerate(value:[Int](https://api.haxe.org/Int.html)):[Void](https://api.haxe.org/Void.html)
+6. **static** setFramerate(value:[Int](https://api.haxe.org/Int.html)):[Void](https://api.haxe.org/Void.html)
 - sets framerate of game and updates fps graph of flixel debugger
 
-8. **static** println(str:[Dynamic](https://api.haxe.org/Dynamic.html)):[Void](https://api.haxe.org/Void.html)
+7. **static** println(str:[Dynamic](https://api.haxe.org/Dynamic.html)):[Void](https://api.haxe.org/Void.html)
 - just a basic `Sys.println` but works on each target
 
 

@@ -87,6 +87,9 @@
 	<haxelib name="linc_luajit"        version="git" url="https://github.com/superpowers04/linc_luajit" branch="633fcc0" if="LUA_ALLOWED"/>
 	<haxelib name="hxdiscord_rpc"      version="git" url="https://github.com/MAJigsaw77/hxdiscord_rpc"  branch="187c445" if="DISCORD_ALLOWED"/>
 	<haxelib name="flxanimate"         version="git" url="https://github.com/Dot-Stuff/flxanimate"      branch="768740a" />
+	<haxelib name="grig.audio"         version="git" url="https://github.com/osakared/grig.audio"      branch="57f5d47" if="BASE_GAME_FILES"/>
+	<haxelib name="tink_core"          version="1.26.0" />
+	<haxelib name="funkin.vis"         version="git" url="https://github.com/FunkinCrew/funkVis"        branch="22b1ce0" if="BASE_GAME_FILES"/>
 
 	<!-- __________________________ Game Assets & Etc. __________________________ -->
 

@@ -83,45 +83,6 @@ class Main extends Sprite
 		Lib.current.addChild(new Main());
 	}
 
-	/**
-	 * Plays video which will be got from relative `key`
-	 * 
-	 * `onFinish` returns:
-	 * - `2` -> video handler not supported by target
-	 * - `1` -> video not found;
-	 * - `0` -> video finished successfully.
-	 * @return `FunkinVideo` object if video loaded successfully, otherwise `null`
-	*/
-	public static function playVideo(key:String, onFinish:(finishCode:Int)->Void):Null<objects.FunkinVideo> {
-		#if VIDEOS_ALLOWED
-		try {
-			var video = new objects.FunkinVideo();
-			if (!video.load(Paths.video(key))) throw "Not found";
-			video.play();
-
-			if (Main.fpsVar != null) Main.fpsVar.visible = false;
-			if (Main.titleWindowColorMode != DISABLED) Main.titleWindowColorMode = RAINBOW;
-			video.bitmap.onEndReached.add(() -> {
-				if (onFinish != null) onFinish(0);
-				video.destroy();
-				if (Main.titleWindowColorMode != DISABLED) Main.titleWindowColorMode = DEFAULT;
-				if (Main.fpsVar != null) Main.fpsVar.visible = true;
-			}, true);
-
-			return video;
-		} catch(e) {
-			trace('Loading video file of "$key" failed!'.toCMD(RED_BOLD), e.toString().toCMD(RED));
-			if (onFinish != null) onFinish(1);
-
-			return null;
-		}
-		#else
-		FlxG.log.warn('Main.playVideo: Platform not supported for hxvlc!');
-		if (onFinish != null) onFinish(2);
-		return null;
-		#end
-	}
-
 	/** Sets framerate of game and updates fps graph of flixel debugger */
 	public static function setFramerate(value:Int) {
 		if(value > FlxG.drawFramerate)
