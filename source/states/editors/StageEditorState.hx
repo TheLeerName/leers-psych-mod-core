@@ -610,7 +610,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		var folderList:Array<String> = [''];
 		for (folder in Paths.directoriesWithFile('week_assets'))
 			if(Paths.isDirectory(folder))
-				folderList.push(folder.substring(folder.lastIndexOf('/'), folder.length));
+				folderList.push(folder.substring(folder.lastIndexOf('/') + 1, folder.length));
 
 		var saveButton:PsychUIButton = new PsychUIButton(UI_box.width - 90, UI_box.height - 50, 'Save', function() {
 			saveData();

@@ -546,7 +546,7 @@ class Paths {
 
 	public static function directoriesWithFile(file:String) {
 		var dirs:Array<String> = directories.copy();
-		for (dir in dirs) dir += file;
+		for (i in 0...dirs.length) dirs[i] += file;
 		return dirs;
 	}
 
