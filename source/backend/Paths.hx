@@ -29,15 +29,16 @@ class Paths {
 		stackItem = getStackItem(stackItem);
 		var loaded = {inst: false, player: false, opponent: false};
 
+		FlxG.sound.music ??= new FlxSound();
 		try {
 			var path:String = instPath(songPath);
 			if (path == null) throw CoolUtil.prettierNotFoundException(lastError);
-			FlxG.sound.playMusic(soundAbsolute(path));
+			FlxG.sound.music.loadEmbedded(soundAbsolute(path));
 			loaded.inst = true;
 		}
 		catch(e) {
 			if (printErrors) callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Inst.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
-			FlxG.sound.playMusic(openflSoundEmpty());
+			FlxG.sound.music.loadEmbedded(openflSoundEmpty());
 		}
 
 		@:privateAccess vocalsP1.cleanup(true);
