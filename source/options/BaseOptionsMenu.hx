@@ -61,6 +61,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 		descText = new FlxText(50, 600, 1180, "", 32);
 		descText.setFormat("VCR OSD Mono", 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		descText.antialiasing = false;
 		descText.scrollFactor.set();
 		descText.borderSize = 2.4;
 		add(descText);
