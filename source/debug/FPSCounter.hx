@@ -123,7 +123,7 @@ class FPSCounter extends TextField
 	}
 
 	var pressedF3Lines:Array<String> = [
-		'%file% %modVer% (%modVer%/%psychVer%)',
+		'%file% %modVer% (%psychVer%)',
 		'%fps% fps T: %maxFPS% %quality% %antialiasing%',
 		'RAM: %ram% GPU: %gpuUsgMem% %caching%',
 		'GPU: %gpuUsg%% (%gpuUsgGlobal%%) %shaders%',
