@@ -191,17 +191,8 @@ class StoryMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if(grpWeekText.length < 1)
-		{
-			if (controls.BACK && !movedBack && !selectedWeek)
-			{
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-				movedBack = true;
-				MusicBeatState.switchState(new MainMenuState());
-			}
-			super.update(elapsed);
+		if(WeekData.weeksList.length < 1)
 			return;
-		}
 
 		// scoreText.setFormat('VCR OSD Mono', 32);
 		if(intendedScore != lerpScore)
