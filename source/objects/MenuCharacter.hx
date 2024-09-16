@@ -45,7 +45,7 @@ class MenuCharacter extends FlxSprite
 			default:
 				var rawJson:String = Paths.path('images/menucharacters/$character.json');
 				if (rawJson == null) {
-					rawJson = Paths.path('images/characters/$DEFAULT_CHARACTER.json'); //If a character couldn't be found, change him to BF just to prevent a crash
+					rawJson = Paths.path('images/menucharacters/$DEFAULT_CHARACTER.json'); //If a character couldn't be found, change him to BF just to prevent a crash
 					color = FlxColor.BLACK;
 					alpha = 0.6;
 				}
