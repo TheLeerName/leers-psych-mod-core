@@ -59,14 +59,14 @@ class SchoolEvil extends BaseStage {
 			case "Trigger BG Ghouls":
 				if(!prefs.lowQuality)
 				{
-					bgGhouls = new BGSprite('weeb/bgGhouls', -100, 190, 0.9, 0.9, ['BG freaks glitch instance'], false);
+					bgGhouls = new BGSprite('weeb/bgGhouls', -100, 190, 0.9, 0.9, ['BG freaks glitch'], false);
 					bgGhouls.setGraphicSize(Std.int(bgGhouls.width * PlayState.daPixelZoom));
 					bgGhouls.updateHitbox();
 					bgGhouls.visible = false;
 					bgGhouls.antialiasing = false;
 					bgGhouls.animation.finishCallback = function(name:String)
 					{
-						if(name == 'BG freaks glitch instance')
+						if(name == 'BG freaks glitch')
 							bgGhouls.visible = false;
 					}
 					addBehindGF(bgGhouls);
