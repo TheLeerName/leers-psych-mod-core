@@ -7,19 +7,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		title = Language.getPhrase('gameplay_menu', 'Gameplay Settings');
 		rpcTitle = 'In the Gameplay Settings Menu'; //for Discord Rich Presence
 
-		var option:Option = new Option('Input to Use',
-			'Which input do you want to use?',
-			'inputUsed',
-			STRING,
-			['Psych', 'Kade', 'Pumpsuki']);
-		addOption(option);
-
-		var option:Option = new Option('Miss When Release',
-			'If checked, when you release a sustain note, it will miss the tail. Works only with guitar hero mode.',
-			'missSustainOnRelease',
-			BOOL);
-		addOption(option);
-
 		//I'd suggest using "Downscroll" as an example for making your own option since it is the simplest here
 		var option:Option = new Option('Downscroll', //Name
 			'If checked, notes go Down instead of Up, simple enough.', //Description

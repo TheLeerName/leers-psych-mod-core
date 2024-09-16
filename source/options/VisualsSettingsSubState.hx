@@ -27,19 +27,11 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
 		// options
 
-		#if VIDEOS_ALLOWED
-		var option:Option = new Option('Show Videos',
-			"If checked, shows videos.",
-			'showVideos',
-			BOOL);
-		addOption(option);
-		#end
-
 		var noteSkins:Array<String> = Paths.mergeAllTextsNamed('images/noteSkins/list.txt');
 		if(noteSkins.length > 0)
 		{
-			if(!noteSkins.contains(prefs.noteSkin))
-				prefs.noteSkin = ClientPrefs.defaultData.noteSkin; //Reset to default if saved noteskin couldnt be found
+			if(!noteSkins.contains(ClientPrefs.data.noteSkin))
+				ClientPrefs.data.noteSkin = ClientPrefs.defaultData.noteSkin; //Reset to default if saved noteskin couldnt be found
 
 			noteSkins.insert(0, ClientPrefs.defaultData.noteSkin); //Default skin always comes first
 			var option:Option = new Option('Note Skins:',
@@ -51,12 +43,12 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			option.onChange = onChangeNoteSkin;
 			noteOptionID = optionsArray.length - 1;
 		}
-
-		/*var noteSplashes:Array<String> = Paths.mergeAllTextsNamed('images/noteSplashes/list.txt');
+		
+		var noteSplashes:Array<String> = Paths.mergeAllTextsNamed('images/noteSplashes/list.txt');
 		if(noteSplashes.length > 0)
 		{
-			if(!noteSplashes.contains(prefs.splashSkin))
-				prefs.splashSkin = ClientPrefs.defaultData.splashSkin; //Reset to default if saved splashskin couldnt be found
+			if(!noteSplashes.contains(ClientPrefs.data.splashSkin))
+				ClientPrefs.data.splashSkin = ClientPrefs.defaultData.splashSkin; //Reset to default if saved splashskin couldnt be found
 
 			noteSplashes.insert(0, ClientPrefs.defaultData.splashSkin); //Default skin always comes first
 			var option:Option = new Option('Note Splashes:',
@@ -65,10 +57,10 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 				STRING,
 				noteSplashes);
 			addOption(option);
-		}*/
+		}
 
 		var option:Option = new Option('Note Splash Opacity',
-			'How much transparent should the Note Splashes be.\nAlso affects to Hold Splashes!',
+			'How much transparent should the Note Splashes be.',
 			'splashAlpha',
 			PERCENT);
 		option.scrollSpeed = 1.6;
@@ -76,31 +68,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		option.maxValue = 1;
 		option.changeValue = 0.1;
 		option.decimals = 1;
-		addOption(option);
-
-        //have to do the american spelling ugh
-		var option:Option = new Option('Colored Note Splashes',
-			"If checked, Note Splashes will be colored with your notes.",
-			'colSplashes',
-			BOOL);
-		addOption(option);
-
-		var option:Option = new Option('Hold Cover for Opponent',
-			"If checked, Hold Covers will appear for the opponent.",
-			'holdCoverOpponent',
-			BOOL);
-		addOption(option);
-
-		var option:Option = new Option('Hold Cover BPM Speed',
-			"If checked, Hold Cover speed is based on BPM, rather than a set speed.",
-			'holdCoverBpmSpeed',
-			BOOL);
-		addOption(option);
-
-		var option:Option = new Option('Gore',
-			"If unchecked, Gore will not be displayed.",
-			'gore',
-			BOOL);
 		addOption(option);
 
 		var option:Option = new Option('Hide HUD',
@@ -116,14 +83,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
 		addOption(option);
 
-		var option:Option = new Option('logo style:',
-			"What should the logo be?",
-			'logoState',
-			STRING,
-			['v1', /*'v1.5', 'v2','v2-beat-a-kid',*/ 'revisited','revisitedtroll']);
-		addOption(option);
-		option.onChange = changeMMusic;
-
 		var option:Option = new Option('Flashing Lights',
 			"Uncheck this if you're sensitive to flashing lights!",
 			'flashing',
@@ -136,8 +95,8 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 
-		var option:Option = new Option('Score Text Zoom on Hit',
-			"If unchecked, disables the Score text zooming\neverytime you hit a note.",
+		var option:Option = new Option('Score Text Grow on Hit',
+			"If unchecked, disables the Score text growing\neverytime you hit a note.",
 			'scoreZoom',
 			BOOL);
 		addOption(option);
@@ -151,12 +110,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		option.maxValue = 1;
 		option.changeValue = 0.1;
 		option.decimals = 1;
-		addOption(option);
-
-		var option:Option = new Option('Note Size',
-			'Notes size shit default is 70%',
-			'noteSize',
-			PERCENT);
 		addOption(option);
 
 		#if !mobile
@@ -181,7 +134,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			"What song do you prefer for the Pause Screen?",
 			'pauseMusic',
 			STRING,
-			['None', 'Tea Time', 'Breakfast']);
+			['None', 'Tea Time', 'Breakfast', 'Breakfast (Pico)']);
 		addOption(option);
 		option.onChange = onChangePauseMusic;
 
@@ -190,7 +143,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			"Uncheck this to prevent accidental leaks, it will hide the Application from your \"Playing\" box on Discord",
 			'discordRPC',
 			BOOL);
-		option.onChange = onChangeDiscordRPC;
 		addOption(option);
 		#end
 

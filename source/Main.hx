@@ -87,7 +87,7 @@ class Main extends Sprite
 	 * Plays video which will be got from relative `key`
 	 * 
 	 * `onFinish` returns:
-	 * - `2` -> video handler not supported by target / `ClientPrefs.data.showVideos` = `false`;
+	 * - `2` -> video handler not supported by target
 	 * - `1` -> video not found;
 	 * - `0` -> video finished successfully.
 	 * @return `FunkinVideo` object if video loaded successfully, otherwise `null`
