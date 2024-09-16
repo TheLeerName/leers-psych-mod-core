@@ -159,7 +159,6 @@ class StageData {
 							var dat:Dynamic = Reflect.getProperty(data, varName);
 							if(dat != null) Reflect.setProperty(spr, varName, dat);
 						}
-						if(!ClientPrefs.data.antialiasing) spr.antialiasing = false;
 					}
 					else
 					{

@@ -71,7 +71,7 @@ class MenuCharacter extends FlxSprite
 				offset.set(charFile.position[0], charFile.position[1]);
 				animation.play('idle');
 
-				antialiasing = (charFile.antialiasing != false && ClientPrefs.data.antialiasing);
+				if (!charFile.antialiasing) antialiasing = false;
 		}
 	}
 }
