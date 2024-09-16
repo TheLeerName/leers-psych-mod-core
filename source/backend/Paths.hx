@@ -523,15 +523,20 @@ class Paths {
 
 		directories.unshift(preloadPath());
 		#if !DISABLE_SHARED_DIRECTORY
-		directories.unshift(preloadPath(SHARED_DIRECTORY + '/'));
+		directories.unshift(preloadPath('$SHARED_DIRECTORY/'));
 		#end
 		#if MODS_ALLOWED
 		directories.unshift(modsPath());
 		#end
 
 		// adding specific directories
+		#if BASE_GAME_FILES
+		directories.unshift('$BASE_GAME_DIRECTORY/');
 		if (currentLevel != null)
-			directories.unshift(preloadPath(currentLevel + '/'));
+			directories.unshift('$BASE_GAME_DIRECTORY/$currentLevel/');
+		#end
+		if (currentLevel != null)
+			directories.unshift(preloadPath('$currentLevel/'));
 		#if MODS_ALLOWED
 		if (Mods.currentModDirectory != null)
 			directories.unshift(modsPath(Mods.currentModDirectory + '/'));
