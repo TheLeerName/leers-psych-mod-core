@@ -16,8 +16,9 @@
 - [Haxe](https://marketplace.visualstudio.com/items?itemName=nadako.vshaxe)
 - [Haxe Extension Pack](https://marketplace.visualstudio.com/items?itemName=vshaxe.haxe-extension-pack)
 - [Lime](https://marketplace.visualstudio.com/items?itemName=openfl.lime-vscode-extension)
-- [Funkin Script AutoCompleter](https://marketplace.visualstudio.com/items?itemName=Snirozu.funkin-script-autocompleter) (if you wanna edit .lua files)
-- [Shader languages support for VS Code](https://marketplace.visualstudio.com/items?itemName=slevesque.shader) (if you wanna edit .frag/.vert files)
+- [quick-run-panel](https://marketplace.visualstudio.com/items?itemName=davehart.quick-run-panel) - if you wanna have handy run tasks in explorer
+- [Funkin Script AutoCompleter](https://marketplace.visualstudio.com/items?itemName=Snirozu.funkin-script-autocompleter) - if you wanna edit .lua files
+- [Shader languages support for VS Code](https://marketplace.visualstudio.com/items?itemName=slevesque.shader) - if you wanna edit .frag/.vert files
 4. Restart VS Code if needed
 5. See that `HTML5` word below? Click on it and choose your compile target (i.e. `Windows`)
 6. Now you have very useful autocompleter for functions, just start type smth like `Flx` in .hx files
