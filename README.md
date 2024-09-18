@@ -5,7 +5,6 @@
 ### [CHANGES](setup/changes.md)
 ### [BUILDING](setup/building.md)
 - tl;dr - upgrade haxe to 4.3 or higher and do `haxe setup.hxml`
-- also u can use [this](COMPILE%20[DEV].bat) and [this](PE7.bat), but i dont recommend it lol - TheLeerName
 - to show cached assets in cmd just do `lime test windows -debug -D TRACE_CACHED_ASSETS`
 - to load song in game start just do `lime test windows -debug -DSONG=<song>`
 
