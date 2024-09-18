@@ -1,5 +1,6 @@
 package stages;
 
+#if BASE_GAME_FILES
 enum HenchmenKillState {
 	WAIT;
 	KILLING;
@@ -277,3 +278,4 @@ class BackgroundDancer extends FlxSprite
 			animation.play('danceLeft', true);
 	}
 }
+#end

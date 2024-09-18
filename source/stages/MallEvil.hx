@@ -1,5 +1,6 @@
 package stages;
 
+#if BASE_GAME_FILES
 class MallEvil extends BaseStage {
 	override function onCreate() {
 		var bg:BGSprite = new BGSprite('christmas/evilBG', -400, -500, 0.2, 0.2);
@@ -60,3 +61,4 @@ class MallEvil extends BaseStage {
 		});
 	}
 }
+#end

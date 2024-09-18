@@ -1,5 +1,6 @@
 package stages;
 
+#if BASE_GAME_FILES
 import shaders.RainShader;
 
 import flixel.addons.transition.FlxTransitionableState;
@@ -1128,3 +1129,4 @@ class DarnellBlazinHandler
 	function get_boyfriendGroup() return PlayState.instance.boyfriendGroup;
 	function get_dadGroup() return PlayState.instance.dadGroup;
 }
+#end

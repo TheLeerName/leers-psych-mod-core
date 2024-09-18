@@ -1,5 +1,6 @@
 package stages;
 
+#if BASE_GAME_FILES
 import shaders.RainShader;
 
 import flixel.addons.display.FlxTiledSprite;
@@ -161,6 +162,72 @@ class PhillyStreets extends BaseStage
 						game.startVideo('2hotCutscene');
 					});
 			}
+		}
+	}
+
+	var overlay:FlxSprite;
+	var overlayConfirmOffsets:FlxPoint = FlxPoint.get();
+	override function onGameOverStart() {
+		if(GameOverSubstate.characterName == 'pico-dead')
+		{
+			overlay = new FlxSprite(boyfriend.x + 205, boyfriend.y - 80);
+			overlay.frames = Paths.getSparrowAtlas('Pico_Death_Retry');
+			overlay.animation.addByPrefix('deathLoop', 'Retry Text Loop', 24, true);
+			overlay.animation.addByPrefix('deathConfirm', 'Retry Text Confirm', 24, false);
+			overlayConfirmOffsets.set(250, 200);
+			overlay.visible = false;
+			GameOverSubstate.instance.add(overlay);
+
+			boyfriend.animation.callback = function(name:String, frameNumber:Int, frameIndex:Int)
+			{
+				switch(name)
+				{
+					case 'firstDeath':
+						if(frameNumber >= 36 - 1)
+						{
+							overlay.visible = true;
+							overlay.animation.play('deathLoop');
+							boyfriend.animation.callback = null;
+						}
+					default:
+						boyfriend.animation.callback = null;
+				}
+			}
+
+			if(gf != null && gf.curCharacter == 'nene')
+			{
+				var neneKnife:FlxSprite = new FlxSprite(boyfriend.x - 450, boyfriend.y - 250);
+				neneKnife.frames = Paths.getSparrowAtlas('NeneKnifeToss');
+				neneKnife.animation.addByPrefix('anim', 'knife toss', 24, false);
+				neneKnife.animation.finishCallback = function(_)
+				{
+					remove(neneKnife);
+					neneKnife.destroy();
+				}
+				insert(0, neneKnife);
+				neneKnife.animation.play('anim', true);
+			}
+		}
+	}
+
+	override function onUpdatePost(elapsed:Float) {
+		if (!game.isDead) return;
+
+		if(overlay != null && GameOverSubstate.instance.justPlayedLoop && overlay.animation.exists('deathLoop'))
+		{
+			overlay.visible = true;
+			overlay.animation.play('deathLoop');
+		}
+	}
+
+	override function onGameOverConfirm(end:Bool) {
+		if (!end) return;
+
+		if(overlay != null && overlay.animation.exists('deathConfirm'))
+		{
+			overlay.visible = true;
+			overlay.animation.play('deathConfirm');
+			overlay.offset.set(overlayConfirmOffsets.x, overlayConfirmOffsets.y);
 		}
 	}
 
@@ -1093,3 +1160,4 @@ class SpraycanAtlasSprite extends FlxSpriteGroup
 		playingAnim = name;
 	}
 }
+#end

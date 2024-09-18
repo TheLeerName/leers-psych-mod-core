@@ -1,9 +1,12 @@
 package stages;
 
+#if BASE_GAME_FILES
 import cutscenes.CutsceneHandler;
 import substates.GameOverSubstate;
 import objects.Character;
 
+@:access(objects.Character)
+@:access(substates.GameOverSubstate)
 class Tank extends BaseStage {
 	var tankWatchtower:BGSprite;
 	var tankGround:BackgroundTank;
@@ -88,6 +91,12 @@ class Tank extends BaseStage {
 	override function onCreatePost() {
 		add(foregroundSprites);
 
+		if(gf?.curCharacter == 'pico-speaker') {
+			gf.skipDance = true;
+			loadMappedAnims(gf);
+			gf.playAnim("shoot1");
+		}
+
 		if(!prefs.lowQuality)
 		{
 			for (daGf in gfGroup)
@@ -114,6 +123,51 @@ class Tank extends BaseStage {
 				}
 			}
 		}
+	}
+
+	override function onUpdatePost(elapsed:Float) {
+		if (game.isDead) {
+			var state = GameOverSubstate.instance;
+			if (state != null && !state.isEnding && !controls.BACK && state.justPlayedLoop) {
+				FlxG.sound.music.volume = 0.2;
+				var exclude:Array<Int> = [];
+				//if(!ClientPrefs.cursing) exclude = [1, 3, 8, 13, 17, 21];
+
+				FlxG.sound.play(Paths.sound('jeffGameover/jeffGameover-' + FlxG.random.int(1, 25, exclude)), 1, false, null, true, function() {
+					if(!state.isEnding)
+					{
+						FlxG.sound.music.fadeIn(0.2, 1, 4);
+					}
+				});
+			}
+		} else if (gf?.curCharacter == 'pico-speaker') {
+			if(gf.animationNotes.length > 0 && Conductor.songPosition > gf.animationNotes[0][0])
+			{
+				var noteData:Int = 1;
+				if(gf.animationNotes[0][1] > 2) noteData = 3;
+
+				noteData += FlxG.random.int(0, 1);
+				gf.playAnim('shoot' + noteData, true);
+				gf.animationNotes.shift();
+			}
+			if(gf.isAnimationFinished()) gf.playAnim(gf.getAnimationName(), false, false, gf.animation.curAnim.frames.length - 3);
+		}
+	}
+
+	function loadMappedAnims(char:Character):Void
+	{
+		try
+		{
+			var songData:SwagSong = Song.getChart('picospeaker', Paths.formatToSongPath(Song.loadedSongName));
+			if(songData != null)
+				for (section in songData.notes)
+					for (songNotes in section.sectionNotes)
+						char.animationNotes.push(songNotes);
+
+			TankmenBG.animationNotes = char.animationNotes;
+			char.animationNotes.sort(char.sortAnims);
+		}
+		catch(e:Dynamic) {}
 	}
 
 	override function onCountdownTick(count:Countdown, num:Int) if(num % 2 == 0) everyoneDance();
@@ -468,3 +522,4 @@ class BackgroundTank extends BGSprite
 		y = offsetY + 1100 * Math.sin(Math.PI / 180 * (tankAngle + 180));
 	}
 }
+#end

@@ -1,5 +1,6 @@
 package stages;
 
+#if BASE_GAME_FILES
 class Spooky extends BaseStage {
 	var halloweenBG:BGSprite;
 	var halloweenWhite:BGSprite;
@@ -107,3 +108,4 @@ class Spooky extends BaseStage {
 		});
 	}
 }
+#end

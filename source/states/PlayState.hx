@@ -230,10 +230,11 @@ class PlayState extends MusicBeatState
 	public static var stageObjects(default, never):Map<String, BaseStageObject> = [];
 	/** Loads stage and clears `stageObjects` */
 	public static function initStage() {
-		if (stage != null && stage.name == curStage) return;
+		if (curStage == null || (stage != null && stage.name == curStage)) return;
 		// que pro tip: you can use name of class (not package) as stage in json without adding it here!
 		var stages:Map<String, Class<BaseStage>> = [
 			'stage' => stages.StageWeek1, //Week 1
+			#if BASE_GAME_FILES
 			'spooky' => stages.Spooky,
 			'philly' => stages.Philly,
 			'limo' => stages.Limo,
@@ -244,6 +245,7 @@ class PlayState extends MusicBeatState
 			'tank' => stages.Tank,
 			'phillyStreets' => stages.PhillyStreets,
 			'phillyBlazin' => stages.PhillyBlazin,
+			#end
 		];
 
 		stageObjects.clear();
@@ -261,9 +263,7 @@ class PlayState extends MusicBeatState
 		if (prefs.clearCacheSongStart)
 			Paths.clearStoredMemory();
 
-		if (curStage == null)
-			StageData.loadStage(SONG.stage);
-		initStage();
+		StageData.loadStage(SONG.stage);
 
 		// for lua
 		instance = this;

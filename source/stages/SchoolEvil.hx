@@ -1,5 +1,6 @@
 package stages;
 
+#if BASE_GAME_FILES
 import flixel.addons.effects.FlxTrail;
 import substates.GameOverSubstate;
 import cutscenes.DialogueBox;
@@ -147,3 +148,4 @@ class SchoolEvil extends BaseStage {
 		});
 	}
 }
+#end

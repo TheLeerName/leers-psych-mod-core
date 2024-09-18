@@ -53,8 +53,6 @@ class GameOverSubstate extends MusicBeatSubstate
 	var charX:Float = 0;
 	var charY:Float = 0;
 
-	var overlay:FlxSprite;
-	var overlayConfirmOffsets:FlxPoint = FlxPoint.get();
 	override function create()
 	{
 		instance = this;
@@ -86,65 +84,20 @@ class GameOverSubstate extends MusicBeatSubstate
 		PlayState.instance.callOnScripts('onGameOverStart', []);
 		FlxG.sound.music.loadEmbedded(Paths.music(loopSoundName), true);
 
-		if(characterName == 'pico-dead')
-		{
-			overlay = new FlxSprite(boyfriend.x + 205, boyfriend.y - 80);
-			overlay.frames = Paths.getSparrowAtlas('Pico_Death_Retry');
-			overlay.animation.addByPrefix('deathLoop', 'Retry Text Loop', 24, true);
-			overlay.animation.addByPrefix('deathConfirm', 'Retry Text Confirm', 24, false);
-			overlayConfirmOffsets.set(250, 200);
-			overlay.visible = false;
-			add(overlay);
-
-			boyfriend.animation.callback = function(name:String, frameNumber:Int, frameIndex:Int)
-			{
-				switch(name)
-				{
-					case 'firstDeath':
-						if(frameNumber >= 36 - 1)
-						{
-							overlay.visible = true;
-							overlay.animation.play('deathLoop');
-							boyfriend.animation.callback = null;
-						}
-					default:
-						boyfriend.animation.callback = null;
-				}
-			}
-
-			if(PlayState.instance.gf != null && PlayState.instance.gf.curCharacter == 'nene')
-			{
-				var neneKnife:FlxSprite = new FlxSprite(boyfriend.x - 450, boyfriend.y - 250);
-				neneKnife.frames = Paths.getSparrowAtlas('NeneKnifeToss');
-				neneKnife.animation.addByPrefix('anim', 'knife toss', 24, false);
-				neneKnife.animation.finishCallback = function(_)
-				{
-					remove(neneKnife);
-					neneKnife.destroy();
-				}
-				insert(0, neneKnife);
-				neneKnife.animation.play('anim', true);
-			}
-		}
-
 		super.create();
 	}
 
+	public var justPlayedLoop:Bool = false;
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
 		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
 
-		var justPlayedLoop:Bool = false;
+		justPlayedLoop = false;
 		if (!boyfriend.isAnimationNull() && boyfriend.getAnimationName() == 'firstDeath' && boyfriend.isAnimationFinished())
 		{
 			boyfriend.playAnim('deathLoop');
-			if(overlay != null && overlay.animation.exists('deathLoop'))
-			{
-				overlay.visible = true;
-				overlay.animation.play('deathLoop');
-			}
 			justPlayedLoop = true;
 		}
 
@@ -170,26 +123,9 @@ class GameOverSubstate extends MusicBeatSubstate
 			}
 			else if (justPlayedLoop)
 			{
-				switch(PlayState.SONG.stage)
-				{
-					case 'tank':
-						coolStartDeath(0.2);
-						
-						var exclude:Array<Int> = [];
-						//if(!ClientPrefs.cursing) exclude = [1, 3, 8, 13, 17, 21];
-	
-						FlxG.sound.play(Paths.sound('jeffGameover/jeffGameover-' + FlxG.random.int(1, 25, exclude)), 1, false, null, true, function() {
-							if(!isEnding)
-							{
-								FlxG.sound.music.fadeIn(0.2, 1, 4);
-							}
-						});
-
-					default:
-						coolStartDeath();
-				}
+				coolStartDeath();
 			}
-			
+
 			if (FlxG.sound.music.playing)
 			{
 				Conductor.songPosition = FlxG.sound.music.time;
@@ -215,12 +151,6 @@ class GameOverSubstate extends MusicBeatSubstate
 			else if(boyfriend.hasAnimation('deathLoop'))
 				boyfriend.playAnim('deathLoop', true);
 
-			if(overlay != null && overlay.animation.exists('deathConfirm'))
-			{
-				overlay.visible = true;
-				overlay.animation.play('deathConfirm');
-				overlay.offset.set(overlayConfirmOffsets.x, overlayConfirmOffsets.y);
-			}
 			FlxG.sound.music.stop();
 			FlxG.sound.play(Paths.music(endSoundName));
 			new FlxTimer().start(0.7, function(tmr:FlxTimer)

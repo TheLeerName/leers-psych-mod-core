@@ -63,7 +63,7 @@ class NoteOffsetState extends MusicBeatState
 		// Stage
 		prevStageDirectory = Paths.currentLevel;
 		Paths.setCurrentLevel(stageDirectory);
-		BackgroundStage.makeStage(this);
+		loadBG();
 
 		// Characters
 		gf = new Character(400, 130, 'gf');
@@ -173,6 +173,25 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.sound.playMusic(Paths.music('offsetSong'), 1, true);
 
 		super.create();
+	}
+
+	final assetFolder = 'week_assets/week1';  //load from assets/base_game/week_assets/week1/
+	function loadBG()
+	{
+		var thePath:String = Paths.path(assetFolder);
+		if (thePath == null) return;
+
+		Paths.directories.unshift('$thePath/');
+
+		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
+		add(bg);
+
+		var stageFront:BGSprite = new BGSprite('stagefront', -650, 600, 0.9, 0.9);
+		stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
+		stageFront.updateHitbox();
+		add(stageFront);
+
+		Paths.resetDirectories();
 	}
 
 	var holdTime:Float = 0;

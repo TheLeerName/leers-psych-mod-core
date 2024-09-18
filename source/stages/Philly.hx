@@ -1,5 +1,6 @@
 package stages;
 
+#if BASE_GAME_FILES
 import objects.Character;
 
 class Philly extends BaseStage {
@@ -385,3 +386,4 @@ class PhillyTrain extends BGSprite
 		startedMoving = false;
 	}
 }
+#end

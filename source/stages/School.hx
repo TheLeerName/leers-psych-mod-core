@@ -1,5 +1,6 @@
 package stages;
 
+#if BASE_GAME_FILES
 import substates.GameOverSubstate;
 import cutscenes.DialogueBox;
 
@@ -183,3 +184,4 @@ class BackgroundGirls extends FlxSprite
 			animation.play('danceLeft', true);
 	}
 }
+#end

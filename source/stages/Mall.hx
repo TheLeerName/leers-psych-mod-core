@@ -1,5 +1,6 @@
 package stages;
 
+#if BASE_GAME_FILES
 class Mall extends BaseStage {
 	var upperBoppers:BGSprite;
 	var bottomBoppers:MallCrowd;
@@ -123,3 +124,4 @@ class MallCrowd extends BGSprite
 		super.dance(forceplay);
 	}
 }
+#end
