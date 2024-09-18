@@ -2261,7 +2261,7 @@ class PlayState extends MusicBeatState
 				else
 				{
 					var difficulty:String = Difficulty.getFilePath();
-					var folder:String = storyPlaylist[PlayState.story];
+					var folder:String = storyPlaylist[0];
 					var song:String = folder + difficulty;
 
 					trace('LOADING NEXT SONG');
