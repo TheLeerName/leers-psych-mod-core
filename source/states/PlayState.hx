@@ -2261,15 +2261,17 @@ class PlayState extends MusicBeatState
 				else
 				{
 					var difficulty:String = Difficulty.getFilePath();
+					var folder:String = storyPlaylist[PlayState.story];
+					var song:String = folder + difficulty;
 
 					trace('LOADING NEXT SONG');
-					trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
+					trace(song);
 
 					skipNextTransIn = true;
 					skipNextTransOut = true;
 					prevCamFollow = camFollow;
 
-					Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
+					Song.loadFromJson(song, folder);
 					FlxG.sound.music.stop();
 
 					canResync = false;

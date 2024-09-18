@@ -102,8 +102,8 @@
 	</section>
 
 	<section unless="DISABLE_SHARED_DIRECTORY">
-		<assets path="assets/shared" rename="assets" exclude="*.ogg" if="web"/>
-		<assets path="assets/shared" rename="assets" exclude="*.mp3" unless="web"/>
+		<assets path="assets/shared" rename="assets/shared" exclude="*.ogg" if="web"/>
+		<assets path="assets/shared" rename="assets/shared" exclude="*.mp3" unless="web"/>
 	</section>
 
 	<assets path='example_mods' rename='mods' if="MODS_ALLOWED"/>
