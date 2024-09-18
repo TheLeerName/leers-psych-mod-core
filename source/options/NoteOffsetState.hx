@@ -6,8 +6,6 @@ import flixel.addons.display.shapes.FlxShapeCircle;
 
 class NoteOffsetState extends MusicBeatState
 {
-	var stageDirectory:String = 'week_assets/week1';
-	var prevStageDirectory:String;
 	var boyfriend:Character;
 	var gf:Character;
 
@@ -33,11 +31,6 @@ class NoteOffsetState extends MusicBeatState
 	var controllerPointer:FlxSprite;
 	var _lastControllerMode:Bool = false;
 
-	override function destroy() {
-		super.destroy();
-		Paths.setCurrentLevel(prevStageDirectory);
-	}
-
 	override public function create()
 	{
 		DiscordClient.changePresence("In the Adjust Delay/Combo Menu");
@@ -59,8 +52,6 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.sound.pause();
 
 		// Stage
-		prevStageDirectory = Paths.currentLevel;
-		Paths.setCurrentLevel(stageDirectory);
 		loadBG();
 
 		// Characters
