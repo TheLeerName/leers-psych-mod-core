@@ -11,9 +11,11 @@ using util.WindowsCMDUtil;
 
 @:publicFields
 class Main {
-	/** @return Is command executed successfully? */
-	static function cmd(command:String, ?addToError:String = 'For fix you can just google it! If you lazy, just restart PC or reinstall Haxe / Git'):Bool {
+	/** @return Output if command executed successfully, otherwise `null` */
+	static function cmd(command:String, ?addToError:String = 'For fix you can just google it! If you lazy, just restart PC or reinstall Haxe / Git'):Null<String> {
 		var pr = new Process(command);
+		var out = pr.stdout.readAll().toString();
+		out = out.substring(0, out.length - 2);
 		var err = pr.stderr.readAll().toString();
 		err = err.substring(0, err.length - 2);
 		pr.close();
@@ -32,9 +34,9 @@ class Main {
 			log(arr.join('\n'));
 
 			Sys.exit(1);
-			return false;
+			return null;
 		}
-		return true;
+		return out;
 	}
 
 	static function main() {
@@ -66,6 +68,11 @@ class Main {
 	}
 
 	static function loadLibs() {
+		if (cmd('haxelib --quiet --always update haxelib') != 'haxelib is up to date') {
+			log('');
+			log('[Setup] '.toCMD(MAGENTA_BOLD) + 'Haxelib '.toCMD(WHITE_BOLD) + 'was updated!'.toCMD(GREEN));
+		}
+
 		if (!FileSystem.exists('.haxelib')) {
 			log('');
 			log('[Setup] '.toCMD(MAGENTA_BOLD) + 'Creating '.toCMD(BLUE) + '.haxelib'.toCMD(WHITE_BOLD) + ' folder...'.toCMD(BLUE));
@@ -133,7 +140,7 @@ class Main {
 							log(' - ' + result.toCMD(WHITE_BOLD) + ' is outdated!'.toCMD(RED));
 
 							log(' - ' + 'Removing '.toCMD(BLUE) + result.toCMD(WHITE_BOLD) + '...'.toCMD(BLUE));
-							cmd('haxelib --quiet --always --skip-dependencies remove $name $result');
+							cmd('haxelib --quiet --always --skip-dependencies remove $name');
 							log(' - ' + 'Successfully removed!'.toCMD(GREEN));
 
 							log(' - ' + 'Downloading '.toCMD(BLUE) + version.toCMD(WHITE_BOLD) + '...'.toCMD(BLUE));
