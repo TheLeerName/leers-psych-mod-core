@@ -71,6 +71,9 @@
 	<!-- btw i improved haxelib node so we can use it as setup dependencies list -->
 	<!-- also btw branch and commit its the same -->
 
+	<!-- fixes buildXml macro which doesnt check local packages, but with this line haxe can use ONLY local libs -->
+	<setenv name="HAXEPATH" value="./"/>
+
 	<haxelib name="hxcpp-debug-server" version="1.2.4" />
 	<haxelib name="hxcpp"              version="4.3.2" />
 	<haxelib name="lime"               version="8.1.2" />
