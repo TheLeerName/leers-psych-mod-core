@@ -20,6 +20,8 @@ class Windows {
 
 	/** 
 	 * Allows drawing window frame in dark mode, works on Windows 10 build 17763 or greater.
+	 * 
+	 * Doesn't do anything if ColorPrevalence is 1 (google it)
 	 * @return Is dark mode allowed?
 	 */
 	@:functionCode('
