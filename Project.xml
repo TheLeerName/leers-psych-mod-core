@@ -72,6 +72,7 @@
 	<!-- also btw branch and commit its the same -->
 
 	<!-- fixes buildXml macro which doesnt check local packages, but with this line haxe can use ONLY local libs -->
+	<!-- thx to https://github.com/HaxeFoundation/haxelib/issues/618#issuecomment-1973587186 -->
 	<setenv name="HAXEPATH" value="./"/>
 
 	<haxelib name="hxcpp-debug-server" version="1.2.4" />
