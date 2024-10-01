@@ -125,57 +125,53 @@
 3. toDouble(n:[Float](https://api.haxe.org/Float.html)):[Float](https://api.haxe.org/Float.html)
 - for example: `(0.32531).toDouble()` will return `0.33`
 
-4. resizeAbsolute(game:[FlxGame](https://api.haxeflixel.com/flixel/FlxGame.html), width:[Int](https://api.haxe.org/Int.html) = 1280, height:[Int](https://api.haxe.org/Int.html) = 720)
-- changes size of game absolutely, i.e. without initial ratio
-- for example: `FlxG.game.resizeAbsolute(960, 720)` will resize game to 4:3
-
-5. clearArray(array:[Array](https://api.haxe.org/Array.html)<[Any](https://api.haxe.org/Any.html)>):[Array](https://api.haxe.org/Array.html)<[Any](https://api.haxe.org/Any.html)>
+4. clearArray(array:[Array](https://api.haxe.org/Array.html)<[Any](https://api.haxe.org/Any.html)>):[Array](https://api.haxe.org/Array.html)<[Any](https://api.haxe.org/Any.html)>
 - clears array
 - for example: `['asdasd', 'vcxbvcbx'].clearArray()` will return `[]`
 
-6. destroyArray(array:[Array](https://api.haxe.org/Array.html)<[IFlxDestroyable](https://api.haxeflixel.com/flixel/util/IFlxDestroyable.html)>):[Array](https://api.haxe.org/Array.html)<[IFlxDestroyable](https://api.haxeflixel.com/flixel/util/IFlxDestroyable.html)>
+5. destroyArray(array:[Array](https://api.haxe.org/Array.html)<[IFlxDestroyable](https://api.haxeflixel.com/flixel/util/IFlxDestroyable.html)>):[Array](https://api.haxe.org/Array.html)<[IFlxDestroyable](https://api.haxeflixel.com/flixel/util/IFlxDestroyable.html)>
 - clears array and destroys each object in array
 - for example: `[new FlxObject(), new FlxObject()].destroyArray()`
 
-7. destroyGroup(group:[FlxTypedGroup](https://api.haxeflixel.com/flixel/group/FlxTypedGroup.html)<[FlxBasic](https://api.haxeflixel.com/flixel/FlxBasic.html)>):[FlxTypedGroup](https://api.haxeflixel.com/flixel/group/FlxTypedGroup.html)<[FlxBasic](https://api.haxeflixel.com/flixel/FlxBasic.html)>
+6. destroyGroup(group:[FlxTypedGroup](https://api.haxeflixel.com/flixel/group/FlxTypedGroup.html)<[FlxBasic](https://api.haxeflixel.com/flixel/FlxBasic.html)>):[FlxTypedGroup](https://api.haxeflixel.com/flixel/group/FlxTypedGroup.html)<[FlxBasic](https://api.haxeflixel.com/flixel/FlxBasic.html)>
 - clears group and destroys each object in group
 - for example: `var g = new FlxGroup(); g.add(new FlxObject()); g.destroyGroup();`
 
-8. disableAntialiasing(spr:[FlxSprite](https://api.haxeflixel.com/flixel/FlxSprite.html)):[FlxSprite](https://api.haxeflixel.com/flixel/FlxSprite.html)
+7. disableAntialiasing(spr:[FlxSprite](https://api.haxeflixel.com/flixel/FlxSprite.html)):[FlxSprite](https://api.haxeflixel.com/flixel/FlxSprite.html)
 - for example: `new FlxSprite().disableAntialiasing()`
 
-9. setID(spr:[FlxBasic](https://api.haxeflixel.com/flixel/FlxBasic.html), id:[Int](https://api.haxe.org/Int.html)):[FlxBasic](https://api.haxeflixel.com/flixel/FlxBasic.html)
+8. setID(spr:[FlxBasic](https://api.haxeflixel.com/flixel/FlxBasic.html), id:[Int](https://api.haxe.org/Int.html)):[FlxBasic](https://api.haxeflixel.com/flixel/FlxBasic.html)
 - for example: `new FlxSprite().setID(3)`
 
-10. setOffset(c:[ColorTransform](https://api.haxeflixel.com/openfl/geom/ColorTransform.html), red:[Float](https://api.haxe.org/Float.html) = 0, green:[Float](https://api.haxe.org/Float.html) = 0, blue:[Float](https://api.haxe.org/Float.html) = 0):[Void](https://api.haxe.org/Void.html)
+9. setOffset(c:[ColorTransform](https://api.haxeflixel.com/openfl/geom/ColorTransform.html), red:[Float](https://api.haxe.org/Float.html) = 0, green:[Float](https://api.haxe.org/Float.html) = 0, blue:[Float](https://api.haxe.org/Float.html) = 0):[Void](https://api.haxe.org/Void.html)
 - for example: `sprite.colorTransform.setOffset(1, 3, 6)`
 
-11. setMultiplier(c:[ColorTransform](https://api.haxeflixel.com/openfl/geom/ColorTransform.html), red:[Float](https://api.haxe.org/Float.html) = 1, green:[Float](https://api.haxe.org/Float.html) = 1, blue:[Float](https://api.haxe.org/Float.html) = 1):[Void](https://api.haxe.org/Void.html)
+10. setMultiplier(c:[ColorTransform](https://api.haxeflixel.com/openfl/geom/ColorTransform.html), red:[Float](https://api.haxe.org/Float.html) = 1, green:[Float](https://api.haxe.org/Float.html) = 1, blue:[Float](https://api.haxe.org/Float.html) = 1):[Void](https://api.haxe.org/Void.html)
 - for example: `sprite.colorTransform.setMultiplier(1.2, 0.2, 0.6)`
 
-12. pow(n:[Float](https://api.haxe.org/Float.html), ?exp:[Float](https://api.haxe.org/Float.html) = 2):[Float](https://api.haxe.org/Float.html)
+11. pow(n:[Float](https://api.haxe.org/Float.html), ?exp:[Float](https://api.haxe.org/Float.html) = 2):[Float](https://api.haxe.org/Float.html)
 - works like [Math.pow](https://api.haxe.org/Math.html#pow)
 - for example: `(10).pow(2)` will return `100`
 
-13. strToInt(n:[String](https://api.haxe.org/String.html)):[Int](https://api.haxe.org/Int.html)
+12. strToInt(n:[String](https://api.haxe.org/String.html)):[Int](https://api.haxe.org/Int.html)
 - for example: `"22".toInt()` will return `22`
 
-14. floatToInt(n:[Float](https://api.haxe.org/Float.html)):[Int](https://api.haxe.org/Int.html)
+13. floatToInt(n:[Float](https://api.haxe.org/Float.html)):[Int](https://api.haxe.org/Int.html)
 - for example: `(22.32).toInt()` will return `22`
 
-15. boolToInt(n:[Bool](https://api.haxe.org/Bool.html)):[Int](https://api.haxe.org/Int.html)
+14. boolToInt(n:[Bool](https://api.haxe.org/Bool.html)):[Int](https://api.haxe.org/Int.html)
 - for example: `(true).toInt()` will return `1`
 
-16. toFloat(n:[String](https://api.haxe.org/String.html)):[Float](https://api.haxe.org/Float.html)
+15. toFloat(n:[String](https://api.haxe.org/String.html)):[Float](https://api.haxe.org/Float.html)
 - for example: `"22.32".toFloat()` will return `22.32`
 
-17. arrIsEmpty(str:[Array](https://api.haxe.org/Array.html)<[Dynamic](https://api.haxe.org/Dynamic.html)>, ?length:[Int](https://api.haxe.org/Int.html) = 1):[Bool](https://api.haxe.org/Bool.html)
+16. arrIsEmpty(str:[Array](https://api.haxe.org/Array.html)<[Dynamic](https://api.haxe.org/Dynamic.html)>, ?length:[Int](https://api.haxe.org/Int.html) = 1):[Bool](https://api.haxe.org/Bool.html)
 - for example: `[].isEmpty()` returns `true`, `['123123'].isEmpty()` returns `false`
 
-18. strIsEmpty(str:[String](https://api.haxe.org/String.html), ?length:[Int](https://api.haxe.org/Int.html) = 1):[Bool](https://api.haxe.org/Bool.html)
+17. strIsEmpty(str:[String](https://api.haxe.org/String.html), ?length:[Int](https://api.haxe.org/Int.html) = 1):[Bool](https://api.haxe.org/Bool.html)
 - for example: `"".isEmpty()` returns `true`, `"34".isEmpty()` returns `false`
 
-19. toCMD(str:[String](https://api.haxe.org/String.html), format:[CMDFormat](util/WindowsCMDUtil.hx)):[String](https://api.haxe.org/String.html)
+18. toCMD(str:[String](https://api.haxe.org/String.html), format:[CMDFormat](util/WindowsCMDUtil.hx)):[String](https://api.haxe.org/String.html)
 - formats `str` for using it in trace
 
 

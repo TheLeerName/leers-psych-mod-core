@@ -54,7 +54,7 @@ enum TitleWindowColorMode {
 @:build(macros.Defines.add())
 class Main extends Sprite
 {
-	var game = {
+	public var game = {
 		width: 1280, // WINDOW width
 		height: 720, // WINDOW height
 		initialState: states.TitleState, // initial game state
@@ -65,6 +65,7 @@ class Main extends Sprite
 	};
 
 	public static var fpsVar:FPSCounter;
+	public static var instance:Main;
 
 	/** If dark mode is allowed on this system, works on Windows target only */
 	public static var isDarkMode(default, null):Bool = false;
@@ -97,6 +98,7 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
+		instance = this;
 
 		// Credits to MAJigsaw77 (he's the og author for this code)
 		#if ios
@@ -222,6 +224,7 @@ class Main extends Sprite
 			backend.NullSafeJson,
 			Paths,
 			backend.WeekData,
+			backend.WindowUtil,
 			#if windows
 			debug.GPUStats,
 			backend.native.Windows,

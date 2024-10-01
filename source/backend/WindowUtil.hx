@@ -1,76 +1,94 @@
 package backend;
 
+#if windows
+import backend.native.Windows;
+#end
+
 /** @author TheLeerName */
 @:publicFields
 class WindowUtil {
-	/**
-	 * Changes size of game absolutely, i.e. without initial ratio
-	 * 
-	 * WARNING: Changes only game size, use `FlxG.resizeWindow` for resizing window BEFORE
-	 */
-	@:access(flixel.FlxCamera)
+	/** Changes size of game absolutely, i.e. without initial ratio */
 	@:access(flixel.FlxGame)
-	static function resizeAbsolute(width:Int = 1280, height:Int = 720) {
-		var initSize = {x: FlxG.width, y: FlxG.height};
+	static function resizeGame(?width:Int, ?height:Int) {
+		width ??= Main.instance.game.width;
+		height ??= Main.instance.game.height;
 
+		// resize game
 		Reflect.setProperty(FlxG, 'width', width); // haha suck ballz
 		Reflect.setProperty(FlxG, 'initialWidth', width);
 		Reflect.setProperty(FlxG, 'height', height);
 		Reflect.setProperty(FlxG, 'initialHeight', height);
+		// dont forget about lua scripts which use this vars!
+		if (FlxG.state is PlayState) {
+			var game:PlayState = cast FlxG.state;
+			game.setOnLuas('screenWidth', width);
+			game.setOnLuas('screenHeight', height);
+		}
 
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
-		for (cam in FlxG.cameras.list) {
+		for (cam in FlxG.cameras.list)
 			cam.setSize(FlxG.width, FlxG.height);
-			cam.updateScrollRect();
-		}
-		FlxG.game.onResize(null);
+		FlxG.game.resizeGame(FlxG.stage.stageWidth, FlxG.stage.stageHeight);
 
 		trace('Changed game size to ' + '${width}x${height}'.toCMD(WHITE_BOLD));
 	}
 
-	static function forceWindowMode(gameWidth:Int, gameHeight:Int) {
-		if (FlxG.width == gameWidth && FlxG.height == gameHeight) return;
-		wasFullscreen = FlxG.fullscreen;
-		wasBounds = [FlxG.stage.window.width, FlxG.stage.window.height];
+	static function resizeWindow(?width:Int, ?height:Int, ?fullscreen:Bool) {
+		width ??= Main.instance.game.width;
+		height ??= Main.instance.game.height;
+		fullscreen ??= FlxG.fullscreen;
 
-		FlxG.game.resizeAbsolute(gameWidth, gameHeight);
-		if (wasFullscreen) {
-			FlxG.fullscreen = false; // no fullscren >:(
-			FlxG.resizeWindow(960, 720);
-			// display-centering window
-			FlxG.stage.window.x = Std.int((FlxG.stage.window.display.bounds.width - FlxG.stage.window.width) / 2);
-			FlxG.stage.window.y = Std.int((FlxG.stage.window.display.bounds.height - FlxG.stage.window.height) / 2);
+		var window = FlxG.stage.window;
+		var wasBoundsWindow = {width: window.width, height: window.height};
+
+		window.resize(width, height);
+		if (fullscreen) {
+			// centering window by monitor bounds cuz we cant get non-fullscreen window size
+			window.move(Std.int((window.display.bounds.width - window.width) / 2), Std.int((window.display.bounds.height - window.height) / 2));
+			// without calling change fullscreen, game will be out of monitor bounds, but when you unfocusing and focusing back to game, it will fix it tho
+			FlxG.fullscreen = false;
+			FlxG.fullscreen = true;
 		} else {
-			FlxG.resizeWindow(960, 720);
-			// centering window by previous bounds
-			FlxG.stage.window.x += Std.int((wasBounds[0] - FlxG.stage.window.width) / 2);
-			FlxG.stage.window.y += Std.int((wasBounds[1] - FlxG.stage.window.height) / 2);
+			// centering window based on previous window size and new window size
+			window.move(window.x + Std.int((wasBoundsWindow.width - window.width) / 2), window.y + Std.int((wasBoundsWindow.height - window.height) / 2));
 		}
 
-		FlxG.stage.window.resizable = false;
-		#if windows backend.native.Windows.removeMaximizeMinimizeButtons(); #end
+		trace('Changed window size to ' + '${width}x${height}'.toCMD(WHITE_BOLD));
+	}
+
+	static function forceWindowMode(?windowWidth:Int, ?windowHeight:Int, ?gameWidth:Int, ?gameHeight:Int) {
+		windowWidth ??= Main.instance.game.width;
+		windowHeight ??= Main.instance.game.height;
+		gameWidth ??= windowWidth;
+		gameHeight ??= windowHeight;
+
+		var window = FlxG.stage.window;
+		if (windowWidth == window.width && windowHeight == window.height) return;
+		wasBounds = {width: window.width, height: window.height};
+
+		wasFullscreen = FlxG.fullscreen;
+		FlxG.fullscreen = false; // no fullscren >:(
+		resizeGame(gameWidth, gameHeight);
+		resizeWindow(windowWidth, windowHeight);
+
+		window.resizable = false;
+		#if windows Windows.removeMaximizeMinimizeButtons(); #end
 		Main.fullscreenAllowed = false;
 	}
 
 	static function disableForceWindowMode() {
-		FlxG.game.resizeAbsolute(); // reverting back game size
-		MusicBeatState.getState().skipNextTransIn = true; // looks strange without it
-
-		if (wasFullscreen)
+		resizeGame();
+		if (wasFullscreen) {
+			resizeWindow(true);
 			FlxG.fullscreen = true; // go back
-		else {
-			// centering window by previous bounds
-			FlxG.stage.window.x -= Std.int((wasBounds[0] - FlxG.stage.window.width) / 2);
-			FlxG.stage.window.y -= Std.int((wasBounds[1] - FlxG.stage.window.height) / 2);
-		}
-		FlxG.resizeWindow(wasBounds[0], wasBounds[1]);
+		} else
+			resizeWindow(wasBounds.width, wasBounds.height);
 
 		FlxG.stage.window.resizable = true;
-		#if windows backend.native.Windows.addMaximizeMinimizeButtons(); #end
+		#if windows Windows.addMaximizeMinimizeButtons(); #end
 		Main.fullscreenAllowed = true;
-		@:privateAccess FlxG.stage.application.__backend.toggleFullscreen = true; // needs to set it to true to allow next toggle
 	}
 
 	@:noCompletion private static var wasFullscreen:Bool;
-	@:noCompletion private static var wasBounds:Array<Int>;
+	@:noCompletion private static var wasBounds:{width:Int, height:Int};
 }

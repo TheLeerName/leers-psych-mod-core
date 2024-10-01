@@ -35,14 +35,6 @@ class StaticExtensions {
 	/** `"meow.json".removeExtension()` returns `"meow"` */
 	inline public static function removeExtension(path:String):String return Paths.removeExtension(path);
 
-	/**
-	 * Changes size of game absolutely, i.e. without initial ratio
-	 * 
-	 * WARNING: Changes only game size, use `FlxG.resizeWindow` for resizing window BEFORE
-	 */
-	inline public static function resizeAbsolute(game:flixel.FlxGame, width:Int = 1280, height:Int = 720)
-		backend.WindowUtil.resizeAbsolute(width, height);
-
 	/** Clears array and returns `null` */
 	public static function clearArray<T:Any>(array:Array<T>):Array<T> {
 		array.splice(0, array.length);
