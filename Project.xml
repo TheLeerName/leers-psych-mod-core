@@ -26,7 +26,7 @@
 	<define name="ACHIEVEMENTS_ALLOWED" />
 	<define name="TRANSLATIONS_ALLOWED" />
 	<define name="DISCORD_ALLOWED" if="cpp"/>
-	<define name="VIDEOS_ALLOWED" if="windows || linux || android" unless="32bits"/>
+	<define name="VIDEOS_ALLOWED" if="desktop || android" unless="32bits"/>
 
 	<define name="IRIS_DEBUG"/>
 	<define name="CRASH_HANDLER" if="desktop release" />
@@ -80,20 +80,20 @@
 	<haxelib name="lime"               version="8.1.2" />
 	<haxelib name="openfl"             version="9.3.3" />
 
-	<haxelib name="hscript"            version="git" url="https://github.com/TheLeerName/hscript-iris-flixel-debugger" branch="638b984" if="HSCRIPT_ALLOWED"/>
+	<haxelib name="hscript"            version="git" url="https://github.com/TheLeerName/hscript-iris-flixel-debugger" branch="638b984" if="HSCRIPT_ALLOWED" />
 
-	<haxelib name="flixel"             version="5.6.2"/>
-	<haxelib name="flixel-addons"      version="3.2.3"/>
-	<haxelib name="tjson"              version="1.4.0"/>
+	<haxelib name="flixel"             version="5.6.2" />
+	<haxelib name="flixel-addons"      version="3.2.3" />
+	<haxelib name="tjson"              version="1.4.0" />
 
-	<haxelib name="hxvlc"              version="1.7.1" if="VIDEOS_ALLOWED"/>
+	<haxelib name="hxvlc"              version="1.7.1" if="VIDEOS_ALLOWED" />
 
-	<haxelib name="linc_luajit"        version="git" url="https://github.com/superpowers04/linc_luajit" branch="633fcc0" if="LUA_ALLOWED"/>
-	<haxelib name="hxdiscord_rpc"      version="git" url="https://github.com/MAJigsaw77/hxdiscord_rpc"  branch="187c445" if="DISCORD_ALLOWED"/>
+	<haxelib name="linc_luajit"        version="git" url="https://github.com/superpowers04/linc_luajit" branch="633fcc0" if="LUA_ALLOWED" />
+	<haxelib name="hxdiscord_rpc"      version="git" url="https://github.com/MAJigsaw77/hxdiscord_rpc"  branch="187c445" if="DISCORD_ALLOWED" />
 	<haxelib name="flxanimate"         version="git" url="https://github.com/Dot-Stuff/flxanimate"      branch="768740a" />
-	<haxelib name="grig.audio"         version="git" url="https://github.com/osakared/grig.audio"      branch="57f5d47" if="BASE_GAME_FILES"/>
+	<haxelib name="grig.audio"         version="git" url="https://github.com/osakared/grig.audio"       branch="57f5d47" if="BASE_GAME_FILES" />
 	<haxelib name="tink_core"          version="1.26.0" />
-	<haxelib name="funkin.vis"         version="git" url="https://github.com/FunkinCrew/funkVis"        branch="22b1ce0" if="BASE_GAME_FILES"/>
+	<haxelib name="funkin.vis"         version="git" url="https://github.com/FunkinCrew/funkVis"        branch="22b1ce0" if="BASE_GAME_FILES" />
 
 	<!-- __________________________ Game Assets & Etc. __________________________ -->
 
@@ -115,7 +115,9 @@
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
-	<haxedef name="HXVLC_FLIXEL_VOLUME_MULTIPLIER" value="150" if="VIDEOS_ALLOWED"/>
+	<haxedef name="HXVLC_FLIXEL_VOLUME_MULTIPLIER" value="150" if="VIDEOS_ALLOWED" />
+	<haxedef name="HXVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
+	<!-- <haxedef name="HXVLC_NO_SHARE_DIRECTORY" if="VIDEOS_ALLOWED" /> -->
 
 	<!-- i guess thats need for hscript iris ??? -->
 	<haxedef name="hscriptPos" />
@@ -149,6 +151,7 @@
 
 	<haxeflag name="--macro" value="allowPackage('flash')" />
 	<haxeflag name="--macro" value="include('stages')" />
+	<haxeflag name="--macro" value="include('backend.transition')" />
 
 	<!-- _________________________________ Custom _______________________________ -->
 

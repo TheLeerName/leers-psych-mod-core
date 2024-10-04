@@ -79,28 +79,28 @@ class NoteSplash extends FlxSprite
 
 		var path:String = 'images/$skin.json';
 		if (configs.exists(path)) this.config = configs.get(path);
-		else if (Paths.exists(path))
-		{
-			var config:Dynamic = Json.parse(Paths.getTextFromFile(path));
-			if (config != null)
-			{
-				var tempConfig:NoteSplashConfig = {
-					animations: new Map(),
-					scale: config.scale,
-					allowRGB: config.allowRGB,
-					allowPixel: config.allowPixel,
-					rgb: config.rgb
-				}
+		else this.config = loadConfig(path);
+	}
 
-				for (i in Reflect.fields(config.animations))
-				{
-					tempConfig.animations.set(i, Reflect.field(config.animations, i));
-				}
+	/** @param path for example: `"images/noteSplashes/noteSplashes.json"` */
+	public static function loadConfig(path:String):Null<NoteSplashConfig> {
+		if (!Paths.exists(path)) return null;
 
-				this.config = tempConfig;
-				configs.set(path, tempConfig);
-			}
+		var config:Dynamic = Json.parse(Paths.getTextFromFile(path));
+		if (config == null) return null;
+		var tempConfig:NoteSplashConfig = {
+			animations: new Map(),
+			scale: config.scale,
+			allowRGB: config.allowRGB,
+			allowPixel: config.allowPixel,
+			rgb: config.rgb
 		}
+		for (i in Reflect.fields(config.animations))
+		{
+			tempConfig.animations.set(i, Reflect.field(config.animations, i));
+		}
+		configs.set(path, tempConfig);
+		return tempConfig;
 	}
 
 	public function spawnSplashNote(note:Note, ?noteData:Int, ?randomize:Bool = true)

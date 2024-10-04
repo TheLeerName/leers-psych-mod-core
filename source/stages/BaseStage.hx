@@ -106,8 +106,7 @@ class BaseStageWithoutDefaultStageObjects {
 		return spr;
 	}
 
-	function triggerEvent(name:String, value1:OneOfTwo<String, Float>, value2:OneOfTwo<String, Float>)
-		game.triggerEvent(name, cast value1, cast value2);
+	function triggerEvent(name:String, value1:OneOfTwo<Float, String>, value2:OneOfTwo<Float, String>) return game.triggerEvent(name, value1, value2);
 	inline function startCountdown() return game.startCountdown();
 	inline function endSong() return game.endSong();
 	inline function moveCamera(isDad:Bool) return game.moveCamera(isDad);

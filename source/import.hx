@@ -27,6 +27,7 @@ import flixel.text.FlxText.FlxTextFormatMarkerPair;
 // you cant do flixel.text.FlxText.*; >:((((
 
 import backend.ui.*; // Psych-UI
+import backend.transition.BaseTransition;
 #if ACHIEVEMENTS_ALLOWED
 import backend.Achievements;
 #end
@@ -38,7 +39,6 @@ import backend.Controls;
 import backend.CoolUtil;
 import backend.MusicBeatState;
 import backend.MusicBeatSubstate;
-import backend.CustomFadeTransition;
 import backend.ClientPrefs;
 import backend.Conductor;
 import backend.Difficulty;

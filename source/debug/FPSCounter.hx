@@ -72,7 +72,7 @@ class FPSCounter extends TextField
 	/** Usually used before `MusicBeatState.switchState` or in start of `create()` */
 	public function tweenToColor(color:FlxColor, ?withDelay:Bool) {
 		if (normalColor == color) return;
-		var dur:Float = CustomFadeTransition.DURATION;
+		var dur:Float = BaseTransition.DURATION;
 
 		function lol(?idk)
 			CoolUtil.tweenColor(this, {normalColor: color}, dur);

@@ -153,16 +153,18 @@
 - works like [Math.pow](https://api.haxe.org/Math.html#pow)
 - for example: `(10).pow(2)` will return `100`
 
-12. strToInt(n:[String](https://api.haxe.org/String.html)):[Int](https://api.haxe.org/Int.html)
-- for example: `"22".toInt()` will return `22`
-
-13. floatToInt(n:[Float](https://api.haxe.org/Float.html)):[Int](https://api.haxe.org/Int.html)
+12. floatToInt(n:[Float](https://api.haxe.org/Float.html)):[Int](https://api.haxe.org/Int.html)
 - for example: `(22.32).toInt()` will return `22`
 
-14. boolToInt(n:[Bool](https://api.haxe.org/Bool.html)):[Int](https://api.haxe.org/Int.html)
+13. boolToInt(n:[Bool](https://api.haxe.org/Bool.html)):[Int](https://api.haxe.org/Int.html)
 - for example: `(true).toInt()` will return `1`
 
-15. toFloat(n:[String](https://api.haxe.org/String.html)):[Float](https://api.haxe.org/Float.html)
+14. toInt(n:[Null](https://api.haxe.org/Null.html)<[OneOfTwo](https://api.haxeflixel.com/flixel/util/typeLimit/OneOfTwo.html)<[Int](https://api.haxe.org/Int.html), [String](https://api.haxe.org/String.html)>>):[Null](https://api.haxe.org/Null.html)<[Int](https://api.haxe.org/Int.html)>
+- works like `Std.parseInt()`, but returns `null` if `Std.parseInt()` returns `NaN`
+- for example: `"22".toInt()` will return `22`
+
+15. toFloat(n:[Null](https://api.haxe.org/Null.html)<[OneOfTwo](https://api.haxeflixel.com/flixel/util/typeLimit/OneOfTwo.html)<[Float](https://api.haxe.org/Float.html), [String](https://api.haxe.org/String.html)>>):[Null](https://api.haxe.org/Null.html)<[Float](https://api.haxe.org/Float.html)>
+- works like `Std.parseFloat()`, but returns `null` if `Std.parseFloat()` returns `NaN`
 - for example: `"22.32".toFloat()` will return `22.32`
 
 16. arrIsEmpty(str:[Array](https://api.haxe.org/Array.html)<[Dynamic](https://api.haxe.org/Dynamic.html)>, ?length:[Int](https://api.haxe.org/Int.html) = 1):[Bool](https://api.haxe.org/Bool.html)
@@ -240,9 +242,8 @@
 - changes variable with name `varr` to `value` value from `arr` array recursively (if member of `arr` array has `members` variable it will change from them too)
 
 
-## [backend.CustomFadeTransition](source/backend.CustomFadeTransition.hx)
-1. **static** DURATION:[Float](https://api.haxe.org/Float.html)
-- used to get duration of in/out transition
+## [backend.transition](source/backend/transition)
+- cool api for making transitions
 
 
 ## [backend.DiscordClient](source/backend/Discord.hx)

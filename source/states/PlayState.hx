@@ -24,6 +24,7 @@ import flixel.FlxSubState;
 import flixel.util.FlxSave;
 import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
+import flixel.util.typeLimit.OneOfTwo;
 import flixel.input.keyboard.FlxKey;
 
 import backend.Rating;
@@ -1856,74 +1857,52 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function triggerEvent(eventName:String, value1:String, value2:String, ?strumTime:Float) {
+	public function triggerEvent(eventName:String, value1:OneOfTwo<Float, String>, value2:OneOfTwo<Float, String>, ?strumTime:Float) {
 		strumTime ??= Conductor.songPosition;
-
-		var flValue1:Null<Float> = Std.parseFloat(value1);
-		var flValue2:Null<Float> = Std.parseFloat(value2);
-		if(Math.isNaN(flValue1)) flValue1 = null;
-		if(Math.isNaN(flValue2)) flValue2 = null;
 
 		switch(eventName) {
 			case 'Hey!':
-				var value:Int = 2;
-				switch(value1.toLowerCase().trim()) {
+				var value2 = value2.toFloat();
+				var char:Character = dad;
+				switch(Std.string(value1).toLowerCase().trim()) {
 					case 'bf' | 'boyfriend' | '0':
-						value = 0;
+						char = boyfriend;
 					case 'gf' | 'girlfriend' | '1':
-						value = 1;
+						char = gf;
 				}
 
-				if(flValue2 == null || flValue2 <= 0) flValue2 = 0.6;
+				if(value2 == null || value2 <= 0) value2 = 0.6;
 
-				if(value != 0) {
-					if(dad.curCharacter.startsWith('gf')) { //Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
-						dad.playAnim('cheer', true);
-						dad.specialAnim = true;
-						dad.heyTimer = flValue2;
-					} else if (gf != null) {
-						gf.playAnim('cheer', true);
-						gf.specialAnim = true;
-						gf.heyTimer = flValue2;
-					}
-				}
-				if(value != 1) {
-					boyfriend.playAnim('hey', true);
-					boyfriend.specialAnim = true;
-					boyfriend.heyTimer = flValue2;
-				}
+				//Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
+				if(char == dad && dad.curCharacter.startsWith('gf'))
+					char = gf;
+
+				char.playAnim('cheer', true);
+				char.specialAnim = true;
+				char.heyTimer = value2;
 
 			case 'Set GF Speed':
-				if(flValue1 == null || flValue1 < 1) flValue1 = 1;
-				gfSpeed = Math.round(flValue1);
+				var value1 = value1.toFloat();
+				if(value1 == null || value1 < 1) value1 = 1;
+				gfSpeed = Math.round(value1);
 
 			case 'Add Camera Zoom':
 				if(prefs.camZooms && FlxG.camera.zoom < 1.35) {
-					flValue1 ??= 0.015;
-					flValue2 ??= 0.03;
-
-					FlxG.camera.zoom += flValue1;
-					camHUD.zoom += flValue2;
+					FlxG.camera.zoom += value1.toFloat() ?? 0.015;
+					camHUD.zoom += value2.toFloat() ?? 0.03;
 				}
 
 			case 'Play Animation':
 				//trace('Anim to play: ' + value1);
 				var char:Character = dad;
-				switch(value2.toLowerCase().trim()) {
-					case 'bf' | 'boyfriend':
+				switch(Std.string(value2).toLowerCase().trim()) {
+					case 'bf' | 'boyfriend' | '1':
 						char = boyfriend;
-					case 'gf' | 'girlfriend':
+					case 'gf' | 'girlfriend' | '2':
 						char = gf;
-					default:
-						flValue2 ??= 0;
-						switch(Math.round(flValue2)) {
-							case 1: char = boyfriend;
-							case 2: char = gf;
-						}
 				}
 
-				if (char != null)
-				{
+				if (char != null) {
 					char.playAnim(value1, true);
 					char.specialAnim = true;
 				}
@@ -1931,36 +1910,26 @@ class PlayState extends MusicBeatState
 			case 'Camera Follow Pos':
 				if(camFollow != null)
 				{
+					var value1 = value1.toFloat();
+					var value2 = value2.toFloat();
 					isCameraOnForcedPos = false;
-					if(flValue1 != null || flValue2 != null)
-					{
+					if(value1 != null && value2 != null) {
 						isCameraOnForcedPos = true;
-						flValue1 ??= 0;
-						flValue2 ??= 0;
-						camFollow.x = flValue1;
-						camFollow.y = flValue2;
+						trace(value1, value2);
+						camFollow.setPosition(value1, value2);
 					}
 				}
 
 			case 'Alt Idle Animation':
 				var char:Character = dad;
-				switch(value1.toLowerCase().trim()) {
-					case 'gf' | 'girlfriend':
+				switch(Std.string(value1).toLowerCase().trim()) {
+					case 'gf' | 'girlfriend' | '2':
 						char = gf;
-					case 'boyfriend' | 'bf':
+					case 'boyfriend' | 'bf' | '1':
 						char = boyfriend;
-					default:
-						var val:Int = Std.parseInt(value1);
-						if(Math.isNaN(val)) val = 0;
-
-						switch(val) {
-							case 1: char = boyfriend;
-							case 2: char = gf;
-						}
 				}
 
-				if (char != null)
-				{
+				if (char != null) {
 					char.idleSuffix = value2;
 					char.recalculateDanceIdle();
 				}
@@ -1985,14 +1954,13 @@ class PlayState extends MusicBeatState
 
 			case 'Change Character':
 				var charType:Int = 0;
-				switch(value1.toLowerCase().trim()) {
+				switch(Std.string(value1).toLowerCase().trim()) {
 					case 'gf' | 'girlfriend':
 						charType = 2;
 					case 'dad' | 'opponent':
 						charType = 1;
 					default:
-						charType = Std.parseInt(value1);
-						if(Math.isNaN(charType)) charType = 0;
+						charType = value1.toFloat().floatToInt() ?? 0;
 				}
 
 				switch(charType) {
@@ -2054,14 +2022,14 @@ class PlayState extends MusicBeatState
 			case 'Change Scroll Speed':
 				if (songSpeedType != "constant")
 				{
-					flValue1 ??= 1;
-					flValue2 ??= 0;
+					var value1 = value1.toFloat() ?? 1;
+					var value2 = value2.toFloat() ?? 0;
 
-					var newValue:Float = SONG.speed * ClientPrefs.getGameplaySetting('scrollspeed') * flValue1;
-					if(flValue2 <= 0)
+					var newValue:Float = SONG.speed * gameplayPrefs.scrollspeed * value1;
+					if(value2 <= 0)
 						songSpeed = newValue;
 					else
-						songSpeedTween = FlxTween.tween(this, {songSpeed: newValue}, flValue2 / playbackRate, {ease: FlxEase.linear, onComplete:
+						songSpeedTween = FlxTween.tween(this, {songSpeed: newValue}, value2 / playbackRate, {ease: FlxEase.linear, onComplete:
 							function (twn:FlxTween)
 							{
 								songSpeedTween = null;
@@ -2072,12 +2040,13 @@ class PlayState extends MusicBeatState
 			case 'Set Property':
 				try
 				{
-					var trueValue:Dynamic = value2.trim();
+					var value2 = value2.toFloat();
+					var trueValue:Dynamic = Std.string(value2).trim();
 					if (trueValue == 'true' || trueValue == 'false') trueValue = trueValue == 'true';
-					else if (flValue2 != null) trueValue = flValue2;
+					else if (value2 != null) trueValue = value2;
 					else trueValue = value2;
 
-					var split:Array<String> = value1.split('.');
+					var split:Array<String> = Std.string(value1).split('.');
 					if(split.length > 1)
 						LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1], trueValue);
 					else
@@ -2091,8 +2060,8 @@ class PlayState extends MusicBeatState
 				}
 
 			case 'Play Sound':
-				flValue2 ??= 1;
-				FlxG.sound.play(Paths.sound(value1), flValue2);
+				var value2 = value2.toFloat() ?? 1;
+				FlxG.sound.play(Paths.sound(value1), value2);
 		}
 
 		callOnScripts('onEvent', [eventName, value1, value2, strumTime]);

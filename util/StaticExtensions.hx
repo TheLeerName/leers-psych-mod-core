@@ -13,6 +13,7 @@ import backend.Paths;
 import backend.CoolUtil;
 #end
 
+import flixel.util.typeLimit.OneOfTwo;
 import util.WindowsCMDUtil;
 using StringTools;
 
@@ -86,15 +87,23 @@ class StaticExtensions {
 	/** Shortcut of `Math.pow` */
 	public static function pow(n:Float, ?exp:Float = 2):Float return Math.pow(n, exp);
 
-	/** Shortcut of `Std.parseInt()` */
-	inline public static function strToInt(str:String):Int return Std.parseInt(str);
 	/** Shortcut of `Std.int` */
 	inline public static function floatToInt(n:Float):Int return Std.int(n);
 	/** Shortcut of `bool ? 1 : 0` */
 	inline public static function boolToInt(b:Bool):Int return b ? 1 : 0;
 
-	/** Shortcut of `Std.parseFloat()` */
-	inline public static function toFloat(n:String):Float return Std.parseFloat(n);
+	/** Works like `Std.parseInt()`, but returns `null` if `Std.parseInt()` returns `NaN` */
+	public static function toInt(n:Null<OneOfTwo<Int, String>>):Null<Int> {
+		if (n == null) return null;
+		var n:Int = n is Int ? n : Std.parseInt(n);
+		return Math.isNaN(n) ? null : n;
+	}
+	/** Works like `Std.parseFloat()`, but returns `null` if `Std.parseFloat()` returns `NaN` */
+	public static function toFloat(n:Null<OneOfTwo<Float, String>>):Null<Float> {
+		if (n == null) return null;
+		var n:Float = n is Float ? n : Std.parseInt(n);
+		return Math.isNaN(n) ? null : n;
+	}
 
 	/** Returns `false` if `arr` is empty array or `null` */
 	public static function arrNotEmpty(arr:Array<Dynamic>, ?length:Int = 1):Bool return arr != null ? arr.length >= length : false;

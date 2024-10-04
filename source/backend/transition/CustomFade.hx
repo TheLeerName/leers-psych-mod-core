@@ -1,23 +1,12 @@
-package backend;
+package backend.transition;
 
 import flixel.util.FlxGradient;
 
-class CustomFadeTransition extends MusicBeatSubstate {
-	public static final DURATION:Float = 0.6;
-	public static var finishCallback:Void->Void;
-	var isTransIn:Bool = false;
+class CustomFade extends BaseTransition {
 	var transBlack:FlxSprite;
 	var transGradient:FlxSprite;
 
-	var duration:Float;
-	public function new(duration:Float, isTransIn:Bool) {
-		this.duration = duration;
-		this.isTransIn = isTransIn;
-		super();
-	}
-
-	override function create() {
-		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
+	override function open() {
 		var width:Int = Std.int(FlxG.width / Math.max(camera.zoom, 0.001));
 		var height:Int = Std.int(FlxG.height / Math.max(camera.zoom, 0.001));
 		transGradient = FlxGradient.createGradientFlxSprite(1, height, (isTransIn ? [0x0, FlxColor.BLACK] : [FlxColor.BLACK, 0x0]));
@@ -38,8 +27,6 @@ class CustomFadeTransition extends MusicBeatSubstate {
 			transGradient.y = transBlack.y - transBlack.height;
 		else
 			transGradient.y = -transGradient.height;
-
-		super.create();
 	}
 
 	override function update(elapsed:Float) {
@@ -47,10 +34,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 
 		final height:Float = FlxG.height * Math.max(camera.zoom, 0.001);
 		final targetPos:Float = transGradient.height + 50 * Math.max(camera.zoom, 0.001);
-		if(duration > 0)
-			transGradient.y += (height + targetPos) * elapsed / duration;
-		else
-			transGradient.y = (targetPos) * elapsed;
+		transGradient.y += (height + targetPos) * elapsed / BaseTransition.DURATION;
 
 		if(isTransIn)
 			transBlack.y = transGradient.y + transGradient.height;
@@ -59,12 +43,5 @@ class CustomFadeTransition extends MusicBeatSubstate {
 
 		if(transGradient.y >= targetPos)
 			close();
-	}
-
-	override function close() {
-		super.close();
-
-		if(finishCallback != null) finishCallback();
-		finishCallback = null;
 	}
 }

@@ -79,6 +79,8 @@ import states.StoryMenuState;
 	var discordRPC:Bool = true;
 	/** If `false`, ratings and combo won't stack */
 	var comboStacking:Bool = true;
+	/** Transition type */
+	var transType:String = BaseTransition.transitions[0];
 
 
 	// gameplay
@@ -179,8 +181,8 @@ import states.StoryMenuState;
 
 class ClientPrefs {
 	/** Client preferences, can be accessed in states with `prefs` */
-	public static var data:SaveVariables = {};
-	public static var defaultData:SaveVariables = {};
+	public static var data:SaveVariables;
+	public static var defaultData:SaveVariables;
 	public static var gameplaySettings(get, never):GameplaySettings;
 
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
@@ -248,8 +250,10 @@ class ClientPrefs {
 		while(gamepadBind != null && gamepadBind.contains(NONE)) gamepadBind.remove(NONE);
 	}
 
-	public static function loadDefaultKeys()
-	{
+	public static function loadDefaultKeys() {
+		data = {};
+		defaultData = {};
+
 		defaultKeys = keyBinds.copy();
 		defaultButtons = gamepadBinds.copy();
 	}

@@ -49,13 +49,15 @@ class BaseEffect extends FlxBasic {
 	public function new(glsl:String) {
 		shader = new FlxRuntimeShader(glsl.replace('\t', ''));
 		super();
-		if (shader.data.iTime != null) shader.data.iTime.value = [0];
-		FlxG.state.add(this);
+		if (shader.data.iTime != null) {
+			shader.data.iTime.value = [0];
+			FlxG.state.add(this);
+		}
 		shaderCoordsFix();
 	}
 	override function update(elapsed:Float) {
 		super.update(elapsed);
-		if (shader.data.iTime != null) shader.data.iTime.value[0] += elapsed;
+		shader.data.iTime.value[0] += elapsed;
 	}
 
 	function shaderCoordsFix() {
