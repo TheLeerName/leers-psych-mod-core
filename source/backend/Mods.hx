@@ -71,21 +71,17 @@ class Mods
 		if(!updatedOnState) updateModList();
 		var list:ModsList = {enabled: [], disabled: [], all: []};
 
-		try {
-			for (mod in CoolUtil.coolTextFile('modsList.txt'))
-			{
-				//trace('Mod: $mod');
-				if(mod.trim().length < 1) continue;
+		if (Paths.existsAbsolute('modsList.txt')) for (mod in CoolUtil.coolTextFile('modsList.txt'))
+		{
+			//trace('Mod: $mod');
+			if(mod.trim().length < 1) continue;
 
-				var dat = mod.split("|");
-				list.all.push(dat[0]);
-				if (dat[1] == "1")
-					list.enabled.push(dat[0]);
-				else
-					list.disabled.push(dat[0]);
-			}
-		} catch(e) {
-			trace(e);
+			var dat = mod.split("|");
+			list.all.push(dat[0]);
+			if (dat[1] == "1")
+				list.enabled.push(dat[0]);
+			else
+				list.disabled.push(dat[0]);
 		}
 		return list;
 	}
@@ -95,19 +91,15 @@ class Mods
 		// Find all that are already ordered
 		var list:Array<Array<Dynamic>> = [];
 		var added:Array<String> = [];
-		try {
-			for (mod in CoolUtil.coolTextFile('modsList.txt'))
+		if (Paths.existsAbsolute('modsList.txt')) for (mod in CoolUtil.coolTextFile('modsList.txt'))
+		{
+			var dat:Array<String> = mod.split("|");
+			var folder:String = dat[0];
+			if(folder.trim().length > 0 && Paths.isDirectory(Paths.modsPath(folder)) && !added.contains(folder))
 			{
-				var dat:Array<String> = mod.split("|");
-				var folder:String = dat[0];
-				if(folder.trim().length > 0 && Paths.isDirectory(Paths.modsPath(folder)) && !added.contains(folder))
-				{
-					added.push(folder);
-					list.push([folder, (dat[1] == "1")]);
-				}
+				added.push(folder);
+				list.push([folder, (dat[1] == "1")]);
 			}
-		} catch(e) {
-			trace(e);
 		}
 		
 		// Scan for folders that aren't on modsList.txt yet
