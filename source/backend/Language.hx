@@ -9,7 +9,10 @@ class Language
 	public static function reloadPhrases() {
 		#if TRANSLATIONS_ALLOWED
 		var langFile:String = ClientPrefs.data.language;
-		if (langFile == ClientPrefs.defaultData.language) return;
+		if (langFile == ClientPrefs.defaultData.language) {
+			AlphaCharacter.loadAlphabetData();
+			return;
+		}
 
 		var loadedText:Array<String> = Paths.mergeAllTextsNamed('data/$langFile.lang');
 		//trace(loadedText);
