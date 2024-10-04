@@ -25,20 +25,19 @@ class Paths {
 	/** Contains `haxe.Exception` object which has last error occurred in some of methods in this class. Changes only if error was happened. */
 	public static var lastError(default, null):Exception;
 
-	public static function loadSong(songPath:String, vocalsP1:FlxSound, vocalsP2:FlxSound, vocalsP1Postfix:String, vocalsP2Postfix:String, ?printErrors:Bool = true, ?stackItem:StackItem):{inst:Bool, player:Bool, opponent:Bool} {
+	public static function loadSong(songPath:String, inst:FlxSound, vocalsP1:FlxSound, vocalsP2:FlxSound, vocalsP1Postfix:String, vocalsP2Postfix:String, ?printErrors:Bool = true, ?stackItem:StackItem):{inst:Bool, player:Bool, opponent:Bool} {
 		stackItem = getStackItem(stackItem);
 		var loaded = {inst: false, player: false, opponent: false};
 
-		FlxG.sound.music ??= new FlxSound();
 		try {
 			var path:String = instPath(songPath);
 			if (path == null) throw CoolUtil.prettierNotFoundException(lastError);
-			FlxG.sound.music.loadEmbedded(soundAbsolute(path));
+			inst.loadEmbedded(soundAbsolute(path));
 			loaded.inst = true;
 		}
 		catch(e) {
 			if (printErrors) callStackTrace(stackItem, 'Loading song audio "songs/$songPath/Inst.$SOUND_EXT" failed! '.toCMD(RED_BOLD) + e.toString().toCMD(RED));
-			FlxG.sound.music.loadEmbedded(openflSoundEmpty());
+			inst.loadEmbedded(openflSoundEmpty());
 		}
 
 		@:privateAccess vocalsP1.cleanup(true);

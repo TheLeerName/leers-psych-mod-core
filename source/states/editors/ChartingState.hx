@@ -1751,7 +1751,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		}
 
 		var newChart:Bool = songPath == DEFAULT_SONG;
-		var loaded = Paths.loadSong(songPath, vocals, opponentVocals, characterData.vocalsP1, characterData.vocalsP2, !newChart);
+		var loaded = Paths.loadSong(songPath, FlxG.sound.music, vocals, opponentVocals, characterData.vocalsP1, characterData.vocalsP2, !newChart);
 		if (loaded.inst) {
 			FlxG.sound.music.volume = 0;
 			FlxG.sound.music.pause();

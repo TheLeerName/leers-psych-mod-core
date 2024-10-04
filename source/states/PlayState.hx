@@ -1133,7 +1133,7 @@ class PlayState extends MusicBeatState
 		vocals = new FlxSound();
 		opponentVocals = new FlxSound();
 
-		Paths.loadSong(songData.path, vocals, opponentVocals, boyfriend.vocalsFile, dad.vocalsFile);
+		Paths.loadSong(songData.path, inst, vocals, opponentVocals, boyfriend.vocalsFile, dad.vocalsFile);
 
 		#if FLX_PITCH
 		vocals.pitch = playbackRate;

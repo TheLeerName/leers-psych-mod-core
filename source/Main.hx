@@ -207,6 +207,7 @@ class Main extends Sprite
 		addChild(new FlxGame(game.width, game.height, game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 		FlxG.cameras.cameraAdded.add(c -> c.filters = []);
 		FlxG.game.filters = [];
+		FlxG.sound.music ??= new FlxSound();
 
 		#if debug
 		var classesToRegister:Array<Class<Dynamic>> = [
