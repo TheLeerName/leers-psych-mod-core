@@ -2,7 +2,8 @@ package backend.transition;
 
 import flixel.util.FlxGradient;
 
-class CustomFade extends BaseTransition {
+/** just a `backend.CustomFadeTransition` from psych */
+class FunkinFade extends BaseTransition {
 	var transBlack:FlxSprite;
 	var transGradient:FlxSprite;
 

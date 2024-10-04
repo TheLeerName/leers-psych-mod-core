@@ -19,7 +19,7 @@ class YourTransition extends BaseTransition {
  */
 class BaseTransition extends MusicBeatSubstate {
 	public static var transitions:Array<String> = [
-		"CustomFade",
+		"FunkinFade",
 	];
 
 	/**
