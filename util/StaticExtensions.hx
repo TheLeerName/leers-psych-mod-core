@@ -101,7 +101,7 @@ class StaticExtensions {
 	/** Works like `Std.parseFloat()`, but returns `null` if `Std.parseFloat()` returns `NaN` */
 	public static function toFloat(n:Null<OneOfTwo<Float, String>>):Null<Float> {
 		if (n == null) return null;
-		var n:Float = n is Float ? n : Std.parseInt(n);
+		var n:Float = n is Float ? n : Std.parseFloat(n);
 		return Math.isNaN(n) ? null : n;
 	}
 
