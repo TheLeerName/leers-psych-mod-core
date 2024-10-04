@@ -115,8 +115,7 @@
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
-	<haxedef name="HXVLC_FLIXEL_VOLUME_MULTIPLIER" value="150" if="VIDEOS_ALLOWED" />
-	<haxedef name="HXVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
+	<!-- <haxedef name="HXVLC_LOGGING" if="VIDEOS_ALLOWED debug" /> -->
 	<!-- <haxedef name="HXVLC_NO_SHARE_DIRECTORY" if="VIDEOS_ALLOWED" /> -->
 
 	<!-- i guess thats need for hscript iris ??? -->
