@@ -565,7 +565,6 @@ class PlayState extends MusicBeatState
 		grpNoteSplashes.add(splash);
 		splash.alpha = 0.000001; //cant make it invisible or it won't allow precaching
 
-		subStateClosed.addOnce(_ -> if (skipCountdown) canPause = true);
 		super.create();
 
 		cacheCountdown();
@@ -1486,7 +1485,7 @@ class PlayState extends MusicBeatState
 	public var paused:Bool = false;
 	public var canReset:Bool = true;
 	var startedCountdown:Bool = false;
-	var canPause:Bool = false;
+	var canPause:Bool = true;
 	var freezeCamera:Bool = false;
 	var allowDebugKeys:Bool = true;
 
