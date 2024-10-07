@@ -9,7 +9,7 @@ class YourTransition extends BaseTransition {
 		// this function works like create() method
 		// ALSO PLS DONT OVERRIDE create()
 		// to end transition, call close()
-		// for examples check backend.transition.CustomFade class
+		// for examples check backend.transition.FunkinFade class
 	}
 }
  * ```
