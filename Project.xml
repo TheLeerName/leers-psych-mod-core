@@ -80,7 +80,7 @@
 	<haxelib name="lime"               version="8.1.2" />
 	<haxelib name="openfl"             version="9.3.3" />
 
-	<haxelib name="hscript"            version="git" url="https://github.com/TheLeerName/hscript-iris-flixel-debugger" branch="638b984" if="HSCRIPT_ALLOWED" />
+	<haxelib name="hscript"            version="git" url="https://github.com/TheLeerName/hscript-iris-flixel-debugger" branch="45dffd7" if="HSCRIPT_ALLOWED" />
 
 	<haxelib name="flixel"             version="5.6.2" />
 	<haxelib name="flixel-addons"      version="3.2.3" />
