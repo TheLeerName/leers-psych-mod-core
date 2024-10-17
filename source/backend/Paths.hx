@@ -275,14 +275,16 @@ class Paths {
 	 * Clears memory from all assets
 	 * 
 	 * WARNING: can crash game if some of bitmaps are used!
-	 * @see `clearUnusedMemory(?_:Dynamic):Int`
+	 * @see `clearUnusedMemory():Int`
 	 */
-	public static function clearStoredMemory(?_:Dynamic) {
+	public static function clearStoredMemory(?stackItem:StackItem) {
+		stackItem = getStackItem(stackItem);
+
 		for (key in FlxG.bitmap._cache.keys()) dumpAsset(key);
 		for (key in currentTrackedSounds.keys()) dumpAsset(key);
 		gc();
 
-		Language.reloadPhrases();
+		Language.reloadPhrases(stackItem);
 	}
 
 	/**
@@ -291,7 +293,7 @@ class Paths {
 	 * Currently cant clear unused sounds :(
 	 * @return Count of cleared assets
 	 */
-	public static function clearUnusedMemory(?_:Dynamic):Int {
+	public static function clearUnusedMemory():Int {
 		var count:Int = 0;
 		for (key => graph in FlxG.bitmap._cache) if (graph != null && graph.useCount <= 0) {
 			dumpAsset(key);
@@ -445,7 +447,7 @@ class Paths {
 
 	inline public static function getStackItem(?stackItem:StackItem):StackItem
 		return stackItem ?? CallStack.callStack()[1];
-	static function callStackTrace(stackItem:StackItem, str:String):Null<Any> {
+	public static function callStackTrace(stackItem:StackItem, str:String):Null<Any> {
 		stackItem = getStackItem(stackItem);
 		switch (stackItem) {
 			case FilePos(s, file, line, column): Main.println(Main.startOfTrace(file, line) + str);
@@ -453,7 +455,7 @@ class Paths {
 		}
 		return null;
 	}
-	inline static function ohNoAssetReturningNull(stackItem:StackItem, assetType:String, ?postfix:String):Null<Any>
+	inline public static function ohNoAssetReturningNull(stackItem:StackItem, assetType:String, ?postfix:String):Null<Any>
 		return callStackTrace(stackItem, 'oh no $assetType returning null NOOOO '.toCMD(RED_BOLD) + (postfix ?? 'undefined').toCMD(RED));
 
 	inline public static function preloadPath(file:String = ''):String

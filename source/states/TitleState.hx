@@ -63,7 +63,7 @@ class TitleState extends MusicBeatState
 		Mods.loadTopMod();
 
 		ClientPrefs.loadPrefs();
-		Language.reloadPhrases();
+		//Language.reloadPhrases(); // commented cuz it already does that in Paths.clearStoredMemory()
 		GPUStats.init();
 
 		initialized = true;

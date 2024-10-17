@@ -148,7 +148,7 @@ class MusicBeatState extends FlxState
 
 	/** @param dumpCache If `true`, calls `Paths.clearStoredMemory()` on next state pre-create, also increases loading times by a LOT. */
 	public static function switchState(nextState:FlxState, ?dumpCache:Bool = false) {
-		if (dumpCache) FlxG.signals.preStateCreate.addOnce(Paths.clearStoredMemory);
+		if (dumpCache) FlxG.signals.preStateCreate.addOnce(_ -> Paths.clearStoredMemory());
 
 		trace('Switching to ' + Type.getClassName(Type.getClass(nextState)).toCMD(WHITE_BOLD));
 

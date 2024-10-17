@@ -1,4 +1,5 @@
 #if !macro
+import haxe.CallStack;
 import backend.NullSafeJson as Json;
 
 #if flxanimate

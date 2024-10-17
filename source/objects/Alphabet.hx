@@ -274,8 +274,9 @@ class AlphaCharacter extends FlxSprite
 
 	public static var allLetters:Map<String, Null<Letter>>;
 
-	public static function loadAlphabetData(request:String = 'alphabet')
-	{
+	public static function loadAlphabetData(?request:String = 'alphabet', ?stackItem:StackItem) {
+		stackItem = Paths.getStackItem(stackItem);
+
 		var path:String = Paths.path('images/$request.json');
 		if (path == null) path = Paths.path('images/alphabet.json');
 
@@ -307,10 +308,10 @@ class AlphaCharacter extends FlxSprite
 						allLetters.set(character, {anim: letterData.animation, offsets: letterData.normal, offsetsBold: letterData.bold});
 				}
 			}
-			trace('Letters reloaded successfully'.toCMD(GREEN), '($path)'.toCMD(YELLOW));
+			Paths.callStackTrace(stackItem, 'Letters reloaded successfully '.toCMD(GREEN) + '($path)'.toCMD(YELLOW));
 		}
 		catch(e) {
-			trace('Loading alphabet data failed!'.toCMD(RED_BOLD), '($path)'.toCMD(YELLOW), e.toString().toCMD(RED));
+			Paths.callStackTrace(stackItem, 'Loading alphabet data failed! '.toCMD(RED_BOLD) + '($path) '.toCMD(YELLOW) + e.toString().toCMD(RED));
 		}
 
 		if(!allLetters.exists('?'))

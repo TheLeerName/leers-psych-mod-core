@@ -64,17 +64,19 @@ class DiscordClient {
 	}
 	#end
 
-	public static function initialize()
+	public static function initialize(?stackItem:StackItem)
 	{
 		if (isInitialized) return;
 		#if DISCORD_ALLOWED
+		stackItem = Paths.getStackItem(stackItem);
+
 		var discordHandlers:DiscordEventHandlers = DiscordEventHandlers.create();
 		discordHandlers.ready = cpp.Function.fromStaticFunction(onReady);
 		discordHandlers.disconnected = cpp.Function.fromStaticFunction(onDisconnected);
 		discordHandlers.errored = cpp.Function.fromStaticFunction(onError);
 		Discord.Initialize(clientID, cpp.RawPointer.addressOf(discordHandlers), 1, null);
 
-		trace("Discord Client initialized".toCMD(GREEN));
+		Paths.callStackTrace(stackItem, "Discord Client initialized".toCMD(GREEN));
 
 		if (__thread == null)
 			__thread = Thread.create(() -> {

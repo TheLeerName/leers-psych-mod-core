@@ -6,11 +6,13 @@ class Language
 	public static var defaultLangName:String = 'English (US)'; //en-US
 
 	static var phrases:Map<String, String> = [];
-	public static function reloadPhrases() {
+	public static function reloadPhrases(?stackItem:StackItem) {
 		#if TRANSLATIONS_ALLOWED
+		stackItem = Paths.getStackItem(stackItem);
+
 		var langFile:String = ClientPrefs.data.language;
 		if (langFile == ClientPrefs.defaultData.language)
-			return AlphaCharacter.loadAlphabetData();
+			return AlphaCharacter.loadAlphabetData(stackItem);
 
 		var loadedText:Array<String> = Paths.mergeAllTextsNamed('data/$langFile.lang');
 		//trace(loadedText);
