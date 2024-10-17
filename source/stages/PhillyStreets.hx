@@ -272,17 +272,13 @@ class PhillyStreets extends BaseStage
 		}
 	}
 
-	#if VIDEOS_ALLOWED
 	var videoEnded:Bool = false;
-	#else
-	var videoEnded:Bool = true; //skip videos
-	#end
 	function videoCutscene(?videoName:String = null)
 	{
 		game.inCutscene = true;
-		#if VIDEOS_ALLOWED
 		if(!videoEnded && videoName != null)
 		{
+			#if VIDEOS_ALLOWED
 			game.startVideo(videoName);
 			game.videoCutscene.finishCallback = game.videoCutscene.onSkip = function()
 			{
@@ -290,10 +286,17 @@ class PhillyStreets extends BaseStage
 				game.videoCutscene = null;
 				videoCutscene();
 			};
+
+			#else //Make a timer to prevent it from crashing due to sprites not being ready yet.
+			new FlxTimer().start(0.0, function(tmr:FlxTimer)
+			{
+				videoEnded = true;
+				videoCutscene(videoName);
+			});
+			#end
 			return;
 		}
-		#end
-		
+
 		if (isStoryMode)
 		{
 			switch (songName)

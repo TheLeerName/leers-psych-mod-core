@@ -1049,7 +1049,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		}
 		else if(FlxG.keys.justPressed.ESCAPE)
 		{
-			FlxG.mouse.visible = false;
 			if(!_goToPlayState)
 			{
 				if(!unsavedProgress)
@@ -1059,7 +1058,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				}
 				else openSubState(new ExitConfirmationPrompt());
 			}
-			else MusicBeatState.switchState(new PlayState());
+			else {
+				FlxG.mouse.visible = false;
+				MusicBeatState.switchState(new PlayState());
+			}
 			return;
 		}
 	}

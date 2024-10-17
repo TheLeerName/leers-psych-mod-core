@@ -65,7 +65,7 @@ class Language
 
 	// More optimized for file loading
 	public static function getFileTranslation(key:String):String
-		return phrases.get(key.trim().toLowerCase()) ?? key;
+		return #if TRANSLATIONS_ALLOWED phrases.get(key.trim().toLowerCase()) ?? #end key;
 
 	#if TRANSLATIONS_ALLOWED
 	static function formatKey(key:String) {

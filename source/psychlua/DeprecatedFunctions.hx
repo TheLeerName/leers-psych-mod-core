@@ -21,8 +21,9 @@ class DeprecatedFunctions
 
 		lua.set("objectPlayAnimation", function(obj:String, name:String, forced:Bool = false, ?startFrame:Int = 0) {
 			debugPrint("objectPlayAnimation is deprecated! Use playAnim instead");
-			if(game.getLuaObject(obj,false) != null) {
-				game.getLuaObject(obj,false).animation.play(name, forced, false, startFrame);
+			var luaObj = PlayState.instance.getLuaObject(obj);
+			if(luaObj != null) {
+				luaObj.animation.play(name, forced, false, startFrame);
 				return true;
 			}
 
@@ -151,6 +152,14 @@ class DeprecatedFunctions
 		lua.set("musicFadeOut", function(duration:Float, toValue:Float = 0) {
 			FlxG.sound.music.fadeOut(duration, toValue);
 			debugPrint('musicFadeOut is deprecated! Use soundFadeOut instead.');
+		});
+		lua.set("updateHitboxFromGroup", function(group:String, index:Int) {
+			if(Std.isOfType(Reflect.getProperty(LuaUtils.getTargetInstance(), group), FlxTypedGroup)) {
+				Reflect.getProperty(LuaUtils.getTargetInstance(), group).members[index].updateHitbox();
+				return;
+			}
+			Reflect.getProperty(LuaUtils.getTargetInstance(), group)[index].updateHitbox();
+			debugPrint('updateHitboxFromGroup is deprecated! Use updateHitbox instead.');
 		});
 	}
 }

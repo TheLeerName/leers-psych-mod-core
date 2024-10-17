@@ -31,10 +31,6 @@
 - variable added by `macros.ModVersion`, usually contains date of when this build was compiled: `"v%yearmonthday%.%buildNumber%"`
 
 
-## [options.GraphicsSettingsSubState](source/options/GraphicsSettingsSubState.hx)
-- added `Clear cache on song start` option, if checked then game will clear cache on switching to / reloading song
-
-
 ## [psychlua](source/psychlua)
 - funk.set instead of Lua_helper.add_callback
 

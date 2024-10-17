@@ -75,7 +75,7 @@
 	<!-- thx to https://github.com/HaxeFoundation/haxelib/issues/618#issuecomment-1973587186 -->
 	<setenv name="HAXEPATH" value="./"/>
 
-	<haxelib name="hxcpp-debug-server" version="1.2.4" />
+	<haxelib name="hxcpp-debug-server" version="1.2.4" if="debug" />
 	<haxelib name="hxcpp"              version="4.3.2" />
 	<haxelib name="lime"               version="8.1.2" />
 	<haxelib name="openfl"             version="9.3.3" />
@@ -86,10 +86,10 @@
 	<haxelib name="flixel-addons"      version="3.2.3" />
 	<haxelib name="tjson"              version="1.4.0" />
 
-	<haxelib name="hxvlc"              version="1.7.1" if="VIDEOS_ALLOWED" />
+	<haxelib name="hxvlc"              version="1.9.2" if="VIDEOS_ALLOWED" />
+	<haxelib name="hxdiscord_rpc"      version="1.2.4" if="DISCORD_ALLOWED" />
 
-	<haxelib name="linc_luajit"        version="git" url="https://github.com/superpowers04/linc_luajit" branch="633fcc0" if="LUA_ALLOWED" />
-	<haxelib name="hxdiscord_rpc"      version="git" url="https://github.com/MAJigsaw77/hxdiscord_rpc"  branch="187c445" if="DISCORD_ALLOWED" />
+	<haxelib name="linc_luajit"        version="git" url="https://github.com/superpowers04/linc_luajit" branch="1906c4a" if="LUA_ALLOWED" />
 	<haxelib name="flxanimate"         version="git" url="https://github.com/Dot-Stuff/flxanimate"      branch="768740a" />
 	<haxelib name="grig.audio"         version="git" url="https://github.com/osakared/grig.audio"       branch="57f5d47" if="BASE_GAME_FILES" />
 	<haxelib name="tink_core"          version="1.26.0" />
@@ -117,6 +117,7 @@
 
 	<!-- <haxedef name="HXVLC_LOGGING" if="VIDEOS_ALLOWED debug" /> -->
 	<!-- <haxedef name="HXVLC_NO_SHARE_DIRECTORY" if="VIDEOS_ALLOWED" /> -->
+	<define name="x86_BUILD" if="32bits" />
 
 	<!-- i guess thats need for hscript iris ??? -->
 	<haxedef name="hscriptPos" />

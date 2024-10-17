@@ -58,7 +58,7 @@ class ModsMenuState extends MusicBeatState
 		persistentUpdate = false;
 
 		modsList = Mods.parseList();
-		Mods.setModDirectory(modsList.all[0]);
+		Mods.loadTopMod();
 
 		DiscordClient.changePresence("In the Mods Menu");
 
@@ -780,8 +780,11 @@ class ModsMenuState extends MusicBeatState
 			fileStr += '$mod|$on';
 		}
 
-		if (fileStr.length > 0)
+		if (fileStr.length > 0) {
 			Paths.saveFile('modsList.txt', fileStr);
+			Mods.parseList();
+			Mods.loadTopMod();
+		}
 	}
 }
 
@@ -809,24 +812,13 @@ class ModItem extends FlxSpriteGroup
 		this.folder = folder;
 		pack = Mods.getPack(folder);
 
-		var path:String = Paths.modsPath('$folder/data/settings.json');
-		if(Paths.existsAbsolute(path))
-		{
-			var data:String = Paths.text(path);
-			try
-			{
-				//trace('trying to load settings: $folder');
-				settings = Json.parse(data);
-			}
-			catch(e:Dynamic)
-			{
-				var errorTitle = 'Mod name: ' + Mods.currentModDirectory ?? "None";
-				var errorMsg = 'An error occurred: $e';
-				#if windows
-				lime.app.Application.current.window.alert(errorMsg, errorTitle);
-				#end
-				trace('$errorTitle - $errorMsg');
-			}
+		var json = Paths.loadJsonFromFile(Paths.modsPath('$folder/data/settings.json'), 'mod settings file of "$folder"');
+		if (json != null) {
+			settings = json;
+		} else {
+			var errorTitle = 'Mod name: ' + Mods.currentModDirectory ?? "None";
+			var errorMsg = 'An error occurred: ' + Paths.lastError;
+			#if windows FlxG.stage.window.alert(errorMsg, errorTitle); #end
 		}
 
 		selectBg = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);

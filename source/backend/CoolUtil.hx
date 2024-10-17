@@ -33,30 +33,27 @@ class CoolUtil {
 	static function dominantColor(path:String):Int {
 		var pixels:openfl.display.BitmapData = Paths.bitmapData(path);
 		var countByColor:Map<Int, Int> = [];
-		for (col in 0...pixels.width) {
-			for (row in 0...pixels.height) {
-				var i:Int = pixels.getPixel32(col, row);
-				if (i != 0) {
-					if (countByColor.exists(i)) {
-						countByColor[i]++;
-					} else if (countByColor[i] != -13520687) {
-						countByColor[i] = 1;
-					}
+		for(col in 0...pixels.width) {
+			for(row in 0...pixels.height) {
+				var colorOfThisPixel:FlxColor = pixels.getPixel32(col, row);
+				if(colorOfThisPixel.alphaFloat > 0.05) {
+					colorOfThisPixel = FlxColor.fromRGB(colorOfThisPixel.red, colorOfThisPixel.green, colorOfThisPixel.blue, 255);
+					var count:Int = countByColor.exists(colorOfThisPixel) ? countByColor[colorOfThisPixel] : 0;
+					countByColor[colorOfThisPixel] = count + 1;
 				}
 			}
 		}
-		pixels.image.data = null;
-		pixels.dispose();
-		pixels.disposeImage();
+
 		var maxCount = 0;
-		var maxKey:Int = 0;
+		var maxKey:Int = 0; //after the loop this will store the max color
 		countByColor[FlxColor.BLACK] = 0;
-		for (key in countByColor.keys()) {
-			if (countByColor[key] >= maxCount) {
-				maxCount = countByColor[maxKey = key];
+		for(key => count in countByColor) {
+			if(count >= maxCount) {
+				maxCount = count;
+				maxKey = key;
 			}
 		}
-		countByColor.clear();
+		countByColor = [];
 		return maxKey;
 	}
 

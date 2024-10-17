@@ -33,12 +33,6 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 		antialiasingOption = optionsArray.length-1;
 
-		var option:Option = new Option('Clear Cache On Song Start',
-			"If unchecked, will skip clearing cache on song start, decreases loading times by a LOT.",
-			'clearCacheSongStart',
-			BOOL);
-		addOption(option);
-
 		var option:Option = new Option('Loading Screen',
 			"If unchecked, will disable all loading screens.",
 			'loadingScreen',

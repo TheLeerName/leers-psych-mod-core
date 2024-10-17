@@ -18,14 +18,19 @@ import states.MainMenuState;
 
 typedef TitleData =
 {
-	titlex:Float,
-	titley:Float,
-	startx:Float,
-	starty:Float,
-	gfx:Float,
-	gfy:Float,
-	backgroundSprite:String,
-	bpm:Float
+	var titlex:Float;
+	var titley:Float;
+	var startx:Float;
+	var starty:Float;
+	var gfx:Float;
+	var gfy:Float;
+	var backgroundSprite:String;
+	var bpm:Float;
+	
+	@:optional var animation:String;
+	@:optional var dance_left:Array<Int>;
+	@:optional var dance_right:Array<Int>;
+	@:optional var idle:Bool;
 }
 
 class TitleState extends MusicBeatState
@@ -36,20 +41,18 @@ class TitleState extends MusicBeatState
 
 	public static var initialized:Bool = false;
 
+	var credGroup:FlxGroup = new FlxGroup();
+	var textGroup:FlxGroup = new FlxGroup();
 	var blackScreen:FlxSprite;
-	var credGroup:FlxGroup;
 	var credTextShit:Alphabet;
-	var textGroup:FlxGroup;
 	var ngSpr:FlxSprite;
-	
+
 	var titleTextColors:Array<FlxColor> = [0xFF33FFFF, 0xFF3333CC];
 	var titleTextAlphas:Array<Float> = [1, .64];
 
 	var curWacky:Array<String> = [];
 
 	var wackyImage:FlxSprite;
-
-	var titleJSON:TitleData;
 
 	public static function initialize() {
 		if (initialized) return;
@@ -77,9 +80,6 @@ class TitleState extends MusicBeatState
 		initialize();
 		DiscordClient.changePresence("In the Title Menu");
 
-		// IGNORE THIS!!!
-		titleJSON = tjson.TJSON.parse(Paths.getTextFromFile('images/gfDanceTitle.json'));
-
 		FlxG.mouse.visible = false;
 		#if FREEPLAY
 		MusicBeatState.switchState(new FreeplayState());
@@ -106,107 +106,135 @@ class TitleState extends MusicBeatState
 
 	function startIntro()
 	{
-		if(!FlxG.sound.music?.playing)
-			FlxG.sound.playMusic(Paths.music(Paths.getMenuMusic('MainMenu')), 0);
-
-		Conductor.bpm = titleJSON.bpm;
 		persistentUpdate = true;
+		if (!(FlxG.sound.music?.playing))
+			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 
-		var bg:FlxSprite = new FlxSprite();
+		loadJsonData();
+		#if TITLE_SCREEN_EASTER_EGG easterEggData(); #end
+		Conductor.bpm = musicBPM;
 
-		if (titleJSON.backgroundSprite != null && titleJSON.backgroundSprite.length > 0 && titleJSON.backgroundSprite != "none")
-			bg.loadGraphic(Paths.image(titleJSON.backgroundSprite));
-		else
-			bg.makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
-
-		// bg.setGraphicSize(Std.int(bg.width * 0.6));
-		// bg.updateHitbox();
-		add(bg);
-
-		logoBl = new FlxSprite(titleJSON.titlex, titleJSON.titley);
+		logoBl = new FlxSprite(logoPosition.x, logoPosition.y);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
+		logoBl.antialiasing = ClientPrefs.data.antialiasing;
 
 		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24, false);
 		logoBl.animation.play('bump');
 		logoBl.updateHitbox();
-		// logoBl.screenCenter();
-		// logoBl.color = FlxColor.BLACK;
 
-		if(prefs.shaders) swagShader = new ColorSwap();
-		gfDance = new FlxSprite(titleJSON.gfx, titleJSON.gfy);
-		gfDance.frames = Paths.getSparrowAtlas('gfDanceTitle');
-		gfDance.animation.addByIndices('danceLeft', 'gfDance', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
-		gfDance.animation.addByIndices('danceRight', 'gfDance', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
-
-		add(gfDance);
-		add(logoBl);
-		if(swagShader != null)
+		gfDance = new FlxSprite(gfPosition.x, gfPosition.y);
+		gfDance.antialiasing = ClientPrefs.data.antialiasing;
+		
+		if(ClientPrefs.data.shaders)
 		{
+			swagShader = new ColorSwap();
 			gfDance.shader = swagShader.shader;
 			logoBl.shader = swagShader.shader;
 		}
+		
+		gfDance.frames = Paths.getSparrowAtlas(characterImage);
+		if(!useIdle)
+		{
+			gfDance.animation.addByIndices('danceLeft', animationName, danceLeftFrames, "", 24, false);
+			gfDance.animation.addByIndices('danceRight', animationName, danceRightFrames, "", 24, false);
+			gfDance.animation.play('danceRight');
+		}
+		else
+		{
+			gfDance.animation.addByPrefix('idle', animationName, 24, false);
+			gfDance.animation.play('idle');
+		}
 
-		titleText = new FlxSprite(titleJSON.startx, titleJSON.starty);
-		titleText.frames = Paths.getSparrowAtlas('titleEnter');
+
 		var animFrames:Array<FlxFrame> = [];
-		@:privateAccess {
+		titleText = new FlxSprite(enterPosition.x, enterPosition.y);
+		titleText.frames = Paths.getSparrowAtlas('titleEnter');
+		@:privateAccess
+		{
 			titleText.animation.findByPrefix(animFrames, "ENTER IDLE");
 			titleText.animation.findByPrefix(animFrames, "ENTER FREEZE");
 		}
 		
-		if (animFrames.length > 0) {
-			newTitle = true;
-			
+		if (newTitle = animFrames.length > 0)
+		{
 			titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
-			titleText.animation.addByPrefix('press', prefs.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);
+			titleText.animation.addByPrefix('press', ClientPrefs.data.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);
 		}
-		else {
-			newTitle = false;
-			
+		else
+		{
 			titleText.animation.addByPrefix('idle', "Press Enter to Begin", 24);
 			titleText.animation.addByPrefix('press', "ENTER PRESSED", 24);
 		}
-		
 		titleText.animation.play('idle');
 		titleText.updateHitbox();
-		// titleText.screenCenter(X);
-		add(titleText);
 
 		var logo:FlxSprite = new FlxSprite().loadGraphic(Paths.image('logo'));
+		logo.antialiasing = ClientPrefs.data.antialiasing;
 		logo.screenCenter();
-		// add(logo);
 
-		// FlxTween.tween(logoBl, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG});
-		// FlxTween.tween(logo, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG, startDelay: 0.1});
-
-		credGroup = new FlxGroup();
-		add(credGroup);
-		textGroup = new FlxGroup();
-
-		blackScreen = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		blackScreen = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		blackScreen.scale.set(FlxG.width, FlxG.height);
+		blackScreen.updateHitbox();
 		credGroup.add(blackScreen);
 
 		credTextShit = new Alphabet(0, 0, "", true);
 		credTextShit.screenCenter();
-
-		// credTextShit.alignment = CENTER;
-
 		credTextShit.visible = false;
 
 		ngSpr = new FlxSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('newgrounds_logo'));
-		add(ngSpr);
 		ngSpr.visible = false;
 		ngSpr.setGraphicSize(Std.int(ngSpr.width * 0.8));
 		ngSpr.updateHitbox();
 		ngSpr.screenCenter(X);
+		ngSpr.antialiasing = ClientPrefs.data.antialiasing;
+
+		add(gfDance);
+		add(logoBl); //FNF Logo
+		add(titleText); //"Press Enter to Begin" text
+		add(credGroup);
+		add(ngSpr);
 
 		if (initialized)
 			skipIntro();
 		else
 			initialized = true;
 
-		Paths.clearUnusedMemory();
 		// credGroup.add(credTextShit);
+	}
+
+	// JSON data
+	var characterImage:String = 'gfDanceTitle';
+	var animationName:String = 'gfDance';
+	var gfPosition:FlxPoint = FlxPoint.get(512, 40);
+	var logoPosition:FlxPoint = FlxPoint.get(-150, -100);
+	var enterPosition:FlxPoint = FlxPoint.get(100, 576);
+	
+	var useIdle:Bool = false;
+	var musicBPM:Float = 102;
+	var danceLeftFrames:Array<Int> = [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29];
+	var danceRightFrames:Array<Int> = [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+	function loadJsonData()
+	{
+		var json = Paths.loadJsonFromFile(Paths.path('images/gfDanceTitle.json'), '"images/gfDanceTitle.json"');
+		if (json == null) return;
+		var json:TitleData = cast json;
+
+		gfPosition.set(json.gfx, json.gfy);
+		logoPosition.set(json.titlex, json.titley);
+		enterPosition.set(json.startx, json.starty);
+		musicBPM = json.bpm;
+
+		if(json.animation != null && json.animation.length > 0) animationName = json.animation;
+		if(json.dance_left != null && json.dance_left.length > 0) danceLeftFrames = json.dance_left;
+		if(json.dance_right != null && json.dance_right.length > 0) danceRightFrames = json.dance_right;
+		useIdle = (json.idle == true);
+
+		if (json.backgroundSprite != null && json.backgroundSprite.trim().length > 0)
+		{
+			var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image(json.backgroundSprite));
+			bg.antialiasing = ClientPrefs.data.antialiasing;
+			add(bg);
+		}
 	}
 
 	function getIntroTextShit():Array<Array<String>>
@@ -359,10 +387,13 @@ class TitleState extends MusicBeatState
 
 		if(gfDance != null) {
 			danceLeft = !danceLeft;
-			if (danceLeft)
-				gfDance.animation.play('danceRight');
-			else
-				gfDance.animation.play('danceLeft');
+			if(!useIdle) {
+				if (danceLeft)
+					gfDance.animation.play('danceRight');
+				else
+					gfDance.animation.play('danceLeft');
+			}
+			else if(curBeat % 2 == 0) gfDance.animation.play('idle', true);
 		}
 
 		if(!closedState) {

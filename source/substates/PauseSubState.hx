@@ -173,6 +173,9 @@ class PauseSubState extends MusicBeatSubstate
 			return;
 		}
 
+		if(FlxG.keys.justPressed.F5)
+			MusicBeatState.switchState(new PlayState(), true);
+
 		updateSkipTextStuff();
 		if (controls.UI_UP_P)
 		{

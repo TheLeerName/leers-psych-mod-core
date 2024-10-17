@@ -37,8 +37,6 @@ import states.StoryMenuState;
 	var lowQuality:Bool = false;
 	/** Is anti-aliasing allowed? */
 	var antialiasing:Bool = true;
-	/** If `false`, will skip clearing cache on song start */
-	var clearCacheSongStart:Bool = false;
 	/** Is shaders allowed? */
 	var shaders:Bool = true;
 	/** If checked, textures will be cached on GPU.\nIf GPU is 75% or more full, RAM caching will be used */

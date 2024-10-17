@@ -1,5 +1,6 @@
 package backend;
 
+import flixel.util.typeLimit.OneOfTwo;
 import debug.GPUStats;
 import haxe.Exception;
 import haxe.CallStack;
@@ -144,19 +145,33 @@ class Paths {
 	public static function exists(key:String, ?ignoreMods:Bool = false):Bool
 		return existsAbsolute(path(key, ignoreMods));
 
+	public static function getMultiAtlas(keys:Array<String>):FlxAtlasFrames {
+		var parentFrames:FlxAtlasFrames = Paths.getAtlas(keys[0].trim());
+		if(keys.length > 1) {
+			var original:FlxAtlasFrames = parentFrames;
+			parentFrames = new FlxAtlasFrames(parentFrames.parent);
+			parentFrames.addAtlas(original, true);
+			for (i in 1...keys.length) {
+				var extraFrames:FlxAtlasFrames = Paths.getAtlas(keys[i].trim());
+				if(extraFrames != null)
+					parentFrames.addAtlas(extraFrames, true);
+			}
+		}
+		return parentFrames;
+	}
 	public static function getAtlas(key:String):FlxAtlasFrames
 		return exists('images/$key.xml') ? getSparrowAtlas(key) : (exists('images/$key.json') ? getAsepriteAtlas(key) : getPackerAtlas(key));
 	public static function getSparrowAtlas(key:String, ?stackItem:StackItem):FlxAtlasFrames {
 		stackItem = getStackItem(stackItem);
 		return FlxAtlasFrames.fromSparrow(image(key, stackItem), getTextFromFile('images/$key.xml'));
 	}
-	public static function getPackerAtlas(key:String, ?stackItem:StackItem):FlxAtlasFrames {
-		stackItem = getStackItem(stackItem);
-		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, stackItem), getTextFromFile('images/$key.txt'));
-	}
 	public static function getAsepriteAtlas(key:String, ?stackItem:StackItem):FlxAtlasFrames {
 		stackItem = getStackItem(stackItem);
 		return FlxAtlasFrames.fromTexturePackerJson(image(key, stackItem), getTextFromFile('images/$key.json'));
+	}
+	public static function getPackerAtlas(key:String, ?stackItem:StackItem):FlxAtlasFrames {
+		stackItem = getStackItem(stackItem);
+		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, stackItem), getTextFromFile('images/$key.txt'));
 	}
 
 	/**
@@ -266,6 +281,8 @@ class Paths {
 		for (key in FlxG.bitmap._cache.keys()) dumpAsset(key);
 		for (key in currentTrackedSounds.keys()) dumpAsset(key);
 		gc();
+
+		Language.reloadPhrases();
 	}
 
 	/**

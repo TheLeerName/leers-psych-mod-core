@@ -35,10 +35,10 @@ class HScript extends Iris
 		}
 		else
 		{
-			hs.varsToBring = varsToBring;
 			try
 			{
 				hs.scriptCode = code;
+				hs.varsToBring = varsToBring;
 				hs.execute();
 			}
 			catch(e:Dynamic)
@@ -88,8 +88,9 @@ class HScript extends Iris
 		this.scriptCode = scriptThing;
 
 		preset();
-		execute();
 		this.varsToBring = varsToBring;
+
+		execute();
 	}
 
 	var varsToBring(default, set):Any = null;
@@ -248,7 +249,7 @@ class HScript extends Iris
 		{
 			lua ??= parentLua;
 			
-			if(parentLua != null) lua.addLocalCallback(name, func);
+			if(lua != null) lua.addLocalCallback(name, func);
 			else debugPrint('createCallback ($name): 3rd argument is null', FlxColor.RED);
 		});
 		#end
@@ -330,7 +331,7 @@ class HScript extends Iris
 		return null;
 	}
 
-	public function executeFunction(funcToRun:String = null, funcArgs:Array<Dynamic>):IrisCall {
+	public function executeFunction(funcToRun:String = null, ?funcArgs:Array<Dynamic>):IrisCall {
 		if (funcToRun == null || !exists(funcToRun)) return null;
 		return call(funcToRun, funcArgs);
 	}
@@ -386,6 +387,7 @@ class HScript extends Iris
 					lua.debugPrint('${lua.hscript.origin}: ${lua.lastCalledFunction} - $e', FlxColor.RED);
 				}
 			}
+			lua.debugPrint("addHaxeLibrary is deprecated! Import classes through \"import\" in HScript!", false, true);
 		});
 	}
 	#end

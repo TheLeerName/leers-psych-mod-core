@@ -15,8 +15,8 @@ enum MainMenuColumn {
 @:build(macros.ModVersion.add())
 class MainMenuState extends MusicBeatState
 {
-	public static var psychEngineVersion:String = '1.0-prerelease';
-	public static var psychEngineLastCommit:String = '1f15374';
+	public static var psychEngineVersion:String = '1.0';
+	public static var psychEngineLastCommit:String = '7addb9c';
 	//public static var modVersion:String;
 	public static var curSelected:Int = 0;
 	public static var curColumn:MainMenuColumn = CENTER;

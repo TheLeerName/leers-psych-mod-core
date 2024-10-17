@@ -4,7 +4,6 @@ import backend.animation.PsychAnimationController;
 
 import flixel.util.FlxSort;
 import flixel.util.FlxDestroyUtil;
-import flixel.graphics.frames.FlxAtlasFrames;
 
 typedef CharacterFile = {
 	var animations:Array<AnimArray>;
@@ -124,21 +123,7 @@ class Character extends FlxSprite
 
 		if(!isAnimateAtlas)
 		{
-			var split:Array<String> = json.image.split(',');
-			var charFrames:FlxAtlasFrames = Paths.getAtlas(split[0].trim());
-			if(split.length > 1)
-			{
-				var original:FlxAtlasFrames = charFrames;
-				charFrames = new FlxAtlasFrames(charFrames.parent);
-				charFrames.addAtlas(original, true);
-				for (i in 1...split.length)
-				{
-					var extraFrames:FlxAtlasFrames = Paths.getAtlas(split[i].trim());
-					if(extraFrames != null)
-						charFrames.addAtlas(extraFrames, true);
-				}
-			}
-			frames = charFrames;
+			frames = Paths.getMultiAtlas(json.image.split(','));
 		}
 		#if flxanimate
 		else
