@@ -5,8 +5,6 @@
 ### [CHANGES](setup/changes.md)
 ### [BUILDING](setup/building.md)
 - tl;dr - upgrade haxe to 4.3 or higher and do `haxe setup.hxml`
-- to show cached assets in cmd just do `lime test windows -debug -D TRACE_CACHED_ASSETS`
-- to load song in game start just do `lime test windows -debug -DSONG=<song>`
 
 ## Known issues
 - `[WARNING] Could not parse frame number of %nameSub% in frame named %name%` => try use full prefix name (before `0001` and etc) in animation.addByPrefix

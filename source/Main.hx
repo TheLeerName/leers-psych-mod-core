@@ -130,7 +130,7 @@ class Main extends Sprite
 		// so its like:    [03:17:48] [debug/GPUStats:75] Traced string yeah
 		// and colors are:    blue           cyan            basic (white)
 		var time = ('[' + DateTools.format(Date.now(), '%H:%M:%S') + ']').toCMD(BLUE);
-		var path = ('[' + (fileName.startsWith('source/') ? fileName.substring(fileName.indexOf('/') + 1, fileName.length - 3) : fileName) + ':' + lineNumber + ']').toCMD(CYAN);
+		var path = ('[' + (fileName.substring(fileName.startsWith('source/') ? (fileName.indexOf('/') + 1) : 0, fileName.length - 3)) + ':' + lineNumber + ']').toCMD(CYAN);
 
 		return '$time $path ';
 	}
@@ -171,6 +171,10 @@ class Main extends Sprite
 			var v:String = v;
 			if (infos.customParams?.length > 0) v += ' ' + infos.customParams.join(' ');
 			println(startOfTrace(infos.fileName, infos.lineNumber) + v);
+			// i got a funny bug! (it fixed, i just wanted to write about it here)
+			// infos.fileName returns source/backend/Discord.hx, but 2nd arg of FilePos in StackItem returns backend/Discord.hx
+			// so Paths.callStackTrace displays states/TitleState.hx, and trace displays states/TitleState
+			// haha!
 		}
 		#end
 

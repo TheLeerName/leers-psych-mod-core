@@ -1,3 +1,9 @@
+## Useful tips to work with code
+- to show cached assets in cmd just do `lime test windows -debug -D TRACE_CACHED_ASSETS`
+- to load song in game start just do `lime test windows -debug -DSONG=<song>`
+- to go to traced line just press Ctrl + LMB on name of file in terminal
+<img src="setup/images/building_tracedfile.png" />
+
 ## Compiling
 1. Install Haxe [4.3.2](https://haxe.org/download/version/4.3.2/)
 2. Install [Git](https://git-scm.com/download/)
