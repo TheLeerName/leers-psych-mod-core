@@ -217,30 +217,31 @@ class Main extends Sprite
 		var classesToRegister:Array<Class<Dynamic>> = [
 			Main,
 			backend.ClientPrefs,
-			Conductor,
-			Controls,
-			CoolUtil,
-			Difficulty,
+			backend.Conductor,
+			backend.Controls,
+			backend.CoolUtil,
+			backend.Difficulty,
 			backend.Highscore,
-			backend.Song,
+			backend.Json,
 			backend.Language,
-			Mods,
-			MusicBeatState,
-			MusicBeatSubstate,
-			backend.NullSafeJson,
-			Paths,
+			backend.Mods,
+			backend.MusicBeatState,
+			backend.MusicBeatSubstate,
+			backend.Paths,
+			backend.Song,
 			backend.WeekData,
-			backend.WindowUtil,
+			psychlua.LuaUtils,
+			states.PlayState,
+			util.StaticExtensions,
+
 			#if windows
 			debug.GPUStats,
 			backend.native.Windows,
 			#end
-			psychlua.LuaUtils,
+
 			#if !flash
 			shaders.Shaders,
 			#end
-			states.PlayState,
-			util.StaticExtensions
 		];
 		for (cl in classesToRegister) FlxG.game.debugger.console.registerClass(cl);
 		#end

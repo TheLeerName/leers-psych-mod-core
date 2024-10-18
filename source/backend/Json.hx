@@ -2,10 +2,12 @@ package backend;
 
 import haxe.Exception;
 
-import #if tjson tjson.TJSON #else haxe.Json #end;
+#if tjson
+import tjson.TJSON;
+#end
 
 @:publicFields
-class NullSafeJson {
+class Json {
 	/** Contains `haxe.Exception` object which has last error occurred in methods. Changes only if error was happened. */
 	static var lastError(default, null):Exception;
 
@@ -29,7 +31,7 @@ class NullSafeJson {
 	static function parse(json:String, ?fileName:String = "JSON Data", ?stringProcessor:String->Dynamic):Null<Dynamic> {
 		var val:Dynamic = "";
 		try {
-			val = #if tjson TJSON.parse(json, fileName, stringProcessor) #else Json.parse(json) #end;
+			val = #if tjson TJSON.parse(json, fileName, stringProcessor) #else haxe.Json.parse(json) #end;
 		} catch(e:Exception) {
 			lastError = e;
 		}
@@ -58,7 +60,7 @@ class NullSafeJson {
 		var val:String = "";
 
 		try {
-			val = #if tjson TJSON.encode(value, space != null ? new HaxeJsonStyle(space) : null) #else Json.stringify(value, replacer, space) #end;
+			val = #if tjson TJSON.encode(value, space != null ? new HaxeJsonStyle(space) : null) #else haxe.Json.stringify(value, replacer, space) #end;
 		} catch(e:Exception) {
 			lastError = e;
 		}
