@@ -1,3 +1,6 @@
+## im not interested in psych engine anymore so no updates!
+- use codename engine it has softcoded everything!
+
 # Leer's Psych Mod Core
 - i guess now it works properly
 
